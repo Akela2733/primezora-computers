@@ -1,0 +1,10 @@
+{
+  "/api/customer/orders/[id]/route": "app/api/customer/orders/[id]/route.js",
+  "/api/orders/route": "app/api/orders/route.js",
+  "/api/customer/orders/route": "app/api/customer/orders/route.js",
+  "/api/payments/verify/route": "app/api/payments/verify/route.js",
+  "/api/admin/orders/route": "app/api/admin/orders/route.js",
+  "/api/admin/orders/[id]/route": "app/api/admin/orders/[id]/route.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js",
+  "/shop/page": "app/shop/page.js"
+}

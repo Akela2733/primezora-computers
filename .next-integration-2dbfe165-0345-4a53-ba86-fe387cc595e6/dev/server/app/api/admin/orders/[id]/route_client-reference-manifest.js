@@ -1,0 +1,1 @@
+globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/admin/orders/[id]/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"C:\\Users\\SAKUNI\\primezora-technologies\\src\\app\\api\\admin\\orders\\[id]\\route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};

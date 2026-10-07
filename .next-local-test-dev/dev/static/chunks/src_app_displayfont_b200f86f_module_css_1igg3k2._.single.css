@@ -1,0 +1,28 @@
+/* [project]/src/app/displayfont_b200f86f.module.css [app-client] (css) */
+@font-face {
+  font-family: displayFont;
+  src: url("../media/orbitron_latin-s.p.3tm7a0g9vbnim.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: displayFont Fallback;
+  src: local(Arial);
+  ascent-override: 79.98%;
+  descent-override: 19.22%;
+  line-gap-override: 0.0%;
+  size-adjust: 126.4%;
+}
+
+.displayfont_b200f86f-module__RadHqW__className {
+  font-family: displayFont, displayFont Fallback;
+  font-style: normal;
+}
+
+.displayfont_b200f86f-module__RadHqW__variable {
+  --font-display: "displayFont", "displayFont Fallback";
+}
+
+/*# sourceMappingURL=src_app_displayfont_b200f86f_module_css_1igg3k2._.single.css.map*/

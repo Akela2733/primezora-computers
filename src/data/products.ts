@@ -1,0 +1,90 @@
+import type { Product } from "@/types/product";
+
+export type { Product } from "@/types/product";
+
+export const products: Product[] = [
+  {
+    id: "rtx-4060",
+    slug: "rtx-4060",
+    name: "GeForce RTX 4060 8GB Gaming GPU",
+    brand: "ASUS",
+    category: "PC Components",
+    price: 124900,
+    oldPrice: 134900,
+    rating: 4.9,
+    reviews: 18,
+    image: "/products/msi.jfif",
+    badge: "SALE",
+    inStock: true,
+  },
+
+  {
+    id: "ryzen-5-7600",
+    slug: "ryzen-5-7600",
+    name: "Ryzen 5 7600 AM5 Processor",
+    brand: "AMD",
+    category: "PC Components",
+    price: 58900,
+    rating: 4.8,
+    reviews: 24,
+    image: "/products/ryzen.jfif",
+    badge: "POPULAR",
+    inStock: true,
+  },
+
+  {
+    id: "gaming-keyboard",
+    slug: "gaming-keyboard",
+    name: "Mechanical RGB Gaming Keyboard",
+    brand: "Redragon",
+    category: "Keyboards",
+    price: 12900,
+    oldPrice: 14900,
+    rating: 4.7,
+    reviews: 31,
+    image: "/products/keyboard.jfif",
+    badge: "SALE",
+    inStock: true,
+  },
+
+  {
+    id: "gaming-mouse",
+    slug: "gaming-mouse",
+    name: "Ultra-Light RGB Gaming Mouse",
+    brand: "Logitech",
+    category: "Mice",
+    price: 8900,
+    rating: 4.8,
+    reviews: 16,
+    image: "/products/Ultra-Light%20RGB%20Gaming%20Mouse.jfif",
+    inStock: true,
+  },
+
+  {
+    id: "corsair-vengeance-32gb",
+    slug: "corsair-vengeance-32gb",
+    name: "Corsair Vengeance RGB DDR5 32GB Memory Kit",
+    brand: "Corsair",
+    category: "PC Components",
+    price: 46990,
+    rating: 4.9,
+    reviews: 49,
+    image: "/products/vengeance.jfif",
+    inStock: true,
+  },
+
+  {
+    id: "gaming-headset",
+    slug: "gaming-headset",
+    name: "Wireless Gaming Headset",
+    brand: "HyperX",
+    category: "Gaming",
+    price: 21900,
+    oldPrice: 24900,
+    rating: 4.6,
+    reviews: 12,
+    image: "/products/headset.jfif",
+    badge: "NEW",
+    inStock: true,
+  },
+];

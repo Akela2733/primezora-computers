@@ -1,0 +1,2 @@
+export const LOW_STOCK_THRESHOLD = 5;
+export const MAX_STOCK_QUANTITY = 2_147_483_647;

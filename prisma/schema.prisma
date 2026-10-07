@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id             String      @id @default(cuid())
+  name           String
+  slug           String      @unique
+  brand          String
+  category       String
+  description    String?
+  price          Int
+  oldPrice       Int?
+  rating         Float       @default(0)
+  reviews        Int         @default(0)
+  image          String
+  badge          String?
+  inStock        Boolean     @default(true)
+  stockQuantity  Int         @default(0)
+  featured       Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  specifications Json?
+  features       Json?
+  images         String[]    @default([])
+  orderItems     OrderItem[]
+
+  @@index([category])
+  @@index([brand])
+  @@index([featured])
+  @@index([inStock])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Customer {
+  id                         String                @id @default(cuid())
+  name                       String?
+  email                      String                @unique
+  phone                      String?
+  address                    String?
+  city                       String?
+  province                   String?
+  postalCode                 String?
+  createdAt                  DateTime              @default(now())
+  updatedAt                  DateTime              @updatedAt
+  authUserId                 String?               @unique
+  firstName                  String?
+  lastName                   String?
+  orders                     Order[]
+  checkoutIdempotencyRecords CheckoutIdempotency[]
+
+  @@index([authUserId])
+}
+
+model Order {
+  id                        String               @id @default(cuid())
+  orderNumber               String               @unique
+  customerId                String?
+  customerName              String
+  customerEmail             String
+  customerPhone             String?
+  deliveryMethod            String
+  address                   String?
+  city                      String?
+  province                  String?
+  postalCode                String?
+  subtotal                  Int
+  deliveryFee               Int
+  total                     Int
+  paymentMethod             String
+  status                    OrderStatus          @default(PENDING)
+  notes                     String?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  customer                  Customer?            @relation(fields: [customerId], references: [id])
+  items                     OrderItem[]
+  statusHistory             OrderStatusHistory[]
+  checkoutIdempotencyRecord CheckoutIdempotency?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CheckoutIdempotency {
+  id                 String   @id @default(cuid())
+  customerId         String
+  key                String
+  requestFingerprint String
+  orderId            String   @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  customer           Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, key])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String
+  productName  String
+  productPrice Int
+  quantity     Int
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id         String      @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus
+  toStatus   OrderStatus
+  changedBy  String
+  createdAt  DateTime    @default(now())
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+}

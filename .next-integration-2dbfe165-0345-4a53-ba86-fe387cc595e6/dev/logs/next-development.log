@@ -1,0 +1,14 @@
+{"timestamp":"00:00:04.404","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:04.405","source":"Server","level":"LOG","message":"  We detected TypeScript in your project and reconfigured your tsconfig.json file for you."}
+{"timestamp":"00:00:04.405","source":"Server","level":"LOG","message":"  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:\n"}
+{"timestamp":"00:00:04.406","source":"Server","level":"LOG","message":"  \t- include was updated to add '.next-integration-2dbfe165-0345-4a53-ba86-fe387cc595e6/types/**/*.ts'"}
+{"timestamp":"00:00:04.406","source":"Server","level":"LOG","message":"  \t- include was updated to add '.next-integration-2dbfe165-0345-4a53-ba86-fe387cc595e6/dev/types/**/*.ts'"}
+{"timestamp":"00:00:04.406","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:06.888","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:10.073","source":"Server","level":"LOG","message":"○ Compiling /api/customer/orders ..."}
+{"timestamp":"00:00:25.336","source":"Server","level":"LOG","message":"○ Compiling /api/customer/profile ..."}
+{"timestamp":"00:01:46.382","source":"Server","level":"LOG","message":"○ Compiling /checkout ..."}
+{"timestamp":"00:02:08.832","source":"Server","level":"LOG","message":"○ Compiling /api/orders ..."}
+{"timestamp":"00:02:53.617","source":"Server","level":"LOG","message":"○ Compiling /categories/[slug] ..."}
+{"timestamp":"00:03:07.983","source":"Server","level":"LOG","message":"○ Compiling / ..."}
+{"timestamp":"00:03:15.759","source":"Server","level":"LOG","message":"○ Compiling /shop ..."}

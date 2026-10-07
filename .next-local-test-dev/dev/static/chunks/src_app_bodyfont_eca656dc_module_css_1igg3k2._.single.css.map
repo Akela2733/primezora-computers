@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/src/app/bodyfont_eca656dc.module.css"],"sourcesContent":["@font-face {\n    \nfont-family: 'bodyFont';\n    src: url('@vercel/turbopack-next/internal/font/local/font?{%22path%22:%22./fonts/inter-latin.woff2%22,%22preload%22:true,%22has_size_adjust%22:true}') format('woff2');\n    font-display: swap;\n    \nfont-weight: 100 900;\nfont-style: normal;\n}\n\n@font-face {\n    font-family: 'bodyFont Fallback';\n    src: local(\"Arial\");\n    ascent-override: 89.79%;\ndescent-override: 22.36%;\nline-gap-override: 0.00%;\nsize-adjust: 107.89%;\n\n}\n\n.className {\n    font-family: 'bodyFont', 'bodyFont Fallback';\n    font-style: normal;\n\n}\n.variable {\n    --font-body: 'bodyFont', 'bodyFont Fallback';\n}\n\n"],"names":[],"mappings":"AAAA;;;;;;;;AAUA;;;;;;;;;AAUA;;;;;AAKA"}}]
+}

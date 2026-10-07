@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050816;
+  --background-secondary: #071024;
+
+  --surface: #081126;
+  --surface-light: #0c1730;
+
+  --primary: #245cff;
+  --primary-light: #3b82ff;
+  --primary-dark: #1010c0;
+
+  --purple: #7c3aed;
+  --blue-glow: #3030ff;
+
+  --white: #f4f4f4;
+  --gray: #8d99b5;
+  --gray-light: #c7cede;
+
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(48, 48, 255, 0.13),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 0% 40%,
+      rgba(0, 140, 255, 0.07),
+      transparent 25%
+    ),
+    var(--background);
+
+  color: var(--white);
+
+  font-family: var(--font-body), sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-display), sans-serif;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+}
+
+/* --------------------------------
+   Primezora Utilities
+-------------------------------- */
+
+.container-primezora {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding-left: 80px;
+  padding-right: 80px;
+}
+
+@media (max-width: 640px) {
+  .container-primezora {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Glass panels */
+
+.primezora-glass {
+  background: rgba(8, 17, 38, 0.72);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Grid background */
+
+.primezora-grid {
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    );
+
+  background-size: 44px 44px;
+}
+
+/* Gradient text */
+
+.primezora-gradient-text {
+  background:
+    linear-gradient(
+      100deg,
+      #ffffff 5%,
+      #4c8dff 48%,
+      #8b5cf6 95%
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+/* Blue glow */
+
+.primezora-blue-glow {
+  box-shadow:
+    0 0 70px rgba(37, 92, 255, 0.18);
+}
+
+/* Purple glow */
+
+.primezora-purple-glow {
+  box-shadow:
+    0 0 80px rgba(124, 58, 237, 0.16);
+}
+
+/* Product card */
+
+.primezora-product-card {
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.primezora-product-card:hover {
+  transform: translateY(-4px);
+
+  border-color:
+    rgba(59, 130, 246, 0.4);
+
+  background:
+    rgba(12, 25, 52, 0.92);
+
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.22);
+}
+
+/* Thin glowing border */
+
+.primezora-border-glow {
+  border: 1px solid rgba(59, 130, 246, 0.18);
+
+  box-shadow:
+    inset 0 0 30px rgba(37, 92, 255, 0.025);
+}
+
+/* Hide scrollbar */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes brand-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.brand-marquee-track {
+  animation: brand-marquee 32s linear infinite;
+}
+
+.brand-marquee:hover .brand-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-marquee-track {
+    animation: none;
+  }
+
+  .brand-marquee-group[aria-hidden="true"] {
+    display: none;
+  }
+
+  .brand-marquee-group:first-child {
+    flex-wrap: wrap;
+  }
+}
+
+.featured-products-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 48px) / 5);
+  gap: 12px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+}
+
+.featured-products-track::-webkit-scrollbar {
+  display: none;
+}
+
+.featured-products-track > * {
+  scroll-snap-align: start;
+}
+
+@media (max-width: 1279px) {
+  .featured-products-track {
+    grid-auto-columns: calc((100% - 36px) / 4);
+  }
+}
+
+@media (max-width: 1023px) {
+  .featured-products-track {
+    grid-auto-columns: calc((100% - 24px) / 3);
+  }
+}
+
+@media (max-width: 639px) {
+  .featured-products-track {
+    grid-auto-columns: calc((100% - 12px) / 2);
+  }
+}
+
+/* --------------------------------
+   Animations
+-------------------------------- */
+
+@keyframes primezora-pulse {
+
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.primezora-pulse {
+  animation:
+    primezora-pulse 4s ease-in-out infinite;
+}
+
+@keyframes primezora-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.primezora-float {
+  animation:
+    primezora-float 5s ease-in-out infinite;
+}

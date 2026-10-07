@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\n  \"app\": {\n    \"[project]/src/app/products/[slug]/page\": [\n      \"static/media/inter_latin-s.p.0gsaq8ukbf34m.woff2\",\n      \"static/media/orbitron_latin-s.p.3tm7a0g9vbnim.woff2\"\n    ]\n  },\n  \"appUsingSizeAdjust\": true,\n  \"pages\": {},\n  \"pagesUsingSizeAdjust\": false\n}"

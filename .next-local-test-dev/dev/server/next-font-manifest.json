@@ -1,0 +1,11 @@
+{
+  "app": {
+    "[project]/src/app/products/[slug]/page": [
+      "static/media/inter_latin-s.p.0gsaq8ukbf34m.woff2",
+      "static/media/orbitron_latin-s.p.3tm7a0g9vbnim.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

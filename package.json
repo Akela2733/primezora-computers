@@ -1,0 +1,50 @@
+{
+  "name": "primezora-technologies",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx scripts/run-next.ts dev",
+    "build": "tsx scripts/run-next.ts build",
+    "build:production": "tsx scripts/run-next.ts build production",
+    "start": "tsx scripts/run-next.ts start",
+    "start:production": "tsx scripts/run-next.ts start production",
+    "lint": "eslint",
+    "db:seed": "tsx prisma/seed.ts",
+    "test:security-headers": "tsx --test tests/security-headers.test.ts",
+    "test:input-limits": "tsx --test tests/input-limits.test.ts",
+    "test:pagination": "tsx --test tests/pagination-limits.test.ts",
+    "test:integration": "tsx --test tests/database-target.test.ts tests/admin-recovery.test.ts tests/integration/order-api.test.ts",
+    "test:rate-limit": "tsx --test tests/rate-limit.test.ts"
+  },
+  "dependencies": {
+    "@icons-pack/react-simple-icons": "^13.15.1",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "@supabase/supabase-js": "^2.117.2",
+    "@upstash/ratelimit": "^2.2.0",
+    "@upstash/redis": "^1.39.0",
+    "dotenv": "^18.0.5",
+    "lucide-react": "^1.48.0",
+    "next": "16.3.7",
+    "pg": "^8.23.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.7",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "allowScripts": {
+    "prisma@7.10.0": true,
+    "@prisma/engines@7.10.0": true
+  }
+}

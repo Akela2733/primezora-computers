@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/src/app/displayfont_b200f86f.module.css"],"sourcesContent":["@font-face {\n    \nfont-family: 'displayFont';\n    src: url('@vercel/turbopack-next/internal/font/local/font?{%22path%22:%22./fonts/orbitron-latin.woff2%22,%22preload%22:true,%22has_size_adjust%22:true}') format('woff2');\n    font-display: swap;\n    \nfont-weight: 400 900;\nfont-style: normal;\n}\n\n@font-face {\n    font-family: 'displayFont Fallback';\n    src: local(\"Arial\");\n    ascent-override: 79.98%;\ndescent-override: 19.22%;\nline-gap-override: 0.00%;\nsize-adjust: 126.40%;\n\n}\n\n.className {\n    font-family: 'displayFont', 'displayFont Fallback';\n    font-style: normal;\n\n}\n.variable {\n    --font-display: 'displayFont', 'displayFont Fallback';\n}\n\n"],"names":[],"mappings":"AAAA;;;;;;;;AAUA;;;;;;;;;AAUA;;;;;AAKA"}}]
+}
