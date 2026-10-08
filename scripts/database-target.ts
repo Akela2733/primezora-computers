@@ -135,12 +135,8 @@ export function configureDatabaseTarget(
       );
     }
 
-    const runtimeUrl =
-      env.DIRECT_DATABASE_URL ?? env.DATABASE_URL ?? env.DIRECT_URL;
-    requirePostgresUrl(runtimeUrl, "DIRECT_DATABASE_URL or DATABASE_URL");
-
-    env.DATABASE_URL ??= env.DIRECT_DATABASE_URL ?? env.DIRECT_URL;
-    env.DIRECT_DATABASE_URL ??= env.DIRECT_URL ?? env.DATABASE_URL;
+    requirePostgresUrl(env.DATABASE_URL, "DATABASE_URL");
+    requirePostgresUrl(env.DIRECT_DATABASE_URL, "DIRECT_DATABASE_URL");
     env.PRISMA_RUNTIME_ENV = "production";
     return "production";
   }

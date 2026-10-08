@@ -2,12 +2,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { configureSeedDatabaseTarget } from "../scripts/database-target";
 
-configureSeedDatabaseTarget();
+const target = configureSeedDatabaseTarget();
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString =
+  target === "production"
+    ? process.env.DIRECT_DATABASE_URL
+    : process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("Selected database URL is unavailable.");
+  throw new Error("Selected seed database URL is unavailable.");
 }
 
 const adapter = new PrismaPg({

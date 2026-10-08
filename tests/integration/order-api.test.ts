@@ -158,8 +158,8 @@ function buildServerEnvironment(): NodeJS.ProcessEnv {
   Object.assign(env, {
     NODE_ENV: "development",
     NEXT_TELEMETRY_DISABLED: "1",
-    DIRECT_DATABASE_URL: directTestDatabaseUrl,
-    DATABASE_URL: databaseUrlSentinel,
+    DIRECT_DATABASE_URL: databaseUrlSentinel,
+    DATABASE_URL: directTestDatabaseUrl,
     DIRECT_URL: databaseUrlSentinel,
     DATABASE_URL_TEST: testDatabaseUrl,
     DIRECT_DATABASE_URL_TEST: directTestDatabaseUrl,
@@ -341,8 +341,8 @@ describe("isolated order API integration", { concurrency: false }, () => {
       throw new Error("The TEST database URL was not loaded from test configuration.");
     }
 
-    process.env.DIRECT_DATABASE_URL = directTestDatabaseUrl;
-    process.env.DATABASE_URL = databaseUrlSentinel;
+    process.env.DIRECT_DATABASE_URL = databaseUrlSentinel;
+    process.env.DATABASE_URL = directTestDatabaseUrl;
     process.env.DIRECT_URL = databaseUrlSentinel;
     process.env.ADMIN_EMAIL = adminEmail;
     process.env.ADMIN_SESSION_SECRET = adminSessionSecret;

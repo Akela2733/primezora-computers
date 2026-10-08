@@ -24,9 +24,11 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 Local development and QA builds use only the isolated TEST database configured
 with `DATABASE_URL_TEST` and `DIRECT_DATABASE_URL_TEST` in `.env.test.local`.
-The integration suite uses the same isolated TEST configuration. Local
-commands fail if that configuration is missing or points to the same database
-as a configured non-TEST URL.
+The integration suite uses the same isolated TEST configuration. The current
+application runtime prefers `DIRECT_DATABASE_URL_TEST` and falls back to
+`DATABASE_URL_TEST`; Prisma CLI TEST configuration also uses
+`DIRECT_DATABASE_URL_TEST`. Local commands fail if TEST configuration is
+missing or points to the same database as a configured non-TEST URL.
 
 Production deployments must explicitly use:
 
@@ -35,11 +37,13 @@ npm run build:production
 npm run start:production
 ```
 
-Provide `DATABASE_URL` and/or `DIRECT_DATABASE_URL` through the deployment
-environment. Production commands do not require `.env.test.local`. Direct
-`next build` or production-runtime commands without an explicit database target
-fail closed. Do not set `PRIMEZORA_DATABASE_TARGET=production` for local
-development.
+Provide both `DATABASE_URL` and `DIRECT_DATABASE_URL` through the deployment
+environment. `DATABASE_URL` is the application/runtime PostgreSQL connection;
+`DIRECT_DATABASE_URL` is the direct PostgreSQL connection for Prisma CLI
+operations and explicitly invoked production seed operations. Production
+commands do not require `.env.test.local`. Direct `next build` or
+production-runtime commands without an explicit database target fail closed.
+Do not set `PRIMEZORA_DATABASE_TARGET=production` for local development.
 
 Admin credentials, including password changes, are managed through deployment
 configuration. Password recovery through the application is disabled; contact
@@ -81,7 +85,7 @@ PRIMEZORA_DATABASE_TARGET=production npm run db:seed
 ```
 
 The TEST target uses only the TEST URL family from `.env.test.local`. The
-production target uses only the production URL family supplied by the runtime
+production target uses `DIRECT_DATABASE_URL` from the production runtime
 environment. Running `npm run db:seed` without a target fails closed.
 
 ## Learn More

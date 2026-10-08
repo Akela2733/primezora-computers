@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { getPrismaConnectionString } from "./prisma-connection";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -8,15 +9,13 @@ const globalForPrisma = globalThis as unknown as {
 
 const useTestDatabase =
   process.env.PRIMEZORA_DATABASE_TARGET !== "production";
-const connectionString = useTestDatabase
-  ? process.env.DIRECT_DATABASE_URL_TEST ?? process.env.DATABASE_URL_TEST
-  : process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
+const connectionString = getPrismaConnectionString(process.env);
 
 if (!connectionString) {
   throw new Error(
     useTestDatabase
       ? "DIRECT_DATABASE_URL_TEST or DATABASE_URL_TEST is required for the test runtime."
-      : "DIRECT_DATABASE_URL or DATABASE_URL is required for the production runtime.",
+      : "DATABASE_URL or DIRECT_DATABASE_URL is required for the production runtime.",
   );
 }
 

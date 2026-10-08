@@ -5,6 +5,7 @@ import {
   configureDatabaseTarget,
   configureSeedDatabaseTarget,
 } from "../scripts/database-target";
+import { getPrismaConnectionString } from "../src/lib/prisma-connection";
 import {
   assertBuildArtifactTarget,
   writeBuildArtifactTarget,
@@ -76,16 +77,56 @@ describe("database target selection", () => {
   });
 
   test("allows production only when explicitly selected with production runtime URLs", () => {
-    const productionUrl = "postgresql://production.invalid:5432/app";
+    const applicationUrl = "postgresql://production.invalid:5432/app";
+    const directUrl = "postgresql://direct.production.invalid:5432/app";
     const env: Record<string, string | undefined> = {
       NODE_ENV: "production",
       PRIMEZORA_DATABASE_TARGET: "production",
-      DATABASE_URL: productionUrl,
+      DATABASE_URL: applicationUrl,
+      DIRECT_DATABASE_URL: directUrl,
     };
 
     assert.equal(configureDatabaseTarget(env, {}), "production");
-    assert.equal(env.DATABASE_URL, productionUrl);
+    assert.equal(env.DATABASE_URL, applicationUrl);
+    assert.equal(env.DIRECT_DATABASE_URL, directUrl);
     assert.equal(env.PRISMA_RUNTIME_ENV, "production");
+  });
+
+  test("requires both Production connection URLs and never substitutes TEST URLs", () => {
+    const env: Record<string, string | undefined> = {
+      NODE_ENV: "production",
+      PRIMEZORA_DATABASE_TARGET: "production",
+      DATABASE_URL_TEST: testDatabaseUrl,
+      DIRECT_DATABASE_URL_TEST: directTestDatabaseUrl,
+    };
+
+    assert.throws(
+      () => configureDatabaseTarget(env, {}),
+      /DATABASE_URL is required/
+    );
+    assert.equal(env.DATABASE_URL, undefined);
+    assert.equal(env.DIRECT_DATABASE_URL, undefined);
+
+    env.DATABASE_URL = "postgresql://production.invalid:5432/app";
+    assert.throws(
+      () => configureDatabaseTarget(env, {}),
+      /DIRECT_DATABASE_URL is required/
+    );
+    assert.equal(env.DIRECT_DATABASE_URL, undefined);
+  });
+
+  test("validates both Production variables as PostgreSQL URLs", () => {
+    const env: Record<string, string | undefined> = {
+      NODE_ENV: "production",
+      PRIMEZORA_DATABASE_TARGET: "production",
+      DATABASE_URL: "postgresql://production.invalid:5432/app",
+      DIRECT_DATABASE_URL: "https://not-postgresql.invalid",
+    };
+
+    assert.throws(
+      () => configureDatabaseTarget(env, {}),
+      /DIRECT_DATABASE_URL must use the PostgreSQL protocol/
+    );
   });
 
   test("rejects production target selection outside production runtime", () => {
@@ -181,7 +222,19 @@ describe("database seed target selection", () => {
 
     assert.throws(
       () => configureSeedDatabaseTarget(env, {}),
-      /DIRECT_DATABASE_URL or DATABASE_URL is required/
+      /DATABASE_URL is required/
+    );
+  });
+
+  test("production seed requires the direct URL even when the runtime URL exists", () => {
+    const env: Record<string, string | undefined> = {
+      PRIMEZORA_DATABASE_TARGET: "production",
+      DATABASE_URL: "postgresql://production.invalid:5432/app",
+    };
+
+    assert.throws(
+      () => configureSeedDatabaseTarget(env, {}),
+      /DIRECT_DATABASE_URL is required/
     );
   });
 
@@ -210,9 +263,80 @@ describe("database seed target selection", () => {
       seedSource.indexOf("configureSeedDatabaseTarget();") <
         seedSource.indexOf("new PrismaClient")
     );
+    assert.match(
+      seedSource,
+      /target === "production"\s*\?\s*process\.env\.DIRECT_DATABASE_URL\s*:\s*process\.env\.DATABASE_URL/
+    );
     assert.match(seedSource, /prisma\.product\.upsert\(/);
     assert.match(seedSource, /Products processed:/);
     assert.doesNotMatch(seedSource, /dotenv\/config/);
+  });
+});
+
+describe("production connection variable wiring", () => {
+  test("application runtime prefers DATABASE_URL and falls back to DIRECT_DATABASE_URL", () => {
+    assert.equal(
+      getPrismaConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
+        DATABASE_URL: "postgresql://app.production.invalid:5432/app",
+        DIRECT_DATABASE_URL: "postgresql://direct.production.invalid:5432/app",
+      }),
+      "postgresql://app.production.invalid:5432/app"
+    );
+    assert.equal(
+      getPrismaConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
+        DIRECT_DATABASE_URL: "postgresql://direct.production.invalid:5432/app",
+      }),
+      "postgresql://direct.production.invalid:5432/app"
+    );
+  });
+
+  test("TEST application runtime continues to prefer DIRECT_DATABASE_URL_TEST", () => {
+    assert.equal(
+      getPrismaConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "test",
+        DATABASE_URL: "postgresql://production.invalid:5432/app",
+        DIRECT_DATABASE_URL: "postgresql://production-direct.invalid:5432/app",
+        DATABASE_URL_TEST: testDatabaseUrl,
+        DIRECT_DATABASE_URL_TEST: directTestDatabaseUrl,
+      }),
+      directTestDatabaseUrl
+    );
+    assert.equal(
+      getPrismaConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "test",
+        DATABASE_URL_TEST: testDatabaseUrl,
+      }),
+      testDatabaseUrl
+    );
+  });
+
+  test("Prisma CLI config uses the direct URL populated by the target helper", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { resolve } = await import("node:path");
+    const configSource = await readFile(
+      resolve(process.cwd(), "prisma7.config.ts"),
+      "utf8"
+    );
+    assert.match(configSource, /url:\s*process\.env\["DIRECT_DATABASE_URL"\]/);
+  });
+
+  test("integration runtime test setup keeps its direct TEST URL separate from generic production URLs", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { resolve } = await import("node:path");
+    const testSource = await readFile(
+      resolve(process.cwd(), "tests/integration/order-api.test.ts"),
+      "utf8"
+    );
+    assert.match(
+      testSource,
+      /DIRECT_DATABASE_URL:\s*databaseUrlSentinel[\s\S]*?DATABASE_URL:\s*directTestDatabaseUrl/
+    );
+    assert.match(
+      testSource,
+      /process\.env\.DIRECT_DATABASE_URL\s*=\s*databaseUrlSentinel[\s\S]*?process\.env\.DATABASE_URL\s*=\s*directTestDatabaseUrl/
+    );
   });
 });
 
