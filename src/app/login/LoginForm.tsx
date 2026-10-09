@@ -21,6 +21,25 @@ type LoginFormProps = {
   registered?: boolean;
 };
 
+function normalizeAuthError(message?: string | null): string {
+  const fallback = "Something went wrong while signing you in. Please try again.";
+  const trimmed = message?.trim();
+
+  if (!trimmed) return fallback;
+
+  const normalized = trimmed.toLowerCase();
+  if (
+    normalized.includes("request protection is temporarily unavailable") ||
+    normalized.includes("authentication service is temporarily unavailable") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("rate limit")
+  ) {
+    return "We’re temporarily unable to verify sign-ins. Please try again in a moment.";
+  }
+
+  return trimmed;
+}
+
 export default function LoginForm({
   nextPath = "/account",
   loggedOut = false,
@@ -65,7 +84,7 @@ export default function LoginForm({
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Invalid email or password.");
+        setError(normalizeAuthError(data?.error || "Invalid email or password."));
         setLoading(false);
         return;
       }

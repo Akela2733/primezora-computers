@@ -18,6 +18,25 @@ type RegisterFormProps = {
   nextPath: string;
 };
 
+function normalizeAuthError(message?: string | null): string {
+  const fallback = "Something went wrong while creating your account. Please try again.";
+  const trimmed = message?.trim();
+
+  if (!trimmed) return fallback;
+
+  const normalized = trimmed.toLowerCase();
+  if (
+    normalized.includes("request protection is temporarily unavailable") ||
+    normalized.includes("authentication service is temporarily unavailable") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("rate limit")
+  ) {
+    return "We’re temporarily unable to create new accounts. Please try again in a moment.";
+  }
+
+  return trimmed;
+}
+
 function getPasswordStrength(password: string) {
   let score = 0;
   const checks = {
@@ -102,7 +121,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registration failed. Please check your information.");
+        setError(normalizeAuthError(data?.error || "Registration failed. Please check your information."));
         setLoading(false);
         return;
       }
