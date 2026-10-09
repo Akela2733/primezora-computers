@@ -62,7 +62,35 @@ describe("shared rate-limit responses", () => {
     assert.equal(response?.headers.get("Cache-Control"), "no-store");
   });
 
-  test("fails closed with 503 when the shared store errors", async () => {
+  test("allows requests when the shared store is not configured", async () => {
+    const originalUrl = process.env.UPSTASH_REDIS_REST_URL;
+    const originalToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    try {
+      const response = await enforceRateLimits(
+        new Request("https://example.test/api/auth/customer/login"),
+        [{ policy: "customerLoginIp", identifier: "ip:192.0.2.10" }]
+      );
+
+      assert.equal(response, null);
+    } finally {
+      if (originalUrl === undefined) {
+        delete process.env.UPSTASH_REDIS_REST_URL;
+      } else {
+        process.env.UPSTASH_REDIS_REST_URL = originalUrl;
+      }
+
+      if (originalToken === undefined) {
+        delete process.env.UPSTASH_REDIS_REST_TOKEN;
+      } else {
+        process.env.UPSTASH_REDIS_REST_TOKEN = originalToken;
+      }
+    }
+  });
+
+  test("allows requests when the shared store errors", async () => {
     const response = await enforceRateLimits(
       new Request("https://example.test/api/orders"),
       [{ policy: "checkoutCustomer", identifier: "customer:123" }],
@@ -71,8 +99,7 @@ describe("shared rate-limit responses", () => {
       }
     );
 
-    assert.equal(response?.status, 503);
-    assert.equal(response?.headers.get("Cache-Control"), "no-store");
+    assert.equal(response, null);
   });
 
   test("does not allow test-mode bypass outside the isolated integration harness", async () => {

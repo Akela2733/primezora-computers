@@ -56,13 +56,16 @@ or does not match the requested target.
 ## Application rate limiting
 
 API rate limits use shared Upstash Redis storage so counters remain consistent
-across application instances. Configure `UPSTASH_REDIS_REST_URL` and
-`UPSTASH_REDIS_REST_TOKEN` in each deployed or local runtime that serves these
-routes. Protected routes fail closed with `503` if the shared limiter is not
-configured or unavailable; requests over a policy receive `429` with a
-`Retry-After` header. IP-scoped policies prefer `x-real-ip` and fall back to the
-first `x-forwarded-for` value, so deployments must only accept those headers
-from a trusted proxy.
+across application instances. When `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` are configured, protected routes enforce limits and
+requests over a policy receive `429` with a `Retry-After` header. If the shared
+limiter is unavailable after configuration, the route fails closed with `503`.
+
+For local development and lightweight environments without Upstash configured,
+requests continue without rate limiting so login and registration remain usable
+while the shared protection is absent. IP-scoped policies prefer `x-real-ip` and
+fall back to the first `x-forwarded-for` value, so deployments must only accept
+those headers from a trusted proxy.
 
 ## Security response headers
 

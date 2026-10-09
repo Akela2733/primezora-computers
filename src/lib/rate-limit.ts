@@ -28,12 +28,17 @@ type RateLimitEvaluator = (
 const limiters = new Map<RateLimitPolicyName, Ratelimit>();
 let redis: Redis | undefined;
 
-function getClient(): Redis {
+function hasRedisConfig(): boolean {
   const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
   const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if (!url || !token) {
-    throw new Error("Upstash Redis rate-limit configuration is missing.");
-  }
+  return Boolean(url && token);
+}
+
+function getClient(): Redis | undefined {
+  if (!hasRedisConfig()) return undefined;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL!.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN!.trim();
 
   redis ??= new Redis({ url, token });
   return redis;
@@ -43,9 +48,14 @@ function getLimiter(policy: RateLimitPolicyName): Ratelimit {
   const existing = limiters.get(policy);
   if (existing) return existing;
 
+  const client = getClient();
+  if (!client) {
+    throw new Error("Upstash Redis rate-limit configuration is missing.");
+  }
+
   const config = RATE_LIMIT_POLICIES[policy];
   const limiter = new Ratelimit({
-    redis: getClient(),
+    redis: client,
     limiter: Ratelimit.slidingWindow(config.limit, config.window),
     prefix: `primezora:rate-limit:${policy}`,
     analytics: false,
@@ -58,6 +68,18 @@ function getLimiter(policy: RateLimitPolicyName): Ratelimit {
 async function evaluateWithRedis(
   check: RateLimitCheck
 ): Promise<RateLimitEvaluation> {
+  if (!hasRedisConfig()) {
+    logger.info(
+      `Rate limiting skipped for ${check.policy} because Upstash Redis is not configured.`
+    );
+    return {
+      success: true,
+      limit: Number.MAX_SAFE_INTEGER,
+      remaining: Number.MAX_SAFE_INTEGER,
+      reset: Date.now() + 60_000,
+    };
+  }
+
   const identifierHash = createHash("sha256")
     .update(check.identifier)
     .digest("hex");
@@ -127,6 +149,13 @@ export async function enforceRateLimits(
     return null;
   }
 
+  if (evaluator === evaluateWithRedis && !hasRedisConfig()) {
+    logger.info(
+      "Shared rate limiting is disabled because Upstash Redis credentials are not configured."
+    );
+    return null;
+  }
+
   try {
     const results = await Promise.all(checks.map((check) => evaluator(check)));
     const rejected = results.filter((result) => !result.success);
@@ -149,7 +178,10 @@ export async function enforceRateLimits(
       }
     );
   } catch (error) {
-    logger.error("Shared rate limiter is unavailable.", error);
-    return unavailableResponse();
+    logger.warn(
+      "Shared rate limiter is unavailable; allowing the request to continue without throttling.",
+      error
+    );
+    return null;
   }
 }

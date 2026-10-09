@@ -121,7 +121,11 @@
     ".next-integration-e34a7d6b-d7d1-4590-a055-b2815ebec37d/types/**/*.ts",
     ".next-integration-e34a7d6b-d7d1-4590-a055-b2815ebec37d/dev/types/**/*.ts",
     ".next-integration-d970a6be-4a1c-441d-ae88-bd3529178769/types/**/*.ts",
-    ".next-integration-d970a6be-4a1c-441d-ae88-bd3529178769/dev/types/**/*.ts"
+    ".next-integration-d970a6be-4a1c-441d-ae88-bd3529178769/dev/types/**/*.ts",
+    ".next-integration-515ba4b2-1785-415a-a957-fdb081981809/types/**/*.ts",
+    ".next-integration-515ba4b2-1785-415a-a957-fdb081981809/dev/types/**/*.ts",
+    ".next-integration-656e6a00-ce2a-4c93-a589-d24ae293fd60/types/**/*.ts",
+    ".next-integration-656e6a00-ce2a-4c93-a589-d24ae293fd60/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
