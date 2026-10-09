@@ -17,21 +17,20 @@ import {
 
 type LoginFormProps = {
   nextPath?: string;
-  registered?: boolean;
   loggedOut?: boolean;
+  registered?: boolean;
 };
 
 export default function LoginForm({
   nextPath = "/account",
-  registered = false,
   loggedOut = false,
+  registered = false,
 }: LoginFormProps) {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -81,7 +80,6 @@ export default function LoginForm({
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-      {/* Header */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
           <ShieldCheck size={28} />
@@ -94,22 +92,17 @@ export default function LoginForm({
         </p>
       </div>
 
-      {/* Notifications */}
-      {registered && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
-          <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
-          <div className="flex-1 leading-relaxed">
-            If registration can be completed, check your email for next steps. If you already have an account, sign in or reset your password.
-          </div>
-        </div>
-      )}
-
       {loggedOut && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-xs text-blue-300">
           <CheckCircle2 size={17} className="shrink-0 text-blue-400" />
-          <div className="flex-1 leading-relaxed">
-            You have been logged out safely.
-          </div>
+          <div className="flex-1 leading-relaxed">You have been logged out safely.</div>
+        </div>
+      )}
+
+      {registered && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
+          <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
+          <div className="flex-1 leading-relaxed">Account created successfully. You can sign in now.</div>
         </div>
       )}
 
@@ -120,11 +113,9 @@ export default function LoginForm({
         </div>
       )}
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Email */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-login-email" className="mb-1.5 block text-xs font-medium text-white/70">
             Email Address
           </label>
           <div className="relative">
@@ -134,6 +125,8 @@ export default function LoginForm({
             <input
               id="customer-login-email"
               type="email"
+              name="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -143,12 +136,17 @@ export default function LoginForm({
           </div>
         </div>
 
-        {/* Password */}
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label className="text-xs font-medium text-white/70">
+            <label htmlFor="customer-login-password" className="text-xs font-medium text-white/70">
               Password
             </label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-medium text-amber-400 transition hover:text-amber-300 hover:underline"
+            >
+              Forgot password?
+            </Link>
           </div>
           <div className="relative">
             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
@@ -157,6 +155,8 @@ export default function LoginForm({
             <input
               id="customer-login-password"
               type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -165,6 +165,7 @@ export default function LoginForm({
             />
             <button
               type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
             >
@@ -173,7 +174,6 @@ export default function LoginForm({
           </div>
         </div>
 
-        {/* Submit Button */}
         <button
           id="customer-login-submit"
           type="submit"
@@ -194,7 +194,6 @@ export default function LoginForm({
         </button>
       </form>
 
-      {/* Footer Links */}
       <div className="mt-8 border-t border-white/[0.06] pt-6 text-center text-xs text-white/50">
         Don&apos;t have an account?{" "}
         <Link

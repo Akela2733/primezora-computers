@@ -44,8 +44,7 @@ export default async function AdminLoginPage({
       : "/admin";
 
   const isLoggedOut = rawLoggedOut === "true";
-  const initialTab =
-    rawTab === "register" || rawTab === "forgot" ? rawTab : "login";
+  const initialTab = rawTab === "forgot" ? "forgot" : "login";
 
   return (
     <main className="min-h-screen bg-[#05090f] text-white flex flex-col justify-center">

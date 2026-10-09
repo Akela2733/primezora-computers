@@ -90,7 +90,7 @@ describe("shared rate-limit responses", () => {
     }
   });
 
-  test("allows requests when the shared store errors", async () => {
+  test("fails closed when the shared store errors after configuration", async () => {
     const response = await enforceRateLimits(
       new Request("https://example.test/api/orders"),
       [{ policy: "checkoutCustomer", identifier: "customer:123" }],
@@ -99,7 +99,8 @@ describe("shared rate-limit responses", () => {
       }
     );
 
-    assert.equal(response, null);
+    assert.equal(response?.status, 503);
+    assert.equal(response?.bodyUsed, false);
   });
 
   test("does not allow test-mode bypass outside the isolated integration harness", async () => {

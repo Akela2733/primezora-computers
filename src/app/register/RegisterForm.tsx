@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,12 +12,31 @@ import {
   ShieldCheck,
   AlertCircle,
   Loader2,
-  CheckCircle2,
 } from "lucide-react";
 
 type RegisterFormProps = {
   nextPath: string;
 };
+
+function getPasswordStrength(password: string) {
+  let score = 0;
+  const checks = {
+    length: password.length >= 8 && password.length <= 128,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
+
+  for (const value of Object.values(checks)) {
+    if (value) score += 1;
+  }
+
+  if (!password) return { score: 0, label: "Add a password", checks };
+  if (score <= 2) return { score, label: "Weak", checks };
+  if (score <= 4) return { score, label: "Good", checks };
+  return { score, label: "Strong", checks };
+}
 
 export default function RegisterForm({ nextPath }: RegisterFormProps) {
   const router = useRouter();
@@ -30,17 +49,15 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage(null);
 
-    // Client-side validation
     if (!firstName.trim() || !lastName.trim()) {
       setError("Please enter your first and last name.");
       return;
@@ -51,8 +68,13 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    if (password.length < 8 || password.length > 128) {
+      setError("Password must be between 8 and 128 characters long.");
+      return;
+    }
+
+    if (strength.score < 4) {
+      setError("Choose a stronger password with uppercase, lowercase, numbers, and a symbol.");
       return;
     }
 
@@ -85,17 +107,8 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         return;
       }
 
-      if (data.requiresEmailConfirmation) {
-        setSuccessMessage(
-          "If registration can be completed, check your email for next steps. If you already have an account, sign in or reset your password."
-        );
-        setTimeout(() => {
-          router.push(data.redirectUrl || `/login?registered=true&next=${encodeURIComponent(nextPath)}`);
-        }, 3000);
-      } else {
-        router.push(data.redirectUrl || "/account");
-        router.refresh();
-      }
+      router.push(data.redirectUrl || "/account");
+      router.refresh();
     } catch {
       setError("A network error occurred. Please check your connection and retry.");
       setLoading(false);
@@ -104,7 +117,6 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
 
   return (
     <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-      {/* Header */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
           <ShieldCheck size={28} />
@@ -117,62 +129,51 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         </p>
       </div>
 
-      {/* Notifications */}
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300" role="alert">
           <AlertCircle size={17} className="shrink-0 text-rose-400" />
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
       )}
 
-      {successMessage && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
-          <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
-          <div className="flex-1 leading-relaxed">{successMessage}</div>
-        </div>
-      )}
-
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name Fields */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/70">
+            <label htmlFor="customer-first-name" className="mb-1.5 block text-xs font-medium text-white/70">
               First Name
             </label>
-            <div className="relative">
-              <input
-                id="customer-first-name"
-                type="text"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Kasun"
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
-              />
-            </div>
+            <input
+              id="customer-first-name"
+              type="text"
+              name="firstName"
+              autoComplete="given-name"
+              required
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Kasun"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+            />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/70">
+            <label htmlFor="customer-last-name" className="mb-1.5 block text-xs font-medium text-white/70">
               Last Name
             </label>
-            <div className="relative">
-              <input
-                id="customer-last-name"
-                type="text"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Perera"
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
-              />
-            </div>
+            <input
+              id="customer-last-name"
+              type="text"
+              name="lastName"
+              autoComplete="family-name"
+              required
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Perera"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+            />
           </div>
         </div>
 
-        {/* Email */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-email" className="mb-1.5 block text-xs font-medium text-white/70">
             Email Address
           </label>
           <div className="relative">
@@ -182,6 +183,8 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
             <input
               id="customer-email"
               type="email"
+              name="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -191,9 +194,8 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
           </div>
         </div>
 
-        {/* Password */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-password" className="mb-1.5 block text-xs font-medium text-white/70">
             Password
           </label>
           <div className="relative">
@@ -203,8 +205,11 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
             <input
               id="customer-password"
               type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="new-password"
               required
               minLength={8}
+              maxLength={128}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
@@ -212,17 +217,42 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
             />
             <button
               type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          <div className="mt-2">
+            <div className="mb-1 flex items-center justify-between text-[10px] text-white/60">
+              <span>Password strength</span>
+              <span>{strength.label}</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  strength.score <= 2
+                    ? "bg-rose-500"
+                    : strength.score <= 4
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
+                }`}
+                style={{ width: `${(strength.score / 5) * 100}%` }}
+              />
+            </div>
+            <ul className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-white/55">
+              <li>8-128 chars</li>
+              <li>Uppercase</li>
+              <li>Lowercase</li>
+              <li>Number</li>
+              <li>Symbol</li>
+            </ul>
+          </div>
         </div>
 
-        {/* Confirm Password */}
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-confirm-password" className="mb-1.5 block text-xs font-medium text-white/70">
             Confirm Password
           </label>
           <div className="relative">
@@ -232,8 +262,11 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
             <input
               id="customer-confirm-password"
               type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              autoComplete="new-password"
               required
               minLength={8}
+              maxLength={128}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter password"
@@ -241,6 +274,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
             />
             <button
               type="button"
+              aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
             >
@@ -249,7 +283,6 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
           </div>
         </div>
 
-        {/* Submit Button */}
         <button
           id="customer-register-submit"
           type="submit"
@@ -270,7 +303,6 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         </button>
       </form>
 
-      {/* Footer Links */}
       <div className="mt-8 border-t border-white/[0.06] pt-6 text-center text-xs text-white/50">
         Already have an account?{" "}
         <Link

@@ -179,9 +179,9 @@ export async function enforceRateLimits(
     );
   } catch (error) {
     logger.warn(
-      "Shared rate limiter is unavailable; allowing the request to continue without throttling.",
+      "Shared rate limiter is unavailable; rejecting the request to fail closed.",
       error
     );
-    return null;
+    return unavailableResponse();
   }
 }
