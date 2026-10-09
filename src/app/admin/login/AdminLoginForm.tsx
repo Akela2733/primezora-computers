@@ -23,6 +23,26 @@ type AdminLoginFormProps = {
   initialTab?: AuthTab;
 };
 
+function normalizeAuthError(message?: string | null): string {
+  const fallback = "Unable to sign in to the admin portal. Please try again.";
+  const trimmed = message?.trim();
+
+  if (!trimmed) return fallback;
+
+  const normalized = trimmed.toLowerCase();
+  if (
+    normalized.includes("request protection is temporarily unavailable") ||
+    normalized.includes("admin login is temporarily unavailable") ||
+    normalized.includes("authentication is temporarily unavailable") ||
+    normalized.includes("temporarily unavailable") ||
+    normalized.includes("rate limit")
+  ) {
+    return "The admin portal is temporarily unavailable. Please try again in a moment.";
+  }
+
+  return trimmed;
+}
+
 export default function AdminLoginForm({
   nextPath = "/admin",
   loggedOut = false,
@@ -80,7 +100,7 @@ export default function AdminLoginForm({
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.error || "Invalid email or password.");
+        setErrorMessage(normalizeAuthError(data?.error || "Invalid email or password."));
         setIsSubmitting(false);
         return;
       }

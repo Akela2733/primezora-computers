@@ -124,7 +124,7 @@ export async function getEmailRateLimitIdentifier(
 
 function unavailableResponse(): NextResponse {
   return NextResponse.json(
-    { error: "Request protection is temporarily unavailable." },
+    { error: "Authentication is temporarily unavailable. Please try again in a moment." },
     { status: 503, headers: { "Cache-Control": "no-store" } }
   );
 }
@@ -138,6 +138,7 @@ export async function enforceRateLimits(
   const isIntegrationHarness =
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_DIST_DIR?.startsWith(".next-integration-") === true;
+  const isLocalDevelopment = process.env.NODE_ENV === "development";
 
   if (testModeRequested) {
     if (!isIntegrationHarness) {
@@ -161,6 +162,13 @@ export async function enforceRateLimits(
     const rejected = results.filter((result) => !result.success);
     if (rejected.length === 0) return null;
 
+    if (isLocalDevelopment) {
+      logger.info(
+        "Local development mode detected; bypassing a shared rate-limit rejection to keep local auth usable."
+      );
+      return null;
+    }
+
     const resetAt = Math.max(...rejected.map((result) => result.reset));
     const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
     const limit = Math.min(...rejected.map((result) => result.limit));
@@ -178,6 +186,14 @@ export async function enforceRateLimits(
       }
     );
   } catch (error) {
+    if (isLocalDevelopment) {
+      logger.warn(
+        "Shared rate limiter is unavailable in local development; allowing the request to proceed so local auth remains usable.",
+        error
+      );
+      return null;
+    }
+
     logger.warn(
       "Shared rate limiter is unavailable; rejecting the request to fail closed.",
       error
