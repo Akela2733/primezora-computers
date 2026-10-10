@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import ResendConfirmationForm from "@/app/email-confirmation/ResendConfirmationForm";
@@ -25,6 +25,31 @@ export default function VerifyEmailClient({
   deliveryFailed,
   cooldownSeconds,
 }: VerifyEmailClientProps) {
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const seen = new Set<string>();
+    const normalized = new URLSearchParams();
+    let hasDuplicateParameters = false;
+
+    url.searchParams.forEach((value, key) => {
+      if (seen.has(key)) {
+        hasDuplicateParameters = true;
+        return;
+      }
+      seen.add(key);
+      normalized.append(key, value);
+    });
+
+    if (hasDuplicateParameters) {
+      url.search = normalized.toString();
+      window.history.replaceState(
+        null,
+        "",
+        `${url.pathname}${url.search}${url.hash}`
+      );
+    }
+  }, []);
+
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(
     deliveryFailed

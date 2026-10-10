@@ -54,10 +54,53 @@ export class ResendEmailProvider implements EmailProvider {
       });
 
       if (!response.ok) {
+        let errorPayload: unknown;
+        try {
+          errorPayload = await response.json();
+        } catch {
+          errorPayload = null;
+        }
+        const providerError =
+          typeof errorPayload === "object" && errorPayload !== null
+            ? (errorPayload as Record<string, unknown>)
+            : {};
+        const rawCode =
+          typeof providerError.name === "string"
+            ? providerError.name
+            : typeof providerError.code === "string"
+              ? providerError.code
+              : undefined;
+        const knownErrorCodes = new Set([
+          "domain_not_found",
+          "domain_not_verified",
+          "invalid_api_key",
+          "invalid_from_address",
+          "invalid_parameter",
+          "invalid_region",
+          "missing_required_field",
+          "rate_limit_exceeded",
+          "restricted_api_key",
+        ]);
+        const normalizedCode = rawCode?.toLowerCase();
+        const errorCode =
+          normalizedCode && knownErrorCodes.has(normalizedCode)
+            ? normalizedCode
+            : undefined;
+        const providerMessage =
+          typeof providerError.message === "string"
+            ? providerError.message.toLowerCase()
+            : "";
+        const category = classifyResendError(
+          response.status,
+          `${errorCode ?? ""} ${providerMessage}`
+        );
         return {
           success: false,
           provider: this.name,
-          error: `Resend API returned HTTP ${response.status}.`,
+          error: "Resend rejected the email request.",
+          httpStatus: response.status,
+          ...(errorCode ? { errorCode } : {}),
+          errorCategory: category,
         };
       }
 
@@ -67,17 +110,45 @@ export class ResendEmailProvider implements EmailProvider {
         messageId: data.id || "resend_sent",
         provider: this.name,
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         provider: this.name,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unknown network error during email dispatch.",
+        error: "Resend email request failed before acceptance.",
+        errorCategory: "network",
       };
     }
   }
+}
+
+function classifyResendError(
+  status: number,
+  providerDetails: string
+): NonNullable<EmailSendResult["errorCategory"]> {
+  if (/rate.?limit|too many requests/.test(providerDetails) || status === 429) {
+    return "rate_limit";
+  }
+  if (
+    /domain|sender|from address|from email|not verified|verified domain/.test(
+      providerDetails
+    )
+  ) {
+    return "sender_domain";
+  }
+  if (
+    /recipient|to address|invalid email|invalid.{0,20}\bto\b|\bto\b.{0,20}invalid/.test(
+      providerDetails
+    )
+  ) {
+    return "recipient";
+  }
+  if (status === 401 || /api.?key|unauthorized|authentication/.test(providerDetails)) {
+    return "authorization";
+  }
+  if (/restricted|suspend|disabled|account/.test(providerDetails)) {
+    return "account_restriction";
+  }
+  return "provider";
 }
 
 /**

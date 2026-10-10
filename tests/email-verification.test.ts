@@ -142,7 +142,9 @@ describe("customer email verification tokens", () => {
 
   test("issues only a hash, uses the configured verification URL, and reports provider acceptance", async () => {
     const originalSiteUrl = process.env.PUBLIC_SITE_URL;
+    const originalEmailFrom = process.env.EMAIL_FROM;
     process.env.PUBLIC_SITE_URL = "https://primezora.example/";
+    process.env.EMAIL_FROM = "Primezora <verify@primezora.example>";
     let storedHash = "";
     let sentMessage: EmailMessage | undefined;
     const issuer: CustomerEmailVerificationIssuer = {
@@ -176,6 +178,7 @@ describe("customer email verification tokens", () => {
       assert.deepEqual(result, { success: true });
       assert.match(storedHash, /^[0-9a-f]{64}$/);
       const message = sentMessage!;
+      assert.equal(message.from, "Primezora <verify@primezora.example>");
       const link = new URL(message.text.match(/https:\/\/\S+/)![0]);
       assert.equal(link.origin, "https://primezora.example");
       assert.equal(link.pathname, "/verify-email");
@@ -190,6 +193,65 @@ describe("customer email verification tokens", () => {
     } finally {
       if (originalSiteUrl === undefined) delete process.env.PUBLIC_SITE_URL;
       else process.env.PUBLIC_SITE_URL = originalSiteUrl;
+      if (originalEmailFrom === undefined) delete process.env.EMAIL_FROM;
+      else process.env.EMAIL_FROM = originalEmailFrom;
+    }
+  });
+
+  test("uses the Resend onboarding sender as the non-production fallback", async () => {
+    const originalValues = {
+      nodeEnv: process.env.NODE_ENV,
+      publicSiteUrl: process.env.PUBLIC_SITE_URL,
+      emailFrom: process.env.EMAIL_FROM,
+    };
+    Reflect.set(process.env, "NODE_ENV", "development");
+    process.env.PUBLIC_SITE_URL = "http://localhost:3000";
+    delete process.env.EMAIL_FROM;
+
+    let sender: string | undefined;
+    const issuer: CustomerEmailVerificationIssuer = {
+      async createToken() {
+        return { issued: true };
+      },
+      async invalidateToken() {
+        assert.fail("Accepted test delivery must keep its verification token.");
+      },
+    };
+    const provider: EmailProvider = {
+      name: "resend",
+      async sendEmail(message) {
+        sender = message.from;
+        return { success: true, provider: "resend" };
+      },
+    };
+
+    try {
+      const result = await issueCustomerEmailConfirmation(
+        {
+          id: "customer-record",
+          email: "customer@example.test",
+          name: "Primezora Customer",
+        },
+        { repository: issuer, provider, now: verificationTime }
+      );
+      assert.deepEqual(result, { success: true });
+      assert.equal(sender, "Primezora <onboarding@resend.dev>");
+    } finally {
+      if (originalValues.nodeEnv === undefined) {
+        Reflect.deleteProperty(process.env, "NODE_ENV");
+      } else {
+        Reflect.set(process.env, "NODE_ENV", originalValues.nodeEnv);
+      }
+      if (originalValues.publicSiteUrl === undefined) {
+        delete process.env.PUBLIC_SITE_URL;
+      } else {
+        process.env.PUBLIC_SITE_URL = originalValues.publicSiteUrl;
+      }
+      if (originalValues.emailFrom === undefined) {
+        delete process.env.EMAIL_FROM;
+      } else {
+        process.env.EMAIL_FROM = originalValues.emailFrom;
+      }
     }
   });
 
@@ -260,6 +322,64 @@ describe("customer email verification tokens", () => {
     });
   });
 
+  test("production delivery fails closed when sender or canonical origin is misconfigured", async () => {
+    const originalValues = {
+      nodeEnv: process.env.NODE_ENV,
+      publicSiteUrl: process.env.PUBLIC_SITE_URL,
+      emailFrom: process.env.EMAIL_FROM,
+    };
+    Reflect.set(process.env, "NODE_ENV", "production");
+    process.env.PUBLIC_SITE_URL = "";
+    process.env.EMAIL_FROM = "Primezora <verify@primezora.example>";
+
+    const issuer: CustomerEmailVerificationIssuer = {
+      async createToken() {
+        assert.fail("Configuration errors must be detected before token creation.");
+      },
+      async invalidateToken() {},
+    };
+    const provider: EmailProvider = {
+      name: "resend",
+      async sendEmail() {
+        assert.fail("Configuration errors must be detected before provider dispatch.");
+      },
+    };
+
+    try {
+      const missingOrigin = await issueCustomerEmailConfirmation(
+        {
+          id: "customer-record",
+          email: "customer@example.test",
+          name: "Primezora Customer",
+        },
+        { repository: issuer, provider, now: verificationTime }
+      );
+      assert.equal(missingOrigin.success, false);
+
+      process.env.PUBLIC_SITE_URL = "https://primezora.example";
+      process.env.EMAIL_FROM = "not-a-sender";
+      const invalidSender = await issueCustomerEmailConfirmation(
+        {
+          id: "customer-record",
+          email: "customer@example.test",
+          name: "Primezora Customer",
+        },
+        { repository: issuer, provider, now: verificationTime }
+      );
+      assert.equal(invalidSender.success, false);
+    } finally {
+      if (originalValues.nodeEnv === undefined) {
+        Reflect.deleteProperty(process.env, "NODE_ENV");
+      } else {
+        Reflect.set(process.env, "NODE_ENV", originalValues.nodeEnv);
+      }
+      if (originalValues.publicSiteUrl === undefined) delete process.env.PUBLIC_SITE_URL;
+      else process.env.PUBLIC_SITE_URL = originalValues.publicSiteUrl;
+      if (originalValues.emailFrom === undefined) delete process.env.EMAIL_FROM;
+      else process.env.EMAIL_FROM = originalValues.emailFrom;
+    }
+  });
+
   test("returns a resend cooldown without attempting a provider send", async () => {
     const issuer: CustomerEmailVerificationIssuer = {
       async createToken() {
@@ -328,25 +448,54 @@ describe("customer email verification tokens", () => {
     }
   });
 
-  test("Resend rejection exposes only its HTTP status, not provider response content", async () => {
+  test("Resend rejection returns safe actionable provider diagnostics", async () => {
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = async () =>
-      new Response("TEST_ONLY_PROVIDER_RESPONSE_SECRET", { status: 403 });
 
     try {
       const provider = new ResendEmailProvider("re_test_only_api_key");
-      const result = await provider.sendEmail({
-        to: "customer@example.test",
-        subject: "Verify",
-        html: "<p>Verify</p>",
-        text: "Verify",
-      });
-      assert.deepEqual(result, {
-        success: false,
-        provider: "resend",
-        error: "Resend API returned HTTP 403.",
-      });
-      assert.doesNotMatch(JSON.stringify(result), /TEST_ONLY_PROVIDER_RESPONSE_SECRET/);
+      const responses = [
+        {
+          status: 401,
+          body: { name: "invalid_api_key", message: "Invalid API key." },
+          category: "authorization",
+        },
+        {
+          status: 403,
+          body: {
+            name: "domain_not_verified",
+            message: "The sender domain is not verified.",
+          },
+          category: "sender_domain",
+        },
+        {
+          status: 429,
+          body: { name: "rate_limit_exceeded", message: "Too many requests." },
+          category: "rate_limit",
+        },
+      ] as const;
+
+      for (const expected of responses) {
+        globalThis.fetch = async () =>
+          new Response(JSON.stringify(expected.body), {
+            status: expected.status,
+            headers: { "Content-Type": "application/json" },
+          });
+        const result = await provider.sendEmail({
+          to: "customer@example.test",
+          subject: "Verify",
+          html: "<p>Verify</p>",
+          text: "Verify",
+        });
+        assert.deepEqual(result, {
+          success: false,
+          provider: "resend",
+          error: "Resend rejected the email request.",
+          httpStatus: expected.status,
+          errorCode: expected.body.name,
+          errorCategory: expected.category,
+        });
+        assert.doesNotMatch(JSON.stringify(result), /not verified|Invalid API key|Too many requests/);
+      }
     } finally {
       globalThis.fetch = originalFetch;
     }

@@ -53,6 +53,17 @@ export interface EmailSendResult {
   provider: string;
   error?: string;
   skipped?: boolean;
+  httpStatus?: number;
+  errorCode?: string;
+  errorCategory?:
+    | "configuration"
+    | "authorization"
+    | "sender_domain"
+    | "recipient"
+    | "rate_limit"
+    | "account_restriction"
+    | "provider"
+    | "network";
 }
 
 export interface EmailProvider {

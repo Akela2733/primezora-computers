@@ -90,19 +90,39 @@ Configure these server-side environment variables:
 
 - `PUBLIC_SITE_URL`: the canonical application origin used in verification
   links. Use `http://localhost:3000` for local development and the exact HTTPS
-  production origin in deployment.
+  production origin in deployment (no path, query string, or fragment).
 - `RESEND_API_KEY`: a server-only Resend API key. Never expose it with a
   `NEXT_PUBLIC_` prefix.
 - `EMAIL_FROM`: a sender such as `Primezora <noreply@primezora.com>`. The sender
-  domain must be verified with Resend.
+  domain must be verified with Resend. Customer verification uses
+  `Primezora <onboarding@resend.dev>` as its local/testing fallback when this
+  variable is unset; production requires `EMAIL_FROM` to be explicitly set.
 
 For production, add the domain in Resend and publish the SPF/DKIM DNS records it
-provides. Wait for the domain to show as verified, then add the API key, sender
-address, and canonical site URL to the production environment and redeploy.
+provides. Wait for the domain to show as verified, then add all three variables
+to Vercel's **Production** environment and redeploy. `EMAIL_FROM` must use that
+verified domain, and `PUBLIC_SITE_URL` must be the site's HTTPS origin.
 Without a configured Resend provider, verification sends fail rather than
 showing a false “email sent” state. Local development may use a Resend test
 domain/key and an allowed recipient configured in Resend; no live delivery is
-claimed until the provider accepts a send request.
+claimed until the provider accepts a send request. If a send fails, inspect the
+Vercel function logs for `CUSTOMER_EMAIL_VERIFICATION_CONFIGURATION_INVALID`,
+`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REJECTED`, or
+`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REQUEST_FAILED`. Rejection logs include
+only the provider name, allowlisted error category/code, and HTTP status; they
+never include API credentials, recipient addresses, tokens, or verification
+links.
+
+For local testing, put `RESEND_API_KEY`, `TEST_EMAIL_TO`, and
+`CONFIRM_EMAIL_SEND=1` in `.env.local`, then run `npm run test:email-delivery`.
+The one-off test refuses to run in production and only reports sanitized
+provider diagnostics; it never prints the API key or recipient address. With
+`EMAIL_FROM` unset, it sends from `Primezora <onboarding@resend.dev>`, which
+Resend permits only for recipients allowed by its onboarding restrictions
+(typically the Resend account owner's address). For other recipients, verify
+your own domain in Resend and set `EMAIL_FROM` to an address on that domain.
+The focused automated checks run with `npm run test:email-verification`; these
+mock provider responses and do not send real email.
 
 Production deployment applies pending Prisma migrations through
 `npm run build:production`. The migration

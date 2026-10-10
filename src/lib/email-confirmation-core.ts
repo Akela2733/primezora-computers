@@ -54,6 +54,55 @@ function getBaseUrl(): string {
   ).replace(/\/+$/, "");
 }
 
+type VerificationConfigurationError =
+  | "missing_resend_api_key"
+  | "missing_public_site_url"
+  | "invalid_public_site_url"
+  | "missing_email_from"
+  | "invalid_email_from";
+
+const EMAIL_ADDRESS_PATTERN =
+  "[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
+
+function getVerificationConfigurationError(
+  provider: EmailProvider
+): VerificationConfigurationError | null {
+  if (provider.name === "console") return "missing_resend_api_key";
+
+  const production = process.env.NODE_ENV === "production";
+  const configuredSiteUrl = process.env.PUBLIC_SITE_URL?.trim();
+  if (production && !configuredSiteUrl) return "missing_public_site_url";
+
+  const siteUrl = configuredSiteUrl || getBaseUrl();
+  try {
+    const parsed = new URL(siteUrl);
+    if (
+      parsed.username ||
+      parsed.password ||
+      parsed.search ||
+      parsed.hash ||
+      (production && parsed.protocol !== "https:") ||
+      parsed.pathname !== "/"
+    ) {
+      return "invalid_public_site_url";
+    }
+  } catch {
+    return "invalid_public_site_url";
+  }
+
+  const emailFrom = process.env.EMAIL_FROM?.trim();
+  if (production && !emailFrom) return "missing_email_from";
+  if (
+    emailFrom &&
+    !new RegExp(
+      `^(?:[^<>]*<${EMAIL_ADDRESS_PATTERN}>|${EMAIL_ADDRESS_PATTERN})$`
+    ).test(emailFrom)
+  ) {
+    return "invalid_email_from";
+  }
+  return null;
+}
+
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => {
     const entities: Record<string, string> = {
@@ -330,8 +379,18 @@ export async function issueCustomerEmailConfirmation(
   const now = dependencies.now ?? new Date();
   const repository = dependencies.repository;
 
-  if (provider.name === "console") {
-    logger.error("CUSTOMER_EMAIL_VERIFICATION_PROVIDER_UNCONFIGURED");
+  const configurationError = getVerificationConfigurationError(provider);
+  if (configurationError) {
+    logger.error(
+      "CUSTOMER_EMAIL_VERIFICATION_CONFIGURATION_INVALID",
+      new Error(
+        JSON.stringify({
+          provider: provider.name,
+          category: "configuration",
+          cause: configurationError,
+        })
+      )
+    );
     return { success: false, error: "Email delivery is not configured." };
   }
 
@@ -367,24 +426,27 @@ export async function issueCustomerEmailConfirmation(
       nextPath: params.nextPath,
     }),
   });
+  const sender =
+    process.env.EMAIL_FROM?.trim() || "Primezora <onboarding@resend.dev>";
 
   let emailAccepted = false;
   try {
     const result = await provider.sendEmail({
       to: params.email,
+      from: sender,
       ...email,
     });
     emailAccepted = result.success && !result.skipped;
     if (!emailAccepted) {
-      const providerStatus = /^Resend API returned HTTP (\d{3})\.$/.exec(
-        result.error ?? ""
-      )?.[1];
       logger.error(
         "CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REJECTED",
         new Error(
-          providerStatus
-            ? `Provider returned HTTP ${providerStatus}.`
-            : "Provider did not accept the verification email."
+          JSON.stringify({
+            provider: result.provider,
+            category: result.errorCategory ?? "provider",
+            httpStatus: result.httpStatus ?? null,
+            providerCode: result.errorCode ?? null,
+          })
         )
       );
     }
