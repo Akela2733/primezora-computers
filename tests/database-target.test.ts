@@ -10,6 +10,7 @@ import {
   assertBuildArtifactTarget,
   writeBuildArtifactTarget,
 } from "../scripts/build-artifact-target";
+import { getPrismaCliConnectionString } from "../src/lib/prisma-connection";
 
 const testDatabaseUrl =
   "postgresql://test.invalid:5432/test_db?schema=public";
@@ -312,14 +313,46 @@ describe("production connection variable wiring", () => {
     );
   });
 
-  test("Prisma CLI config uses the direct URL populated by the target helper", async () => {
+  test("Prisma CLI prefers the production migration URL and retains the direct URL fallback", async () => {
+    const migrationUrl =
+      "postgresql://postgres.project@session.pooler.supabase.com:5432/postgres";
+    const directUrl =
+      "postgresql://postgres@db.project.supabase.co:5432/postgres";
+
+    assert.equal(
+      getPrismaCliConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
+        MIGRATION_DATABASE_URL: migrationUrl,
+        DIRECT_DATABASE_URL: directUrl,
+      }),
+      migrationUrl
+    );
+    assert.equal(
+      getPrismaCliConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
+        DIRECT_DATABASE_URL: directUrl,
+      }),
+      directUrl
+    );
+    assert.equal(
+      getPrismaCliConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "test",
+        MIGRATION_DATABASE_URL: migrationUrl,
+        DIRECT_DATABASE_URL: directTestDatabaseUrl,
+      }),
+      directTestDatabaseUrl
+    );
+
     const { readFile } = await import("node:fs/promises");
     const { resolve } = await import("node:path");
     const configSource = await readFile(
       resolve(process.cwd(), "prisma7.config.ts"),
       "utf8"
     );
-    assert.match(configSource, /url:\s*process\.env\["DIRECT_DATABASE_URL"\]/);
+    assert.match(
+      configSource,
+      /url:\s*getPrismaCliConnectionString\(process\.env\)/
+    );
   });
 
   test("integration runtime test setup keeps its direct TEST URL separate from generic production URLs", async () => {
