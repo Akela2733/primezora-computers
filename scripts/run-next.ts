@@ -72,6 +72,17 @@ const nextCli = resolve(projectRoot, "node_modules/next/dist/bin/next");
 const commands =
   command === "build"
     ? [
+        ...(productionRequested
+          ? [
+              {
+                executable: resolve(
+                  projectRoot,
+                  "node_modules/prisma/build/index.js"
+                ),
+                args: ["migrate", "deploy"],
+              },
+            ]
+          : []),
         {
           executable: resolve(
             projectRoot,

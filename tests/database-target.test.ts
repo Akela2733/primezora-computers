@@ -483,4 +483,19 @@ describe("build artifact target marker", () => {
         wrapper.indexOf("for (const { executable, args } of commands)")
     );
   });
+
+  test("production builds apply pending migrations before generating Prisma Client", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { resolve } = await import("node:path");
+    const wrapper = await readFile(
+      resolve(process.cwd(), "scripts/run-next.ts"),
+      "utf8"
+    );
+    const migrationCommand = wrapper.indexOf('args: ["migrate", "deploy"]');
+    const generateCommand = wrapper.indexOf('args: ["generate"]');
+
+    assert.ok(migrationCommand >= 0);
+    assert.ok(generateCommand > migrationCommand);
+    assert.match(wrapper, /productionRequested\s*\?\s*\[/);
+  });
 });

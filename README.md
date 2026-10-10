@@ -40,8 +40,10 @@ npm run start:production
 Provide both `DATABASE_URL` and `DIRECT_DATABASE_URL` through the deployment
 environment. `DATABASE_URL` is the application/runtime PostgreSQL connection;
 `DIRECT_DATABASE_URL` is the direct PostgreSQL connection for Prisma CLI
-operations and explicitly invoked production seed operations. Production
-commands do not require `.env.test.local`. Direct `next build` or
+operations, production migrations, and explicitly invoked production seed
+operations. `npm run build:production` applies pending Prisma migrations before
+generating the client and building the application. Production commands do not
+require `.env.test.local`. Direct `next build` or
 production-runtime commands without an explicit database target fail closed.
 Do not set `PRIMEZORA_DATABASE_TARGET=production` for local development.
 
