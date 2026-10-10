@@ -88,6 +88,16 @@ export async function handleCustomerLogin(
       lastName,
     });
 
+    if (!customer.emailVerified) {
+      return NextResponse.json(
+        {
+          error: "Please confirm your email before signing in. We sent a verification link to your inbox.",
+          requiresEmailConfirmation: true,
+        },
+        { status: 401 }
+      );
+    }
+
     await issueSession(customer.id, authUserId, customer.email);
 
     return NextResponse.json({

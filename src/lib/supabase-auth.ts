@@ -5,12 +5,12 @@ import { createClient, type SupabaseClient, type User } from "@supabase/supabase
 export type SupabaseAuthConfig = {
   url: string;
   anonKey: string;
+  serviceRoleKey: string;
   isConfigured: boolean;
 };
 
 /**
- * Reads existing Supabase configuration from environment variables.
- * Prioritizes public client variables, falling back to service role key if needed server-side.
+ * Reads the public Auth configuration and the server-only admin key separately.
  */
 export function getSupabaseAuthConfig(): SupabaseAuthConfig {
   const url =
@@ -21,8 +21,8 @@ export function getSupabaseAuthConfig(): SupabaseAuthConfig {
   const anonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
     "";
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
   const cleanUrl = url.trim().replace(/\/+$/, "");
   const cleanKey = anonKey.trim();
@@ -30,11 +30,13 @@ export function getSupabaseAuthConfig(): SupabaseAuthConfig {
   return {
     url: cleanUrl,
     anonKey: cleanKey,
+    serviceRoleKey: serviceRoleKey.trim(),
     isConfigured: Boolean(cleanUrl && cleanKey),
   };
 }
 
 let authClientInstance: SupabaseClient | null = null;
+let supabaseAdminClientInstance: SupabaseClient | null = null;
 
 /**
  * Returns a server-side Supabase client dedicated to Auth operations.
@@ -59,6 +61,26 @@ export function getSupabaseAuthClient(): SupabaseClient {
   return authClientInstance;
 }
 
+function getSupabaseAdminClient(): SupabaseClient {
+  const config = getSupabaseAuthConfig();
+  if (!config.url || !config.serviceRoleKey) {
+    throw new Error(
+      "Supabase customer registration requires SUPABASE_SERVICE_ROLE_KEY."
+    );
+  }
+
+  if (!supabaseAdminClientInstance) {
+    supabaseAdminClientInstance = createClient(config.url, config.serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+
+  return supabaseAdminClientInstance;
+}
+
 export type SignUpResult = {
   success: boolean;
   user?: User;
@@ -77,7 +99,7 @@ export type SignInResult = {
 };
 
 /**
- * Registers a new customer with Supabase Auth.
+ * Creates a customer account without depending on Supabase confirmation email delivery.
  */
 export async function supabaseSignUp(params: {
   email: string;
@@ -94,16 +116,15 @@ export async function supabaseSignUp(params: {
   }
 
   try {
-    const supabase = getSupabaseAuthClient();
-    const { data, error } = await supabase.auth.signUp({
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase.auth.admin.createUser({
       email: params.email.trim().toLowerCase(),
       password: params.password,
-      options: {
-        data: {
-          firstName: params.firstName.trim(),
-          lastName: params.lastName.trim(),
-          fullName: `${params.firstName.trim()} ${params.lastName.trim()}`.trim(),
-        },
+      email_confirm: true,
+      user_metadata: {
+        firstName: params.firstName.trim(),
+        lastName: params.lastName.trim(),
+        fullName: `${params.firstName.trim()} ${params.lastName.trim()}`.trim(),
       },
     });
 
@@ -111,6 +132,7 @@ export async function supabaseSignUp(params: {
       // Map Supabase errors to friendly messages without revealing system internals
       if (
         error.message.toLowerCase().includes("already registered") ||
+        error.message.toLowerCase().includes("already been registered") ||
         error.message.toLowerCase().includes("unique constraint") ||
         error.status === 422
       ) {
@@ -132,21 +154,10 @@ export async function supabaseSignUp(params: {
       };
     }
 
-    // Check for fake sign-up enumeration prevention in Supabase (identities array empty)
-    if (data.user.identities && data.user.identities.length === 0) {
-      return {
-        success: false,
-        emailMayExist: true,
-      };
-    }
-
-    const requiresEmailConfirmation = !data.session && Boolean(data.user);
-
     return {
       success: true,
       user: data.user,
-      session: data.session,
-      requiresEmailConfirmation,
+      requiresEmailConfirmation: true,
     };
   } catch (err) {
     console.error("Supabase signUp exception:", err);
@@ -194,7 +205,7 @@ export async function supabaseSignIn(params: {
       if (error.message.toLowerCase().includes("email not confirmed")) {
         return {
           success: false,
-          error: "Please confirm your email address before logging in.",
+          error: "This older account still requires email verification. Please contact support for help accessing it.",
         };
       }
 

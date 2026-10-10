@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
+import { issueCustomerEmailConfirmation } from "@/lib/email-confirmation";
 
 type CustomerRegistrationSignUpResult = {
   success: boolean;
@@ -29,12 +30,20 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function createRegistrationAcceptedResponse(redirectPath: string): NextResponse {
+function createRegistrationAcceptedResponse(
+  redirectPath: string,
+  email?: string
+): NextResponse {
+  const redirectUrl = email
+    ? `/email-confirmation?email=${encodeURIComponent(email)}&next=${encodeURIComponent(redirectPath)}`
+    : `/login?registered=true&next=${encodeURIComponent(redirectPath)}`;
+
   return NextResponse.json(
     {
       success: true,
-      requiresEmailConfirmation: true,
-      redirectUrl: `/login?registered=true&next=${encodeURIComponent(redirectPath)}`,
+      requiresSignIn: true,
+      requiresEmailConfirmation: Boolean(email),
+      redirectUrl,
     },
     { status: 201 }
   );
@@ -120,11 +129,27 @@ export async function handleCustomerRegistration(
 
     const existingCustomer = await db.customer.findUnique({
       where: { email: cleanEmail },
-      select: { id: true },
+      select: {
+        id: true,
+        emailVerified: true,
+        firstName: true,
+        lastName: true,
+        name: true,
+      },
     });
 
     if (existingCustomer) {
-      return createRegistrationAcceptedResponse(redirectPath);
+      if (!existingCustomer.emailVerified) {
+        await issueCustomerEmailConfirmation({
+          id: existingCustomer.id,
+          email: cleanEmail,
+          firstName: existingCustomer.firstName,
+          lastName: existingCustomer.lastName,
+          name: existingCustomer.name,
+        });
+      }
+
+      return createRegistrationAcceptedResponse(redirectPath, cleanEmail);
     }
 
     const signUpResult = await signUp({
@@ -135,7 +160,7 @@ export async function handleCustomerRegistration(
     });
 
     if (signUpResult.emailMayExist || signUpResult.error?.toLowerCase().includes("already")) {
-      return createRegistrationAcceptedResponse(redirectPath);
+      return createRegistrationAcceptedResponse(redirectPath, cleanEmail);
     }
 
     if (!signUpResult.success || !signUpResult.user) {
@@ -158,7 +183,26 @@ export async function handleCustomerRegistration(
     });
 
     if (signUpResult.requiresEmailConfirmation) {
-      return createRegistrationAcceptedResponse(redirectPath);
+      const emailConfirmation = await issueCustomerEmailConfirmation({
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        name: customer.name,
+      });
+
+      if (!emailConfirmation.success) {
+        return NextResponse.json(
+          {
+            error:
+              emailConfirmation.error ||
+              "We could not send your confirmation email. Please contact support.",
+          },
+          { status: 500 }
+        );
+      }
+
+      return createRegistrationAcceptedResponse(redirectPath, customer.email);
     }
 
     await issueSession(customer.id, authUserId, customer.email);

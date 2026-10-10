@@ -124,7 +124,7 @@ export default function LoginForm({
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
           <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
           <div className="flex-1 leading-relaxed">
-            If an account can be created for this email, we’ll send a confirmation link. Check your inbox and spam folder. For your privacy, we can’t confirm whether an account already exists. Already a customer? Sign in below, or{" "}
+            Your account has been created. Please check your email and confirm it before signing in. If you already have an account, sign in below or{" "}
             <a
               href="mailto:support@primezora.com"
               className="font-medium underline underline-offset-2 hover:text-emerald-200"

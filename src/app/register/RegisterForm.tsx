@@ -116,7 +116,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
       const data: {
         error?: string;
         redirectUrl?: string;
-        requiresEmailConfirmation?: boolean;
+        requiresSignIn?: boolean;
       } = await res.json();
 
       if (!res.ok) {
@@ -125,7 +125,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         return;
       }
 
-      const fallbackPath = data.requiresEmailConfirmation
+      const fallbackPath = data.requiresSignIn
         ? `/login?registered=true&next=${encodeURIComponent(nextPath)}`
         : nextPath;
       router.push(data.redirectUrl || fallbackPath);

@@ -61,10 +61,17 @@ model Customer {
   authUserId                 String?               @unique
   firstName                  String?
   lastName                   String?
-  orders                     Order[]
+  emailVerified             Boolean               @default(false)
+  emailVerificationToken    String?               @unique
+  emailVerificationSentAt   DateTime?
+  emailVerificationExpiresAt DateTime?
+  emailVerifiedAt           DateTime?
+  orders                    Order[]
   checkoutIdempotencyRecords CheckoutIdempotency[]
 
   @@index([authUserId])
+  @@index([emailVerified])
+  @@index([emailVerificationExpiresAt])
 }
 
 model Order {

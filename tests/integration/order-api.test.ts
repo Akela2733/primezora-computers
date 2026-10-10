@@ -1265,7 +1265,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
     const expectedConfirmation = await responseJson(newResponse);
     assert.deepEqual(expectedConfirmation, {
       success: true,
-      requiresEmailConfirmation: true,
+      requiresSignIn: true,
       redirectUrl: "/login?registered=true&next=%2Faccount",
     });
 
