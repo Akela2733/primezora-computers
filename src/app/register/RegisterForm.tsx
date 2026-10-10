@@ -126,7 +126,7 @@ export default function RegisterForm({
 
       if (!res.ok) {
         if (data.verificationPending && data.redirectUrl) {
-          router.push(`${data.redirectUrl}&state=send-failed`);
+          router.push(data.redirectUrl);
           return;
         }
         setError(normalizeAuthError(data?.error || "Registration failed. Please check your information."));

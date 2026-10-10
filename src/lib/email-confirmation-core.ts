@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
+import { logger } from "@/lib/logger";
 import { getEmailProvider } from "@/lib/notifications/providers";
 import type { EmailProvider } from "@/lib/notifications/types";
 
@@ -330,6 +331,7 @@ export async function issueCustomerEmailConfirmation(
   const repository = dependencies.repository;
 
   if (provider.name === "console") {
+    logger.error("CUSTOMER_EMAIL_VERIFICATION_PROVIDER_UNCONFIGURED");
     return { success: false, error: "Email delivery is not configured." };
   }
 
@@ -373,8 +375,25 @@ export async function issueCustomerEmailConfirmation(
       ...email,
     });
     emailAccepted = result.success && !result.skipped;
+    if (!emailAccepted) {
+      const providerStatus = /^Resend API returned HTTP (\d{3})\.$/.exec(
+        result.error ?? ""
+      )?.[1];
+      logger.error(
+        "CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REJECTED",
+        new Error(
+          providerStatus
+            ? `Provider returned HTTP ${providerStatus}.`
+            : "Provider did not accept the verification email."
+        )
+      );
+    }
   } catch {
     emailAccepted = false;
+    logger.error(
+      "CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REQUEST_FAILED",
+      new Error("Email provider request failed.")
+    );
   }
 
   if (!emailAccepted) {

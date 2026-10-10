@@ -54,11 +54,10 @@ export class ResendEmailProvider implements EmailProvider {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         return {
           success: false,
           provider: this.name,
-          error: `Resend API returned status ${response.status}: ${errorText}`,
+          error: `Resend API returned HTTP ${response.status}.`,
         };
       }
 

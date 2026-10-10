@@ -36,8 +36,19 @@ function isValidEmail(email: string): boolean {
   return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function getVerificationUrl(email: string, redirectPath: string): string {
-  return `/verify-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(redirectPath)}`;
+export function getCustomerVerificationPageUrl(
+  email: string,
+  redirectPath: string,
+  options: { sendFailed?: boolean; cooldownSeconds?: number } = {}
+): string {
+  const url = new URL("/verify-email", "https://primezora.invalid");
+  url.searchParams.set("email", email);
+  url.searchParams.set("next", redirectPath);
+  if (options.sendFailed) url.searchParams.set("state", "send-failed");
+  if (options.cooldownSeconds) {
+    url.searchParams.set("cooldown", String(options.cooldownSeconds));
+  }
+  return `${url.pathname}${url.search}`;
 }
 
 function registrationError(
@@ -144,23 +155,22 @@ export async function handleCustomerRegistration(
         ...existingCustomer,
         nextPath: redirectPath,
       });
-      const redirectUrl = getVerificationUrl(cleanEmail, redirectPath);
       if (!result.success) {
         return registrationError(
           result.retryAfterSeconds ? 429 : 503,
           "We couldn't send your verification email. You can retry from the verification page.",
           {
             verificationPending: true,
-            redirectUrl: `${redirectUrl}&state=send-failed${
-              result.retryAfterSeconds
-                ? `&cooldown=${result.retryAfterSeconds}`
-                : ""
-            }`,
+            redirectUrl: getCustomerVerificationPageUrl(cleanEmail, redirectPath, {
+              sendFailed: true,
+              cooldownSeconds: result.retryAfterSeconds,
+            }),
             retryAfterSeconds: result.retryAfterSeconds,
           }
         );
       }
 
+      const redirectUrl = getCustomerVerificationPageUrl(cleanEmail, redirectPath);
       return NextResponse.json(
         {
           success: true,
@@ -211,7 +221,6 @@ export async function handleCustomerRegistration(
         name: true,
       },
     });
-    const redirectUrl = getVerificationUrl(cleanEmail, redirectPath);
     const emailResult = await sendVerification({
       ...customer,
       nextPath: redirectPath,
@@ -223,16 +232,16 @@ export async function handleCustomerRegistration(
         "Your account is created but we couldn't send the verification email. Please retry from the verification page.",
         {
           verificationPending: true,
-          redirectUrl: `${redirectUrl}&state=send-failed${
-            emailResult.retryAfterSeconds
-              ? `&cooldown=${emailResult.retryAfterSeconds}`
-              : ""
-          }`,
+          redirectUrl: getCustomerVerificationPageUrl(cleanEmail, redirectPath, {
+            sendFailed: true,
+            cooldownSeconds: emailResult.retryAfterSeconds,
+          }),
           retryAfterSeconds: emailResult.retryAfterSeconds,
         }
       );
     }
 
+    const redirectUrl = getCustomerVerificationPageUrl(cleanEmail, redirectPath);
     return NextResponse.json(
       {
         success: true,

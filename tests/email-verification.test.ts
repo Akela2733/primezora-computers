@@ -10,6 +10,8 @@ import {
   type VerificationTokenRecord,
   verifyCustomerEmailConfirmation,
 } from "../src/lib/email-confirmation-core";
+import { ResendEmailProvider } from "../src/lib/notifications/providers";
+import { getCustomerVerificationPageUrl } from "../src/lib/customer-registration";
 
 const verificationTime = new Date("2030-01-01T00:00:00.000Z");
 const rawToken = Buffer.alloc(32, 23).toString("base64url");
@@ -47,6 +49,21 @@ function makeRepository(
 }
 
 describe("customer email verification tokens", () => {
+  test("failed registration produces exactly one state and preserves checkout destination", () => {
+    const url = new URL(
+      getCustomerVerificationPageUrl("customer+test@example.test", "/checkout", {
+        sendFailed: true,
+        cooldownSeconds: 60,
+      }),
+      "https://primezora.example"
+    );
+    assert.equal(url.searchParams.getAll("state").length, 1);
+    assert.equal(url.searchParams.get("state"), "send-failed");
+    assert.equal(url.searchParams.get("email"), "customer+test@example.test");
+    assert.equal(url.searchParams.get("next"), "/checkout");
+    assert.equal(url.searchParams.get("cooldown"), "60");
+  });
+
   test("valid token is confirmed through the repository and only by its hash", async () => {
     let confirmed = false;
     const repository: CustomerEmailVerificationRepository = {
@@ -272,5 +289,66 @@ describe("customer email verification tokens", () => {
       error: "This account is already verified or a verification email was sent recently.",
       retryAfterSeconds: 17,
     });
+  });
+
+  test("Resend sends with bearer authorization and reports provider acceptance", async () => {
+    const originalFetch = globalThis.fetch;
+    let authorization = "";
+    let requestBody: Record<string, unknown> | undefined;
+    globalThis.fetch = async (_input, init) => {
+      authorization = new Headers(init?.headers).get("Authorization") ?? "";
+      requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(JSON.stringify({ id: "resend-message-id" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+
+    try {
+      const provider = new ResendEmailProvider(
+        "re_test_only_api_key",
+        "Primezora <verify@example.test>"
+      );
+      const result = await provider.sendEmail({
+        to: "customer@example.test",
+        subject: "Verify",
+        html: "<p>Verify</p>",
+        text: "Verify",
+      });
+      assert.deepEqual(result, {
+        success: true,
+        messageId: "resend-message-id",
+        provider: "resend",
+      });
+      assert.equal(authorization, "Bearer re_test_only_api_key");
+      assert.equal(requestBody?.from, "Primezora <verify@example.test>");
+      assert.equal(requestBody?.to, "customer@example.test");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("Resend rejection exposes only its HTTP status, not provider response content", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () =>
+      new Response("TEST_ONLY_PROVIDER_RESPONSE_SECRET", { status: 403 });
+
+    try {
+      const provider = new ResendEmailProvider("re_test_only_api_key");
+      const result = await provider.sendEmail({
+        to: "customer@example.test",
+        subject: "Verify",
+        html: "<p>Verify</p>",
+        text: "Verify",
+      });
+      assert.deepEqual(result, {
+        success: false,
+        provider: "resend",
+        error: "Resend API returned HTTP 403.",
+      });
+      assert.doesNotMatch(JSON.stringify(result), /TEST_ONLY_PROVIDER_RESPONSE_SECRET/);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });
