@@ -318,6 +318,8 @@ describe("production connection variable wiring", () => {
       "postgresql://postgres.project@session.pooler.supabase.com:5432/postgres";
     const directUrl =
       "postgresql://postgres@db.project.supabase.co:5432/postgres";
+    const transactionPoolerUrl =
+      "postgresql://postgres.project:password@aws-0-region.pooler.supabase.com:6543/postgres?sslmode=require";
 
     assert.equal(
       getPrismaCliConnectionString({
@@ -330,6 +332,23 @@ describe("production connection variable wiring", () => {
     assert.equal(
       getPrismaCliConnectionString({
         PRIMEZORA_DATABASE_TARGET: "production",
+        DATABASE_URL: transactionPoolerUrl,
+        DIRECT_DATABASE_URL: directUrl,
+      }),
+      "postgresql://postgres.project:password@aws-0-region.pooler.supabase.com:5432/postgres?sslmode=require"
+    );
+    assert.equal(
+      getPrismaCliConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
+        DATABASE_URL:
+          "postgresql://postgres.project@aws-0-region.pooler.supabase.com:5432/postgres",
+        DIRECT_DATABASE_URL: directUrl,
+      }),
+      "postgresql://postgres.project@aws-0-region.pooler.supabase.com:5432/postgres"
+    );
+    assert.equal(
+      getPrismaCliConnectionString({
+        PRIMEZORA_DATABASE_TARGET: "production",
         DIRECT_DATABASE_URL: directUrl,
       }),
       directUrl
@@ -338,6 +357,7 @@ describe("production connection variable wiring", () => {
       getPrismaCliConnectionString({
         PRIMEZORA_DATABASE_TARGET: "test",
         MIGRATION_DATABASE_URL: migrationUrl,
+        DATABASE_URL: transactionPoolerUrl,
         DIRECT_DATABASE_URL: directTestDatabaseUrl,
       }),
       directTestDatabaseUrl

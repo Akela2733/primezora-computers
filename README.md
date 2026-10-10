@@ -42,13 +42,14 @@ environment. `DATABASE_URL` is the application/runtime PostgreSQL connection;
 `DIRECT_DATABASE_URL` is the direct PostgreSQL connection for explicitly
 invoked production seed operations and as the default Prisma CLI connection.
 `MIGRATION_DATABASE_URL` optionally overrides it for Prisma CLI operations,
-including production migrations. For Vercel builds that cannot reach Supabase's
-IPv6-only direct endpoint, set `MIGRATION_DATABASE_URL` to the Session Pooler
-connection string copied from Supabase Dashboard > Connect (port 5432). Do not
-use the Transaction Pooler connection for migrations. `npm run build:production`
-applies pending Prisma migrations before generating the client and building the
-application. Production commands do not require `.env.test.local`. Direct
-`next build` or
+including production migrations. When it is unset, a Supabase pooler URL in
+`DATABASE_URL` is automatically changed to session mode (port 5432) for CLI
+operations; this supports Vercel builds that cannot reach Supabase's IPv6-only
+direct endpoint. An explicitly supplied migration URL should use Supabase's
+Session Pooler (port 5432), not the Transaction Pooler (port 6543).
+`npm run build:production` applies pending Prisma migrations before generating
+the client and building the application. Production commands do not require
+`.env.test.local`. Direct `next build` or
 production-runtime commands without an explicit database target fail closed.
 Do not set `PRIMEZORA_DATABASE_TARGET=production` for local development.
 
