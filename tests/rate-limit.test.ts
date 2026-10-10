@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { describe, test } from "node:test";
 
 import {
@@ -101,6 +102,34 @@ describe("shared rate-limit responses", () => {
 
     assert.equal(response?.status, 503);
     assert.equal(response?.bodyUsed, false);
+  });
+
+  test("uses bounded in-memory limits for customer and admin auth when Redis is unavailable", async () => {
+    const cases = [
+      { policy: "customerLoginAccount", limit: 5 },
+      { policy: "customerRegistrationAccount", limit: 3 },
+      { policy: "adminLoginAccount", limit: 5 },
+    ] as const;
+
+    for (const { policy, limit } of cases) {
+      const identifier = `email:redis-fallback-${randomUUID()}@example.test`;
+      const makeRequest = () =>
+        enforceRateLimits(
+          new Request("https://example.test/api/auth/login"),
+          [{ policy, identifier }],
+          async () => {
+            throw new Error("Redis unavailable");
+          }
+        );
+
+      for (let attempt = 0; attempt < limit; attempt += 1) {
+        assert.equal(await makeRequest(), null);
+      }
+
+      const limited = await makeRequest();
+      assert.equal(limited?.status, 429);
+      assert.ok(Number(limited?.headers.get("Retry-After")) > 0);
+    }
   });
 
   test("does not allow test-mode bypass outside the isolated integration harness", async () => {

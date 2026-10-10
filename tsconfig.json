@@ -125,7 +125,9 @@
     ".next-integration-515ba4b2-1785-415a-a957-fdb081981809/types/**/*.ts",
     ".next-integration-515ba4b2-1785-415a-a957-fdb081981809/dev/types/**/*.ts",
     ".next-integration-656e6a00-ce2a-4c93-a589-d24ae293fd60/types/**/*.ts",
-    ".next-integration-656e6a00-ce2a-4c93-a589-d24ae293fd60/dev/types/**/*.ts"
+    ".next-integration-656e6a00-ce2a-4c93-a589-d24ae293fd60/dev/types/**/*.ts",
+    ".next-integration-7ef837d5-f6aa-4e4c-aa12-47a3cd3b63cc/types/**/*.ts",
+    ".next-integration-7ef837d5-f6aa-4e4c-aa12-47a3cd3b63cc/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

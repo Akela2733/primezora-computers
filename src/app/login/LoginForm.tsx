@@ -98,7 +98,7 @@ export default function LoginForm({
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-8">
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
           <ShieldCheck size={28} />
@@ -107,7 +107,9 @@ export default function LoginForm({
           Sign In
         </h1>
         <p className="mt-2 text-sm text-white/50">
-          Access your orders, saved addresses, and profile details.
+          {nextPath === "/checkout"
+            ? "Sign in to continue securely with your order."
+            : "View your orders, manage delivery details, and save your favorite gear."}
         </p>
       </div>
 
@@ -121,12 +123,21 @@ export default function LoginForm({
       {registered && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
           <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
-          <div className="flex-1 leading-relaxed">Account created successfully. You can sign in now.</div>
+          <div className="flex-1 leading-relaxed">
+            If an account can be created for this email, we’ll send a confirmation link. Check your inbox and spam folder. For your privacy, we can’t confirm whether an account already exists. Already a customer? Sign in below, or{" "}
+            <a
+              href="mailto:support@primezora.com"
+              className="font-medium underline underline-offset-2 hover:text-emerald-200"
+            >
+              contact support
+            </a>
+            .
+          </div>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
+        <div role="alert" aria-live="assertive" className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
           <AlertCircle size={17} className="shrink-0 text-rose-400" />
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
@@ -146,9 +157,15 @@ export default function LoginForm({
               type="email"
               name="email"
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
               placeholder="you@example.com"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
@@ -161,7 +178,7 @@ export default function LoginForm({
               Password
             </label>
             <Link
-              href="/forgot-password"
+              href={`/forgot-password?next=${encodeURIComponent(nextPath)}`}
               className="text-[11px] font-medium text-amber-400 transition hover:text-amber-300 hover:underline"
             >
               Forgot password?
@@ -178,8 +195,11 @@ export default function LoginForm({
               autoComplete="current-password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
+              placeholder="Enter your password"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
             <button
@@ -197,6 +217,7 @@ export default function LoginForm({
           id="customer-login-submit"
           type="submit"
           disabled={loading}
+          aria-busy={loading}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:opacity-50"
         >
           {loading ? (

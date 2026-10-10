@@ -29,6 +29,17 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function createRegistrationAcceptedResponse(redirectPath: string): NextResponse {
+  return NextResponse.json(
+    {
+      success: true,
+      requiresEmailConfirmation: true,
+      redirectUrl: `/login?registered=true&next=${encodeURIComponent(redirectPath)}`,
+    },
+    { status: 201 }
+  );
+}
+
 export async function handleCustomerRegistration(
   request: Request,
   dependencies: CustomerRegistrationDependencies
@@ -113,12 +124,7 @@ export async function handleCustomerRegistration(
     });
 
     if (existingCustomer) {
-      return NextResponse.json(
-        {
-          error: "An account with this email already exists. Please sign in or reset your password.",
-        },
-        { status: 409 }
-      );
+      return createRegistrationAcceptedResponse(redirectPath);
     }
 
     const signUpResult = await signUp({
@@ -129,12 +135,7 @@ export async function handleCustomerRegistration(
     });
 
     if (signUpResult.emailMayExist || signUpResult.error?.toLowerCase().includes("already")) {
-      return NextResponse.json(
-        {
-          error: "An account with this email already exists. Please sign in or reset your password.",
-        },
-        { status: 409 }
-      );
+      return createRegistrationAcceptedResponse(redirectPath);
     }
 
     if (!signUpResult.success || !signUpResult.user) {
@@ -155,6 +156,10 @@ export async function handleCustomerRegistration(
         name: fullName,
       },
     });
+
+    if (signUpResult.requiresEmailConfirmation) {
+      return createRegistrationAcceptedResponse(redirectPath);
+    }
 
     await issueSession(customer.id, authUserId, customer.email);
 

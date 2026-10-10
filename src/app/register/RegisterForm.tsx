@@ -92,11 +92,6 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
       return;
     }
 
-    if (strength.score < 4) {
-      setError("Choose a stronger password with uppercase, lowercase, numbers, and a symbol.");
-      return;
-    }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -118,7 +113,11 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         }),
       });
 
-      const data = await res.json();
+      const data: {
+        error?: string;
+        redirectUrl?: string;
+        requiresEmailConfirmation?: boolean;
+      } = await res.json();
 
       if (!res.ok) {
         setError(normalizeAuthError(data?.error || "Registration failed. Please check your information."));
@@ -126,7 +125,10 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         return;
       }
 
-      router.push(data.redirectUrl || "/account");
+      const fallbackPath = data.requiresEmailConfirmation
+        ? `/login?registered=true&next=${encodeURIComponent(nextPath)}`
+        : nextPath;
+      router.push(data.redirectUrl || fallbackPath);
       router.refresh();
     } catch {
       setError("A network error occurred. Please check your connection and retry.");
@@ -135,7 +137,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-8">
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
           <ShieldCheck size={28} />
@@ -144,12 +146,14 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
           Create Your Account
         </h1>
         <p className="mt-2 text-sm text-white/50">
-          Join Primezora to track orders, manage addresses, and save favorites.
+          {nextPath === "/checkout"
+            ? "Create an account to continue checkout and keep your order details in one place."
+            : "Track computer orders, manage delivery details, and keep your favorite gear together."}
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300" role="alert">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300" role="alert" aria-live="assertive">
           <AlertCircle size={17} className="shrink-0 text-rose-400" />
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
@@ -166,10 +170,14 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               type="text"
               name="firstName"
               autoComplete="given-name"
+              maxLength={50}
               required
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Kasun"
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                setError(null);
+              }}
+              placeholder="First name"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
           </div>
@@ -182,10 +190,14 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               type="text"
               name="lastName"
               autoComplete="family-name"
+              maxLength={50}
               required
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Perera"
+              onChange={(e) => {
+                setLastName(e.target.value);
+                setError(null);
+              }}
+              placeholder="Last name"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
           </div>
@@ -204,9 +216,15 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               type="email"
               name="email"
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
               placeholder="you@example.com"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
@@ -230,12 +248,16 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               minLength={8}
               maxLength={128}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
               placeholder="At least 8 characters"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
             <button
               type="button"
+              disabled={loading}
               aria-label={showPassword ? "Hide password" : "Show password"}
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
@@ -243,12 +265,20 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          <div className="mt-2">
+          <div className="mt-2" aria-live="polite">
             <div className="mb-1 flex items-center justify-between text-[10px] text-white/60">
-              <span>Password strength</span>
+              <span>Password strength (optional tips)</span>
               <span>{strength.label}</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+            <div
+              className="h-1.5 w-full overflow-hidden rounded-full bg-white/5"
+              role="meter"
+              aria-label="Password strength"
+              aria-valuemin={0}
+              aria-valuemax={5}
+              aria-valuenow={strength.score}
+              aria-valuetext={strength.label}
+            >
               <div
                 className={`h-full rounded-full transition-all ${
                   strength.score <= 2
@@ -260,12 +290,15 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
                 style={{ width: `${(strength.score / 5) * 100}%` }}
               />
             </div>
-            <ul className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-white/55">
-              <li>8-128 chars</li>
-              <li>Uppercase</li>
-              <li>Lowercase</li>
-              <li>Number</li>
-              <li>Symbol</li>
+            <p className="mt-1.5 text-[10px] leading-relaxed text-white/50">
+              Use at least 8 characters. A longer passphrase is easier to remember; mixing character types makes it harder to guess.
+            </p>
+            <ul className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-white/55" aria-label="Optional password tips">
+              <li className={strength.checks.length ? "text-emerald-300" : ""}>8-128 characters</li>
+              <li className={strength.checks.uppercase ? "text-emerald-300" : ""}>Uppercase letter</li>
+              <li className={strength.checks.lowercase ? "text-emerald-300" : ""}>Lowercase letter</li>
+              <li className={strength.checks.number ? "text-emerald-300" : ""}>Number</li>
+              <li className={strength.checks.symbol ? "text-emerald-300" : ""}>Symbol</li>
             </ul>
           </div>
         </div>
@@ -287,12 +320,16 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
               minLength={8}
               maxLength={128}
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError(null);
+              }}
               placeholder="Re-enter password"
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
             <button
               type="button"
+              disabled={loading}
               aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
@@ -306,6 +343,7 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
           id="customer-register-submit"
           type="submit"
           disabled={loading}
+          aria-busy={loading}
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:opacity-50"
         >
           {loading ? (

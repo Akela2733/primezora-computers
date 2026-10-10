@@ -59,7 +59,11 @@ API rate limits use shared Upstash Redis storage so counters remain consistent
 across application instances. When `UPSTASH_REDIS_REST_URL` and
 `UPSTASH_REDIS_REST_TOKEN` are configured, protected routes enforce limits and
 requests over a policy receive `429` with a `Retry-After` header. If the shared
-limiter is unavailable after configuration, the route fails closed with `503`.
+limiter becomes unavailable, customer and admin authentication routes use
+bounded per-instance limits so sign-in and registration remain available;
+other protected routes fail closed with `503`. Per-instance fallback limits do
+not synchronize across application instances, so the shared Redis configuration
+should still be restored promptly.
 
 For local development and lightweight environments without Upstash configured,
 requests continue without rate limiting so login and registration remain usable
