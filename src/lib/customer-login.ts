@@ -81,6 +81,28 @@ export async function handleCustomerLogin(
       typeof metadata.firstName === "string" ? metadata.firstName : "";
     const lastName =
       typeof metadata.lastName === "string" ? metadata.lastName : "";
+
+    const unverifiedCustomer = await db.customer.findFirst({
+      where: {
+        emailVerified: false,
+        OR: [{ authUserId }, { email: cleanEmail }],
+      },
+      select: { email: true },
+    });
+    if (unverifiedCustomer) {
+      const redirectUrl = `/verify-email?email=${encodeURIComponent(
+        unverifiedCustomer.email
+      )}&next=${encodeURIComponent(getSafeCustomerRedirectPath(next))}`;
+      return NextResponse.json(
+        {
+          error: "Email verification is required before you can sign in.",
+          requiresEmailConfirmation: true,
+          verificationUrl: redirectUrl,
+        },
+        { status: 403, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
     const customer = await resolveCustomerIdentity(db, {
       authUserId,
       email: cleanEmail,
@@ -91,10 +113,13 @@ export async function handleCustomerLogin(
     if (!customer.emailVerified) {
       return NextResponse.json(
         {
-          error: "Please confirm your email before signing in. We sent a verification link to your inbox.",
+          error: "Email verification is required before you can sign in.",
           requiresEmailConfirmation: true,
+          verificationUrl: `/verify-email?email=${encodeURIComponent(
+            customer.email
+          )}&next=${encodeURIComponent(getSafeCustomerRedirectPath(next))}`,
         },
-        { status: 401 }
+        { status: 403, headers: { "Cache-Control": "no-store" } }
       );
     }
 

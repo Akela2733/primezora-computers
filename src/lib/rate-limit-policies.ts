@@ -5,6 +5,7 @@ export const RATE_LIMIT_POLICIES = {
   customerRegistrationAccount: { limit: 3, window: "1 d" },
   customerEmailConfirmationIp: { limit: 10, window: "1 h" },
   customerEmailConfirmationAccount: { limit: 3, window: "1 d" },
+  customerEmailVerificationIp: { limit: 30, window: "1 h" },
   adminLoginIp: { limit: 10, window: "15 m" },
   adminLoginAccount: { limit: 5, window: "15 m" },
   checkoutCustomer: { limit: 10, window: "10 m" },

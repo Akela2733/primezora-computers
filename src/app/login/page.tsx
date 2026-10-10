@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 type CustomerLoginPageProps = {
   searchParams: Promise<{
     next?: string | string[];
+    email?: string | string[];
     registered?: string | string[];
     loggedOut?: string | string[];
   }>;
@@ -30,6 +31,7 @@ export default async function CustomerLoginPage({
   const rawLoggedOut = Array.isArray(params.loggedOut)
     ? params.loggedOut[0]
     : params.loggedOut;
+  const rawEmail = Array.isArray(params.email) ? params.email[0] : params.email;
 
   const nextPath = getSafeCustomerRedirectPath(rawNext);
 
@@ -42,6 +44,7 @@ export default async function CustomerLoginPage({
     <main className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-12">
       <LoginForm
         nextPath={nextPath}
+        initialEmail={rawEmail?.trim().slice(0, 254) ?? ""}
         registered={rawRegistered === "true"}
         loggedOut={rawLoggedOut === "true"}
       />

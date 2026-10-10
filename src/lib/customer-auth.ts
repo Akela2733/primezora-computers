@@ -140,6 +140,20 @@ export async function requireCustomerApiWithProfileCheck(): Promise<CustomerApiA
     };
   }
 
+  if (!customer.emailVerified) {
+    return {
+      session: null,
+      response: NextResponse.json(
+        {
+          error: "Email verification is required to access customer services.",
+          requiresEmailConfirmation: true,
+          verificationUrl: `/verify-email?email=${encodeURIComponent(customer.email)}`,
+        },
+        { status: 403, headers: { "Cache-Control": "no-store" } }
+      ),
+    };
+  }
+
   return {
     session: {
       customer,

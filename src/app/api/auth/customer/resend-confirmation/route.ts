@@ -2,15 +2,15 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { issueCustomerEmailConfirmation } from "@/lib/email-confirmation";
-import { getEmailProvider } from "@/lib/notifications/providers";
+import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
 import {
   enforceRateLimits,
   getClientIp,
   getEmailRateLimitIdentifier,
 } from "@/lib/rate-limit";
 
-const genericSuccessMessage =
-  "If an unverified Primezora account is associated with that email, a new confirmation link has been sent.";
+const genericNotice =
+  "Request received. If an unverified account matches this address, a verification link will be sent when delivery is available.";
 
 export async function POST(request: Request) {
   const emailIdentifier = await getEmailRateLimitIdentifier(request);
@@ -37,24 +37,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const rawEmail =
+  const fields =
     typeof body === "object" && body !== null && !Array.isArray(body)
-      ? (body as Record<string, unknown>).email
-      : undefined;
-  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+      ? (body as Record<string, unknown>)
+      : {};
+  const email = typeof fields.email === "string" ? fields.email.trim().toLowerCase() : "";
   if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { error: "Please provide a valid email address." },
       { status: 400, headers: { "Cache-Control": "no-store" } }
     );
   }
-
-  if (getEmailProvider().name === "console") {
-    return NextResponse.json(
-      { error: "Email delivery is temporarily unavailable. Please try again later." },
-      { status: 503, headers: { "Cache-Control": "no-store" } }
-    );
-  }
+  const nextPath = getSafeCustomerRedirectPath(fields.next);
 
   try {
     const customer = await prisma.customer.findUnique({
@@ -69,23 +63,45 @@ export async function POST(request: Request) {
       },
     });
 
-    if (customer && !customer.emailVerified) {
-      const result = await issueCustomerEmailConfirmation(customer);
-      if (!result.success) {
-        console.error("CUSTOMER_EMAIL_CONFIRMATION_RESEND_FAILED");
-        return NextResponse.json(
-          { error: "We could not send the confirmation email. Please try again later." },
-          { status: 503, headers: { "Cache-Control": "no-store" } }
-        );
-      }
+    if (!customer || customer.emailVerified) {
+      return NextResponse.json(
+        { success: true, sent: false, message: genericNotice },
+        { headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    const result = await issueCustomerEmailConfirmation({
+      ...customer,
+      nextPath,
+    });
+    if (!result.success) {
+      const cooldown = result.retryAfterSeconds;
+      return NextResponse.json(
+        {
+          error: cooldown
+            ? `We couldn't send another verification email right now. Please wait ${cooldown} seconds and try again.`
+            : "We could not send the verification email. Please try again later.",
+        },
+        {
+          status: cooldown ? 429 : 503,
+          headers: {
+            "Cache-Control": "no-store",
+            ...(cooldown ? { "Retry-After": String(cooldown) } : {}),
+          },
+        }
+      );
     }
 
     return NextResponse.json(
-      { success: true, message: genericSuccessMessage },
+      {
+        success: true,
+        sent: true,
+        message: "Verification email sent. Check your inbox and spam folder.",
+      },
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
-    console.error("CUSTOMER_EMAIL_CONFIRMATION_RESEND_ERROR:", error);
+    console.error("CUSTOMER_EMAIL_VERIFICATION_RESEND_ERROR:", error);
     return NextResponse.json(
       { error: "We could not process your request. Please try again later." },
       { status: 500, headers: { "Cache-Control": "no-store" } }

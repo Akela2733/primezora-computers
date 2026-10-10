@@ -364,6 +364,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
         lastName: "A",
         email: customerAEmail,
         authUserId: customerAAuthUserId,
+        emailVerified: true,
         phone: "TEST-ONLY-A",
       },
       select: { id: true, authUserId: true, email: true },
@@ -376,6 +377,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
         lastName: "B",
         email: customerBEmail,
         authUserId: customerBAuthUserId,
+        emailVerified: true,
         phone: "TEST-ONLY-B",
       },
       select: { id: true, authUserId: true, email: true },
@@ -896,6 +898,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
       data: {
         email: profileEmail,
         authUserId: profileAuthUserId,
+        emailVerified: true,
         firstName: "Original",
         lastName: "Customer",
         name: "Original Customer",
@@ -1083,7 +1086,12 @@ describe("isolated order API integration", { concurrency: false }, () => {
     const authUserId = `TEST_ONLY_UNLINKED_${runId}`;
     const email = `unlinked-${runId}@test.primezora.invalid`;
     const customer = await prisma.customer.create({
-      data: { email, name: "TEST ONLY Unlinked", authUserId: null },
+      data: {
+        email,
+        name: "TEST ONLY Unlinked",
+        authUserId: null,
+        emailVerified: true,
+      },
     });
     createdCustomers.push({ id: customer.id, email });
 
@@ -1105,7 +1113,12 @@ describe("isolated order API integration", { concurrency: false }, () => {
     const authUserId = `TEST_ONLY_ALREADY_LINKED_${runId}`;
     const email = `already-linked-${runId}@test.primezora.invalid`;
     const customer = await prisma.customer.create({
-      data: { email, authUserId, name: "TEST ONLY Already Linked" },
+      data: {
+        email,
+        authUserId,
+        name: "TEST ONLY Already Linked",
+        emailVerified: true,
+      },
     });
     createdCustomers.push({ id: customer.id, email });
 
@@ -1131,6 +1144,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
         email,
         authUserId: originalAuthUserId,
         name: "TEST ONLY Conflicting Identity",
+        emailVerified: true,
       },
     });
     createdCustomers.push({ id: customer.id, email });
@@ -1199,24 +1213,30 @@ describe("isolated order API integration", { concurrency: false }, () => {
     const email = `new-identity-${runId}@test.primezora.invalid`;
 
     const response = await loginAsIdentity(email, authUserId);
-    assert.equal(response.status, 200);
+    assert.equal(response.status, 403);
     const payload = await responseJson(response);
-    assert.deepEqual(payload, { success: true, redirectUrl: "/account" });
+    assert.equal(payload.requiresEmailConfirmation, true);
+    assert.equal(payload.verificationUrl, `/verify-email?email=${encodeURIComponent(email)}&next=%2Faccount`);
 
     const customer = await prisma.customer.findUniqueOrThrow({
       where: { authUserId },
-      select: { id: true, authUserId: true, email: true },
+      select: { id: true, authUserId: true, email: true, emailVerified: true },
     });
     createdCustomers.push({ id: customer.id, email: customer.email });
     assert.equal(customer.authUserId, authUserId);
     assert.equal(customer.email, email);
+    assert.equal(customer.emailVerified, false);
     assert.equal(await prisma.customer.count({ where: { email } }), 1);
   });
 
-  test("concurrent logins cannot link an unlinked customer to multiple identities", async () => {
+  test("concurrent logins cannot link an unverified customer before email verification", async () => {
     const email = `concurrent-link-${runId}@test.primezora.invalid`;
     const customer = await prisma.customer.create({
-      data: { email, authUserId: null, name: "TEST ONLY Concurrent Link" },
+      data: {
+        email,
+        authUserId: null,
+        name: "TEST ONLY Concurrent Link",
+      },
     });
     createdCustomers.push({ id: customer.id, email });
     const authUserIds = [
@@ -1228,13 +1248,13 @@ describe("isolated order API integration", { concurrency: false }, () => {
       authUserIds.map((authUserId) => loginAsIdentity(email, authUserId))
     );
     const statuses = responses.map((response) => response.status).sort();
-    assert.deepEqual(statuses, [200, 409]);
+    assert.deepEqual(statuses, [403, 403]);
 
     const linkedCustomer = await prisma.customer.findUniqueOrThrow({
       where: { id: customer.id },
       select: { authUserId: true },
     });
-    assert.ok(authUserIds.includes(linkedCustomer.authUserId ?? ""));
+    assert.equal(linkedCustomer.authUserId, null);
     assert.equal(await prisma.customer.count({ where: { email } }), 1);
     assert.equal(
       await prisma.customer.count({
@@ -1244,7 +1264,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
     );
   });
 
-  test("registration does not enumerate or link existing customer accounts", async () => {
+  test("registration verifies new accounts and never links duplicate customer accounts", async () => {
     const newAuthUserId = `TEST_ONLY_REGISTERED_${runId}`;
     const newEmail = `new-registration-${runId}@test.primezora.invalid`;
     const newResponse = await handleCustomerRegistration(
@@ -1256,17 +1276,18 @@ describe("isolated order API integration", { concurrency: false }, () => {
           user: { id: newAuthUserId },
           requiresEmailConfirmation: true,
         }),
-        issueSession: async () => {
-          assert.fail("Confirmation-required registration must not issue a session.");
+        sendVerification: async () => {
+          return { success: true };
         },
       }
     );
     assert.equal(newResponse.status, 201);
-    const expectedConfirmation = await responseJson(newResponse);
-    assert.deepEqual(expectedConfirmation, {
+    assert.deepEqual(await responseJson(newResponse), {
       success: true,
+      emailAccepted: true,
       requiresSignIn: true,
-      redirectUrl: "/login?registered=true&next=%2Faccount",
+      requiresEmailConfirmation: true,
+      redirectUrl: `/verify-email?email=${encodeURIComponent(newEmail)}&next=%2Faccount`,
     });
 
     const newCustomer = await prisma.customer.findUniqueOrThrow({
@@ -1308,7 +1329,6 @@ describe("isolated order API integration", { concurrency: false }, () => {
     createdIdentityOrderIds.push(order.id);
 
     let providerCalled = false;
-    let sessionIssued = false;
     const existingResponse = await handleCustomerRegistration(
       registrationRequest(existingEmail),
       {
@@ -1321,23 +1341,27 @@ describe("isolated order API integration", { concurrency: false }, () => {
             requiresEmailConfirmation: false,
           };
         },
-        issueSession: async () => {
-          sessionIssued = true;
+        sendVerification: async (customer) => {
+          assert.equal(customer.id, existingCustomer.id);
+          return { success: true };
         },
       }
     );
     assert.equal(existingResponse.status, newResponse.status);
     const existingBody = await responseJson(existingResponse);
-    assert.deepEqual(existingBody, expectedConfirmation);
+    assert.deepEqual(existingBody, {
+      success: true,
+      emailAccepted: true,
+      requiresSignIn: true,
+      requiresEmailConfirmation: true,
+      redirectUrl: `/verify-email?email=${encodeURIComponent(existingEmail)}&next=%2Faccount`,
+    });
     assert.equal(providerCalled, false);
-    assert.equal(sessionIssued, false);
 
     const bodyText = JSON.stringify(existingBody);
     for (const internalValue of [
-      existingCustomer.id,
       originalAuthUserId,
       `TEST_ONLY_SHOULD_NOT_LINK_${runId}`,
-      existingEmail,
       "TEST_ONLY_REGISTRATION_SECRET",
     ]) {
       assert.ok(
@@ -1408,11 +1432,17 @@ describe("isolated order API integration", { concurrency: false }, () => {
             requiresEmailConfirmation: false,
           };
         },
-        issueSession: async () => {},
+        sendVerification: async () => ({ success: true }),
       }
     );
     assert.equal(unlinkedResponse.status, newResponse.status);
-    assert.deepEqual(await responseJson(unlinkedResponse), expectedConfirmation);
+    assert.deepEqual(await responseJson(unlinkedResponse), {
+      success: true,
+      emailAccepted: true,
+      requiresSignIn: true,
+      requiresEmailConfirmation: true,
+      redirectUrl: `/verify-email?email=${encodeURIComponent(unlinkedEmail)}&next=%2Faccount`,
+    });
     assert.equal(unlinkedProviderCalled, false);
     const [stillUnlinkedCustomer, unchangedUnlinkedOrder] = await Promise.all([
       prisma.customer.findUniqueOrThrow({
@@ -1437,11 +1467,13 @@ describe("isolated order API integration", { concurrency: false }, () => {
           success: false,
           emailMayExist: true,
         }),
-        issueSession: async () => {},
       }
     );
-    assert.equal(providerDuplicateResponse.status, newResponse.status);
-    assert.deepEqual(await responseJson(providerDuplicateResponse), expectedConfirmation);
+    assert.equal(providerDuplicateResponse.status, 409);
+    assert.match(
+      JSON.stringify(await responseJson(providerDuplicateResponse)),
+      /account with this email already exists/
+    );
     assert.equal(
       await prisma.customer.count({ where: { email: providerDuplicateEmail } }),
       0

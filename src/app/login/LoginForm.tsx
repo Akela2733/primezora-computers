@@ -17,6 +17,7 @@ import {
 
 type LoginFormProps = {
   nextPath?: string;
+  initialEmail?: string;
   loggedOut?: boolean;
   registered?: boolean;
 };
@@ -42,12 +43,13 @@ function normalizeAuthError(message?: string | null): string {
 
 export default function LoginForm({
   nextPath = "/account",
+  initialEmail = "",
   loggedOut = false,
   registered = false,
 }: LoginFormProps) {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +86,13 @@ export default function LoginForm({
       const data = await res.json();
 
       if (!res.ok) {
+        if (data?.requiresEmailConfirmation) {
+          const verificationUrl =
+            data.verificationUrl ||
+            `/verify-email?email=${encodeURIComponent(cleanEmail)}&next=${encodeURIComponent(nextPath)}`;
+          router.push(verificationUrl);
+          return;
+        }
         setError(normalizeAuthError(data?.error || "Invalid email or password."));
         setLoading(false);
         return;
@@ -121,10 +130,10 @@ export default function LoginForm({
       )}
 
       {registered && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-300">
-          <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-xs text-blue-200">
+          <CheckCircle2 size={17} className="shrink-0 text-blue-300" />
           <div className="flex-1 leading-relaxed">
-            Your account has been created. Please check your email and confirm it before signing in. If you already have an account, sign in below or{" "}
+            If your account still needs email verification, open the Primezora verification page before signing in. Otherwise, sign in below or{" "}
             <a
               href="mailto:support@primezora.com"
               className="font-medium underline underline-offset-2 hover:text-emerald-200"

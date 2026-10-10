@@ -62,16 +62,28 @@ model Customer {
   firstName                  String?
   lastName                   String?
   emailVerified             Boolean               @default(false)
-  emailVerificationToken    String?               @unique
   emailVerificationSentAt   DateTime?
-  emailVerificationExpiresAt DateTime?
   emailVerifiedAt           DateTime?
+  emailVerificationTokens   CustomerEmailVerificationToken[]
   orders                    Order[]
   checkoutIdempotencyRecords CheckoutIdempotency[]
 
   @@index([authUserId])
   @@index([emailVerified])
-  @@index([emailVerificationExpiresAt])
+}
+
+model CustomerEmailVerificationToken {
+  id            String    @id @default(cuid())
+  customerId    String
+  tokenHash     String    @unique
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, createdAt])
+  @@index([expiresAt])
 }
 
 model Order {

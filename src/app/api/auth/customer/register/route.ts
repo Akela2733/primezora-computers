@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { supabaseSignUp } from "@/lib/supabase-auth";
-import { setCustomerSessionCookie } from "@/lib/customer-auth";
 import { handleCustomerRegistration } from "@/lib/customer-registration";
 import {
   enforceRateLimits,
@@ -26,6 +25,5 @@ export async function POST(request: Request) {
   return handleCustomerRegistration(request, {
     db: prisma,
     signUp: supabaseSignUp,
-    issueSession: setCustomerSessionCookie,
   });
 }

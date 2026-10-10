@@ -1,24 +1,46 @@
 "use client";
 
-import { useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, Info, Loader2, Mail } from "lucide-react";
 
 type ResendConfirmationFormProps = {
   initialEmail: string;
+  nextPath?: string;
+  initialCooldownSeconds?: number;
 };
 
 export default function ResendConfirmationForm({
   initialEmail,
+  nextPath = "/account",
+  initialCooldownSeconds = 0,
 }: ResendConfirmationFormProps) {
   const [email, setEmail] = useState(initialEmail);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageIsSent, setMessageIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(
+    Math.max(0, initialCooldownSeconds)
+  );
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timeout = window.setTimeout(
+      () => setCooldownSeconds((seconds) => Math.max(0, seconds - 1)),
+      1000
+    );
+    return () => window.clearTimeout(timeout);
+  }, [cooldownSeconds]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
+    setMessageIsSent(false);
     setError(null);
+    if (cooldownSeconds > 0) {
+      setError(`Please wait ${cooldownSeconds} seconds before requesting another link.`);
+      return;
+    }
 
     const cleanEmail = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) || cleanEmail.length > 254) {
@@ -31,19 +53,24 @@ export default function ResendConfirmationForm({
       const response = await fetch("/api/auth/customer/resend-confirmation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail }),
+        body: JSON.stringify({ email: cleanEmail, next: nextPath }),
       });
-      const data: { message?: string; error?: string } = await response.json();
+      const data: { message?: string; error?: string; sent?: boolean } = await response.json();
 
       if (!response.ok) {
+        const retryAfter = Number(response.headers.get("Retry-After"));
+        if (response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 0) {
+          setCooldownSeconds(retryAfter);
+        }
         setError(data.error || "We could not send the email. Please try again later.");
         return;
       }
 
       setMessage(
         data.message ||
-          "If an unverified account is associated with that email, a new confirmation link has been sent."
+          "Request received. If an unverified account matches this address, a verification link will be sent when delivery is available."
       );
+      setMessageIsSent(data.sent === true);
     } catch {
       setError("A network error occurred. Please check your connection and retry.");
     } finally {
@@ -79,6 +106,7 @@ export default function ResendConfirmationForm({
             onChange={(event) => {
               setEmail(event.target.value);
               setMessage(null);
+              setMessageIsSent(false);
               setError(null);
             }}
             placeholder="you@example.com"
@@ -90,9 +118,17 @@ export default function ResendConfirmationForm({
           <div
             role="status"
             aria-live="polite"
-            className="flex items-start gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs leading-5 text-emerald-200"
+            className={`flex items-start gap-2 rounded-xl border p-3 text-xs leading-5 ${
+              messageIsSent
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                : "border-blue-500/30 bg-blue-500/10 text-blue-200"
+            }`}
           >
-            <CheckCircle2 size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+            {messageIsSent ? (
+              <CheckCircle2 size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+            ) : (
+              <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+            )}
             <span>{message}</span>
           </div>
         )}
@@ -110,7 +146,7 @@ export default function ResendConfirmationForm({
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || cooldownSeconds > 0}
           aria-busy={loading}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -119,8 +155,10 @@ export default function ResendConfirmationForm({
               <Loader2 size={16} className="animate-spin" />
               Sending confirmation email...
             </>
+          ) : cooldownSeconds > 0 ? (
+            `Resend available in ${cooldownSeconds}s`
           ) : (
-            "Resend confirmation email"
+            "Resend verification email"
           )}
         </button>
       </form>

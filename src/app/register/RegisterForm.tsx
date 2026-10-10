@@ -16,6 +16,7 @@ import {
 
 type RegisterFormProps = {
   nextPath: string;
+  initialEmail?: string;
 };
 
 function normalizeAuthError(message?: string | null): string {
@@ -57,12 +58,15 @@ function getPasswordStrength(password: string) {
   return { score, label: "Strong", checks };
 }
 
-export default function RegisterForm({ nextPath }: RegisterFormProps) {
+export default function RegisterForm({
+  nextPath,
+  initialEmail = "",
+}: RegisterFormProps) {
   const router = useRouter();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -117,9 +121,14 @@ export default function RegisterForm({ nextPath }: RegisterFormProps) {
         error?: string;
         redirectUrl?: string;
         requiresSignIn?: boolean;
+        verificationPending?: boolean;
       } = await res.json();
 
       if (!res.ok) {
+        if (data.verificationPending && data.redirectUrl) {
+          router.push(`${data.redirectUrl}&state=send-failed`);
+          return;
+        }
         setError(normalizeAuthError(data?.error || "Registration failed. Please check your information."));
         setLoading(false);
         return;

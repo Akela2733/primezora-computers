@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 type RegisterPageProps = {
-  searchParams: Promise<{ next?: string | string[] }>;
+  searchParams: Promise<{ next?: string | string[]; email?: string | string[] }>;
 };
 
 export default async function RegisterPage({
@@ -20,6 +20,7 @@ export default async function RegisterPage({
 }: RegisterPageProps) {
   const params = await searchParams;
   const rawNext = Array.isArray(params.next) ? params.next[0] : params.next;
+  const rawEmail = Array.isArray(params.email) ? params.email[0] : params.email;
   const nextPath = getSafeCustomerRedirectPath(rawNext);
   const session = await getCustomerSession();
   if (session) {
@@ -28,7 +29,10 @@ export default async function RegisterPage({
 
   return (
     <main className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-12">
-      <RegisterForm nextPath={nextPath} />
+      <RegisterForm
+        nextPath={nextPath}
+        initialEmail={rawEmail?.trim().slice(0, 254) ?? ""}
+      />
     </main>
   );
 }

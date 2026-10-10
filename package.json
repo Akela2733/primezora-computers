@@ -13,6 +13,7 @@
     "test:security-headers": "tsx --test tests/security-headers.test.ts",
     "test:input-limits": "tsx --test tests/input-limits.test.ts",
     "test:pagination": "tsx --test tests/pagination-limits.test.ts",
+    "test:email-verification": "tsx --test tests/email-verification.test.ts",
     "test:integration": "tsx --test tests/database-target.test.ts tests/admin-recovery.test.ts tests/integration/order-api.test.ts",
     "test:rate-limit": "tsx --test tests/rate-limit.test.ts"
   },

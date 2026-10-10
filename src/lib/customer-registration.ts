@@ -7,7 +7,6 @@ type CustomerRegistrationSignUpResult = {
   success: boolean;
   user?: { id: string };
   error?: string;
-  requiresEmailConfirmation?: boolean;
   emailMayExist?: boolean;
 };
 
@@ -19,33 +18,49 @@ type CustomerRegistrationDependencies = {
     firstName: string;
     lastName: string;
   }) => Promise<CustomerRegistrationSignUpResult>;
-  issueSession: (
-    customerId: string,
-    authUserId: string,
-    email: string
-  ) => Promise<void>;
+  sendVerification?: (customer: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    name: string | null;
+    nextPath: string;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+    retryAfterSeconds?: number;
+  }>;
 };
 
 function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function createRegistrationAcceptedResponse(
-  redirectPath: string,
-  email?: string
-): NextResponse {
-  const redirectUrl = email
-    ? `/email-confirmation?email=${encodeURIComponent(email)}&next=${encodeURIComponent(redirectPath)}`
-    : `/login?registered=true&next=${encodeURIComponent(redirectPath)}`;
+function getVerificationUrl(email: string, redirectPath: string): string {
+  return `/verify-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(redirectPath)}`;
+}
 
+function registrationError(
+  status: number,
+  error: string,
+  options: {
+    verificationPending?: boolean;
+    redirectUrl?: string;
+    retryAfterSeconds?: number;
+  } = {}
+): NextResponse {
+  const { retryAfterSeconds, ...body } = options;
   return NextResponse.json(
+    { error, ...body },
     {
-      success: true,
-      requiresSignIn: true,
-      requiresEmailConfirmation: Boolean(email),
-      redirectUrl,
-    },
-    { status: 201 }
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+        ...(retryAfterSeconds
+          ? { "Retry-After": String(retryAfterSeconds) }
+          : {}),
+      },
+    }
   );
 }
 
@@ -53,24 +68,19 @@ export async function handleCustomerRegistration(
   request: Request,
   dependencies: CustomerRegistrationDependencies
 ): Promise<NextResponse> {
-  const { db, signUp, issueSession } = dependencies;
+  const sendVerification =
+    dependencies.sendVerification ?? issueCustomerEmailConfirmation;
 
   try {
     let body: unknown;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON request body." },
-        { status: 400 }
-      );
+      return registrationError(400, "Invalid JSON request body.");
     }
 
-    if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        { error: "Registration details are required." },
-        { status: 400 }
-      );
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return registrationError(400, "Registration details are required.");
     }
 
     const {
@@ -81,7 +91,6 @@ export async function handleCustomerRegistration(
       confirmPassword,
       next,
     } = body as Record<string, unknown>;
-
     const cleanFirstName =
       typeof firstName === "string" ? firstName.trim() : "";
     const cleanLastName = typeof lastName === "string" ? lastName.trim() : "";
@@ -93,44 +102,29 @@ export async function handleCustomerRegistration(
     const redirectPath = getSafeCustomerRedirectPath(next);
 
     if (!cleanFirstName || !cleanLastName) {
-      return NextResponse.json(
-        { error: "First and last name are required." },
-        { status: 400 }
-      );
+      return registrationError(400, "First and last name are required.");
     }
-
     if (cleanFirstName.length > 50 || cleanLastName.length > 50) {
-      return NextResponse.json(
-        { error: "Name fields cannot exceed 50 characters." },
-        { status: 400 }
+      return registrationError(400, "Name fields cannot exceed 50 characters.");
+    }
+    if (!isValidEmail(cleanEmail)) {
+      return registrationError(400, "Please provide a valid email address.");
+    }
+    if (cleanPassword.length < 8 || cleanPassword.length > 128) {
+      return registrationError(
+        400,
+        "Password must be between 8 and 128 characters long."
       );
     }
-
-    if (!cleanEmail || !isValidEmail(cleanEmail)) {
-      return NextResponse.json(
-        { error: "Please provide a valid email address." },
-        { status: 400 }
-      );
-    }
-
-    if (!cleanPassword || cleanPassword.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters long." },
-        { status: 400 }
-      );
-    }
-
     if (cleanPassword !== cleanConfirmPassword) {
-      return NextResponse.json(
-        { error: "Passwords do not match." },
-        { status: 400 }
-      );
+      return registrationError(400, "Passwords do not match.");
     }
 
-    const existingCustomer = await db.customer.findUnique({
+    const existingCustomer = await dependencies.db.customer.findUnique({
       where: { email: cleanEmail },
       select: {
         id: true,
+        email: true,
         emailVerified: true,
         firstName: true,
         lastName: true,
@@ -139,87 +133,121 @@ export async function handleCustomerRegistration(
     });
 
     if (existingCustomer) {
-      if (!existingCustomer.emailVerified) {
-        await issueCustomerEmailConfirmation({
-          id: existingCustomer.id,
-          email: cleanEmail,
-          firstName: existingCustomer.firstName,
-          lastName: existingCustomer.lastName,
-          name: existingCustomer.name,
-        });
+      if (existingCustomer.emailVerified) {
+        return registrationError(
+          409,
+          "An account with this email already exists. Sign in or use account recovery."
+        );
       }
 
-      return createRegistrationAcceptedResponse(redirectPath, cleanEmail);
+      const result = await sendVerification({
+        ...existingCustomer,
+        nextPath: redirectPath,
+      });
+      const redirectUrl = getVerificationUrl(cleanEmail, redirectPath);
+      if (!result.success) {
+        return registrationError(
+          result.retryAfterSeconds ? 429 : 503,
+          "We couldn't send your verification email. You can retry from the verification page.",
+          {
+            verificationPending: true,
+            redirectUrl: `${redirectUrl}&state=send-failed${
+              result.retryAfterSeconds
+                ? `&cooldown=${result.retryAfterSeconds}`
+                : ""
+            }`,
+            retryAfterSeconds: result.retryAfterSeconds,
+          }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          emailAccepted: true,
+          redirectUrl,
+          requiresSignIn: true,
+          requiresEmailConfirmation: true,
+        },
+        { status: 201, headers: { "Cache-Control": "no-store" } }
+      );
     }
 
-    const signUpResult = await signUp({
+    const signUpResult = await dependencies.signUp({
       email: cleanEmail,
       password: cleanPassword,
       firstName: cleanFirstName,
       lastName: cleanLastName,
     });
 
-    if (signUpResult.emailMayExist || signUpResult.error?.toLowerCase().includes("already")) {
-      return createRegistrationAcceptedResponse(redirectPath, cleanEmail);
-    }
-
     if (!signUpResult.success || !signUpResult.user) {
-      return NextResponse.json(
-        { error: signUpResult.error || "Registration could not be completed." },
-        { status: 400 }
+      if (signUpResult.emailMayExist) {
+        return registrationError(
+          409,
+          "An account with this email already exists. Sign in or use account recovery."
+        );
+      }
+      return registrationError(
+        400,
+        signUpResult.error || "Registration could not be completed."
       );
     }
 
-    const authUserId = signUpResult.user.id;
     const fullName = `${cleanFirstName} ${cleanLastName}`.trim();
-    const customer = await db.customer.create({
+    const customer = await dependencies.db.customer.create({
       data: {
-        authUserId,
+        authUserId: signUpResult.user.id,
         email: cleanEmail,
         firstName: cleanFirstName,
         lastName: cleanLastName,
         name: fullName,
+        emailVerified: false,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        name: true,
       },
     });
+    const redirectUrl = getVerificationUrl(cleanEmail, redirectPath);
+    const emailResult = await sendVerification({
+      ...customer,
+      nextPath: redirectPath,
+    });
 
-    if (signUpResult.requiresEmailConfirmation) {
-      const emailConfirmation = await issueCustomerEmailConfirmation({
-        id: customer.id,
-        email: customer.email,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        name: customer.name,
-      });
-
-      if (!emailConfirmation.success) {
-        return NextResponse.json(
-          {
-            error:
-              emailConfirmation.error ||
-              "We could not send your confirmation email. Please contact support.",
-          },
-          { status: 500 }
-        );
-      }
-
-      return createRegistrationAcceptedResponse(redirectPath, customer.email);
+    if (!emailResult.success) {
+      return registrationError(
+        emailResult.retryAfterSeconds ? 429 : 503,
+        "Your account is created but we couldn't send the verification email. Please retry from the verification page.",
+        {
+          verificationPending: true,
+          redirectUrl: `${redirectUrl}&state=send-failed${
+            emailResult.retryAfterSeconds
+              ? `&cooldown=${emailResult.retryAfterSeconds}`
+              : ""
+          }`,
+          retryAfterSeconds: emailResult.retryAfterSeconds,
+        }
+      );
     }
-
-    await issueSession(customer.id, authUserId, customer.email);
 
     return NextResponse.json(
       {
         success: true,
-        requiresEmailConfirmation: false,
-        redirectUrl: redirectPath,
+        emailAccepted: true,
+        redirectUrl,
+        requiresSignIn: true,
+        requiresEmailConfirmation: true,
       },
-      { status: 201 }
+      { status: 201, headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
     console.error("CUSTOMER_REGISTER_ERROR:", error);
-    return NextResponse.json(
-      { error: "Unable to process registration. Please try again later." },
-      { status: 500 }
+    return registrationError(
+      500,
+      "Unable to process registration. Please try again later."
     );
   }
 }

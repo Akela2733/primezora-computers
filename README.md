@@ -79,6 +79,39 @@ while the shared protection is absent. IP-scoped policies prefer `x-real-ip` and
 fall back to the first `x-forwarded-for` value, so deployments must only accept
 those headers from a trusted proxy.
 
+## Customer email verification and transactional email
+
+Customer credentials remain managed by Supabase Auth. Primezora stores its own
+customer verification state and only a SHA-256 hash of each short-lived,
+single-use verification token. Verification does not sign the customer in;
+they must sign in after confirming their email. Admin authentication is separate.
+
+Configure these server-side environment variables:
+
+- `PUBLIC_SITE_URL`: the canonical application origin used in verification
+  links. Use `http://localhost:3000` for local development and the exact HTTPS
+  production origin in deployment.
+- `RESEND_API_KEY`: a server-only Resend API key. Never expose it with a
+  `NEXT_PUBLIC_` prefix.
+- `EMAIL_FROM`: a sender such as `Primezora <noreply@primezora.com>`. The sender
+  domain must be verified with Resend.
+
+For production, add the domain in Resend and publish the SPF/DKIM DNS records it
+provides. Wait for the domain to show as verified, then add the API key, sender
+address, and canonical site URL to the production environment and redeploy.
+Without a configured Resend provider, verification sends fail rather than
+showing a false “email sent” state. Local development may use a Resend test
+domain/key and an allowed recipient configured in Resend; no live delivery is
+claimed until the provider accepts a send request.
+
+Production deployment applies pending Prisma migrations through
+`npm run build:production`. The migration
+`20261010220000_hash_customer_verification_tokens` replaces the previous
+plaintext-token columns with a token table that stores hashes only; applying it
+invalidates all outstanding links created by the old implementation. Review and
+apply that migration as part of the normal deployment process. No production
+database migration or live email test is run from local development.
+
 ## Security response headers
 
 The Next.js Proxy adds a Content Security Policy, `nosniff`, frame protection,
