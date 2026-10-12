@@ -56,43 +56,67 @@ async function getCustomerOAuthClient(): Promise<SupabaseClient> {
 
   const cookieStore = await cookies();
   const memoryStorage = new Map<string, string>();
-  const cookieNameForKey = (key: string) => key;
-  const isVerifierKey = (key: string) =>
-    key.startsWith(`${CUSTOMER_OAUTH_STORAGE_KEY}-`) &&
-    key.endsWith("-code-verifier");
+  // Persist ALL keys that belong to this OAuth session to cookies so they
+  // survive across separate serverless function invocations (POST → GET).
+  // This includes PKCE verifier slot keys, the flow index, and the legacy fixed key.
+  const isPersistentKey = (key: string) =>
+    key === CUSTOMER_OAUTH_STORAGE_KEY ||
+    key.startsWith(`${CUSTOMER_OAUTH_STORAGE_KEY}-`);
 
   const storage: SupportedStorage = {
     getItem: async (key) => {
-      if (!isVerifierKey(key)) return memoryStorage.get(key) ?? null;
-      return cookieStore.get(cookieNameForKey(key))?.value ?? null;
+      if (!isPersistentKey(key)) return memoryStorage.get(key) ?? null;
+      const cookieValue = cookieStore.get(key)?.value;
+      if (cookieValue) return cookieValue;
+
+      // Resilient fallback: If Supabase requests a specific slot verifier
+      // (`primezora-customer-oauth-flow-<flowId>-code-verifier`) that is missing,
+      // fallback to the legacy fixed verifier (`primezora-customer-oauth-code-verifier`).
+      if (
+        key.endsWith("-code-verifier") &&
+        key !== `${CUSTOMER_OAUTH_STORAGE_KEY}-code-verifier`
+      ) {
+        const legacyValue = cookieStore.get(`${CUSTOMER_OAUTH_STORAGE_KEY}-code-verifier`)?.value;
+        if (legacyValue) return legacyValue;
+      }
+
+      return memoryStorage.get(key) ?? null;
     },
     setItem: async (key, value) => {
-      if (!isVerifierKey(key)) {
-        memoryStorage.set(key, value);
-        return;
-      }
+      memoryStorage.set(key, value);
 
-      cookieStore.set(cookieNameForKey(key), value, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS,
-      });
+      if (!isPersistentKey(key)) return;
+
+      try {
+        cookieStore.set(key, value, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS,
+        });
+      } catch (err) {
+        // In Next.js GET route handlers the cookie store may be read-only;
+        // memoryStorage provides best-effort fallback in the same invocation.
+        console.warn("CUSTOMER_OAUTH_COOKIE_SET_WARN:", key, err);
+      }
     },
     removeItem: async (key) => {
-      if (!isVerifierKey(key)) {
-        memoryStorage.delete(key);
-        return;
-      }
+      memoryStorage.delete(key);
 
-      cookieStore.set(cookieNameForKey(key), "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 0,
-      });
+      if (!isPersistentKey(key)) return;
+
+      try {
+        cookieStore.set(key, "", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 0,
+        });
+      } catch {
+        // Cleanup is best-effort; never let it crash the code exchange.
+      }
     },
   };
 

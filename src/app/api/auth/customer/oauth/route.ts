@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
@@ -48,5 +49,22 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ url: result.url });
+  const response = NextResponse.json({ url: result.url });
+  const cookieStore = await cookies();
+  for (const cookie of cookieStore.getAll()) {
+    if (
+      cookie.name === "primezora-customer-oauth" ||
+      cookie.name.startsWith("primezora-customer-oauth-")
+    ) {
+      response.cookies.set(cookie.name, cookie.value, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 15 * 60,
+      });
+    }
+  }
+
+  return response;
 }

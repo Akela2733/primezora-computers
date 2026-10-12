@@ -1,6 +1,12 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { setCustomerSessionCookie } from "@/lib/customer-auth";
+import {
+  createCustomerSessionToken,
+  CUSTOMER_SESSION_COOKIE,
+  CUSTOMER_SESSION_MAX_AGE_SECONDS,
+} from "@/lib/customer-session";
 import { CustomerIdentityLinkError, resolveCustomerIdentity } from "@/lib/customer-identity";
 import { prisma } from "@/lib/prisma";
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
@@ -84,7 +90,35 @@ export async function GET(request: Request) {
 
     await setCustomerSessionCookie(customer.id, signInResult.user.id, customer.email);
 
-    return NextResponse.redirect(new URL(next, request.url));
+    const response = NextResponse.redirect(new URL(next, request.url));
+    const token = await createCustomerSessionToken(
+      customer.id,
+      signInResult.user.id,
+      customer.email
+    );
+    response.cookies.set(CUSTOMER_SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: CUSTOMER_SESSION_MAX_AGE_SECONDS,
+    });
+
+    try {
+      const cookieStore = await cookies();
+      for (const cookie of cookieStore.getAll()) {
+        if (
+          cookie.name === "primezora-customer-oauth" ||
+          cookie.name.startsWith("primezora-customer-oauth-")
+        ) {
+          response.cookies.delete(cookie.name);
+        }
+      }
+    } catch {
+      // Best-effort cleanup
+    }
+
+    return response;
   } catch (error) {
     if (error instanceof CustomerIdentityLinkError) {
       return NextResponse.redirect(
