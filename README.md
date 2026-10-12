@@ -79,12 +79,52 @@ while the shared protection is absent. IP-scoped policies prefer `x-real-ip` and
 fall back to the first `x-forwarded-for` value, so deployments must only accept
 those headers from a trusted proxy.
 
-## Customer email verification and transactional email
+## Customer authentication
 
-Customer credentials remain managed by Supabase Auth. Primezora stores its own
-customer verification state and only a SHA-256 hash of each short-lived,
-single-use verification token. Verification does not sign the customer in;
-they must sign in after confirming their email. Admin authentication is separate.
+Customer email/password credentials and Google/Facebook OAuth are managed by
+Supabase Auth. New email/password registrations are confirmed by the server
+through Supabase Auth and receive a Primezora customer session immediately;
+new registrations do not require an email-confirmation step. Existing Supabase
+Auth users created before this flow whose email remains unconfirmed may still
+be rejected by Supabase password sign-in. The app does not auto-confirm those
+accounts based on a login attempt; resolve them only after independently
+verifying account ownership and updating the Supabase Auth account through an
+authorized process. Google and Facebook OAuth use Supabase's PKCE flow. The
+short-lived PKCE verifier is kept in an HTTP-only, same-site cookie and is
+exchanged by the app callback at
+`/api/auth/customer/oauth/callback`. Customer sessions are separate from admin
+sessions, and OAuth identities are not linked to an existing customer by email
+alone.
+
+To enable Google or Facebook sign-in:
+
+1. In Supabase Dashboard, enable Google and Facebook under **Authentication >
+   Providers** and enter the client IDs and secrets issued by their respective
+   developer consoles. Keep those provider secrets in Supabase; they are not
+   application environment variables.
+2. Copy the Supabase callback URL shown in each provider's Supabase setup and
+   add it as the OAuth redirect URI in the Google and Meta developer consoles.
+3. In **Authentication > URL Configuration**, add these app callback patterns
+   to the allowed redirect URLs, replacing the production origin with the
+   canonical HTTPS site origin:
+   - `http://localhost:3000/api/auth/customer/oauth/callback*`
+   - `https://<your-production-origin>/api/auth/customer/oauth/callback*`
+4. Confirm the project's public Supabase URL and anon key, server-only service
+   role key, and `CUSTOMER_SESSION_SECRET` are configured in the app
+   environment. Use an independently generated secret of at least 32 bytes;
+   do not reuse or expose a service-role or provider secret.
+
+The callback's `sb_flow_id` query parameter is used to select the matching
+short-lived PKCE verifier. Keep the wildcard suffix on the allowed redirect
+patterns so Supabase accepts that parameter. OAuth cannot be considered
+configured until both provider credentials and the callback allowlists are
+saved in Supabase and the corresponding provider consoles.
+
+Primezora also retains its independent customer email-verification token
+handlers for compatibility with previously issued verification links and
+resend requests. These store only a SHA-256 hash of each short-lived,
+single-use token; that legacy flow is not required to create or sign in to a
+new customer account. Admin authentication remains separate.
 
 Configure these server-side environment variables:
 

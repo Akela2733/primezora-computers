@@ -14,10 +14,17 @@ type ResolveCustomerIdentityInput = {
   lastName: string;
 };
 
+type ResolveCustomerIdentityOptions = {
+  allowEmailLink?: boolean;
+};
+
 export async function resolveCustomerIdentity(
   db: PrismaClient,
-  input: ResolveCustomerIdentityInput
+  input: ResolveCustomerIdentityInput,
+  options: ResolveCustomerIdentityOptions = {}
 ) {
+  const { allowEmailLink = true } = options;
+
   const customerByAuthUserId = await db.customer.findUnique({
     where: { authUserId: input.authUserId },
   });
@@ -28,32 +35,43 @@ export async function resolveCustomerIdentity(
   });
 
   if (customerByEmail) {
-    if (customerByEmail.authUserId !== null) {
+    if (customerByEmail.authUserId && customerByEmail.authUserId !== input.authUserId) {
       throw new CustomerIdentityLinkError();
     }
 
-    const linked = await db.customer.updateMany({
-      where: {
-        id: customerByEmail.id,
-        authUserId: null,
-      },
-      data: { authUserId: input.authUserId },
-    });
+    if (!allowEmailLink) {
+      if (!customerByEmail.authUserId) {
+        throw new CustomerIdentityLinkError();
+      }
+      return customerByEmail;
+    }
 
-    if (linked.count === 1) {
-      return db.customer.findUniqueOrThrow({
+    if (customerByEmail.authUserId === null) {
+      const linked = await db.customer.updateMany({
+        where: {
+          id: customerByEmail.id,
+          authUserId: null,
+        },
+        data: { authUserId: input.authUserId },
+      });
+
+      if (linked.count === 1) {
+        return db.customer.findUniqueOrThrow({
+          where: { id: customerByEmail.id },
+        });
+      }
+
+      const currentCustomer = await db.customer.findUnique({
         where: { id: customerByEmail.id },
       });
+      if (currentCustomer?.authUserId === input.authUserId) {
+        return currentCustomer;
+      }
+
+      throw new CustomerIdentityLinkError();
     }
 
-    const currentCustomer = await db.customer.findUnique({
-      where: { id: customerByEmail.id },
-    });
-    if (currentCustomer?.authUserId === input.authUserId) {
-      return currentCustomer;
-    }
-
-    throw new CustomerIdentityLinkError();
+    return customerByEmail;
   }
 
   const fullName =

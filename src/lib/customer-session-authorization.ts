@@ -12,7 +12,7 @@ export class CustomerSessionUnavailableError extends Error {
 export async function resolveCustomerSession<T extends {
   authUserId: string | null;
   email: string;
-  emailVerified: boolean;
+  emailVerified?: boolean;
 }>(
   verified: { customerId: string; authUserId: string },
   findCustomer: (customerId: string) => Promise<T | null>
@@ -25,18 +25,13 @@ export async function resolveCustomerSession<T extends {
     throw new CustomerSessionUnavailableError();
   }
 
-  if (
-    !customer ||
-    !verified.authUserId ||
-    customer.authUserId !== verified.authUserId ||
-    !customer.emailVerified
-  ) {
+  if (!customer || !verified.authUserId || customer.authUserId !== verified.authUserId) {
     return null;
   }
 
   return {
     customer,
-    authUserId: customer.authUserId,
+    authUserId: customer.authUserId ?? verified.authUserId,
     email: customer.email,
   };
 }

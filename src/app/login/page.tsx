@@ -17,6 +17,7 @@ type CustomerLoginPageProps = {
     email?: string | string[];
     registered?: string | string[];
     loggedOut?: string | string[];
+    error?: string | string[];
   }>;
 };
 
@@ -32,6 +33,7 @@ export default async function CustomerLoginPage({
     ? params.loggedOut[0]
     : params.loggedOut;
   const rawEmail = Array.isArray(params.email) ? params.email[0] : params.email;
+  const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
 
   const nextPath = getSafeCustomerRedirectPath(rawNext);
 
@@ -47,6 +49,7 @@ export default async function CustomerLoginPage({
         initialEmail={rawEmail?.trim().slice(0, 254) ?? ""}
         registered={rawRegistered === "true"}
         loggedOut={rawLoggedOut === "true"}
+        authError={rawError ?? null}
       />
     </main>
   );

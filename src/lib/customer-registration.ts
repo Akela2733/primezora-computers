@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
-import { issueCustomerEmailConfirmation } from "@/lib/email-confirmation";
 
 type CustomerRegistrationSignUpResult = {
   success: boolean;
@@ -18,6 +17,11 @@ type CustomerRegistrationDependencies = {
     firstName: string;
     lastName: string;
   }) => Promise<CustomerRegistrationSignUpResult>;
+  issueSession?: (
+    customerId: string,
+    authUserId: string,
+    email: string
+  ) => Promise<void>;
   sendVerification?: (customer: {
     id: string;
     email: string;
@@ -38,17 +42,25 @@ function isValidEmail(email: string): boolean {
 
 export function getCustomerVerificationPageUrl(
   email: string,
-  redirectPath: string,
+  nextPath: string,
   options: { sendFailed?: boolean; cooldownSeconds?: number } = {}
 ): string {
-  const url = new URL("/verify-email", "https://primezora.invalid");
+  const url = new URL("/verify-email", "https://primezora.example");
   url.searchParams.set("email", email);
-  url.searchParams.set("next", redirectPath);
-  if (options.sendFailed) url.searchParams.set("state", "send-failed");
-  if (options.cooldownSeconds) {
-    url.searchParams.set("cooldown", String(options.cooldownSeconds));
+  url.searchParams.set("next", getSafeCustomerRedirectPath(nextPath));
+
+  if (options.sendFailed) {
+    url.searchParams.set("state", "send-failed");
   }
-  return `${url.pathname}${url.search}`;
+
+  if (typeof options.cooldownSeconds === "number" && Number.isFinite(options.cooldownSeconds)) {
+    const sanitizedCooldown = Math.max(0, Math.floor(options.cooldownSeconds));
+    if (sanitizedCooldown > 0) {
+      url.searchParams.set("cooldown", String(sanitizedCooldown));
+    }
+  }
+
+  return url.toString();
 }
 
 function registrationError(
@@ -79,9 +91,6 @@ export async function handleCustomerRegistration(
   request: Request,
   dependencies: CustomerRegistrationDependencies
 ): Promise<NextResponse> {
-  const sendVerification =
-    dependencies.sendVerification ?? issueCustomerEmailConfirmation;
-
   try {
     let body: unknown;
     try {
@@ -144,42 +153,9 @@ export async function handleCustomerRegistration(
     });
 
     if (existingCustomer) {
-      if (existingCustomer.emailVerified) {
-        return registrationError(
-          409,
-          "An account with this email already exists. Sign in or use account recovery."
-        );
-      }
-
-      const result = await sendVerification({
-        ...existingCustomer,
-        nextPath: redirectPath,
-      });
-      if (!result.success) {
-        return registrationError(
-          result.retryAfterSeconds ? 429 : 503,
-          "We couldn't send your verification email. You can retry from the verification page.",
-          {
-            verificationPending: true,
-            redirectUrl: getCustomerVerificationPageUrl(cleanEmail, redirectPath, {
-              sendFailed: true,
-              cooldownSeconds: result.retryAfterSeconds,
-            }),
-            retryAfterSeconds: result.retryAfterSeconds,
-          }
-        );
-      }
-
-      const redirectUrl = getCustomerVerificationPageUrl(cleanEmail, redirectPath);
-      return NextResponse.json(
-        {
-          success: true,
-          emailAccepted: true,
-          redirectUrl,
-          requiresSignIn: true,
-          requiresEmailConfirmation: true,
-        },
-        { status: 201, headers: { "Cache-Control": "no-store" } }
+      return registrationError(
+        409,
+        "An account with this email already exists. Sign in to continue."
       );
     }
 
@@ -194,7 +170,7 @@ export async function handleCustomerRegistration(
       if (signUpResult.emailMayExist) {
         return registrationError(
           409,
-          "An account with this email already exists. Sign in or use account recovery."
+          "An account with this email already exists. Sign in to continue."
         );
       }
       return registrationError(
@@ -211,7 +187,7 @@ export async function handleCustomerRegistration(
         firstName: cleanFirstName,
         lastName: cleanLastName,
         name: fullName,
-        emailVerified: false,
+        emailVerified: true,
       },
       select: {
         id: true,
@@ -221,34 +197,16 @@ export async function handleCustomerRegistration(
         name: true,
       },
     });
-    const emailResult = await sendVerification({
-      ...customer,
-      nextPath: redirectPath,
-    });
 
-    if (!emailResult.success) {
-      return registrationError(
-        emailResult.retryAfterSeconds ? 429 : 503,
-        "Your account is created but we couldn't send the verification email. Please retry from the verification page.",
-        {
-          verificationPending: true,
-          redirectUrl: getCustomerVerificationPageUrl(cleanEmail, redirectPath, {
-            sendFailed: true,
-            cooldownSeconds: emailResult.retryAfterSeconds,
-          }),
-          retryAfterSeconds: emailResult.retryAfterSeconds,
-        }
-      );
+    if (dependencies.issueSession) {
+      await dependencies.issueSession(customer.id, signUpResult.user.id, customer.email);
     }
 
-    const redirectUrl = getCustomerVerificationPageUrl(cleanEmail, redirectPath);
     return NextResponse.json(
       {
         success: true,
         emailAccepted: true,
-        redirectUrl,
-        requiresSignIn: true,
-        requiresEmailConfirmation: true,
+        redirectUrl: redirectPath,
       },
       { status: 201, headers: { "Cache-Control": "no-store" } }
     );

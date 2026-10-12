@@ -1,6 +1,12 @@
 import "server-only";
 
-import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import {
+  createClient,
+  type SupabaseClient,
+  type SupportedStorage,
+  type User,
+} from "@supabase/supabase-js";
 
 export type SupabaseAuthConfig = {
   url: string;
@@ -37,6 +43,70 @@ export function getSupabaseAuthConfig(): SupabaseAuthConfig {
 
 let authClientInstance: SupabaseClient | null = null;
 let supabaseAdminClientInstance: SupabaseClient | null = null;
+const CUSTOMER_OAUTH_STORAGE_KEY = "primezora-customer-oauth";
+const CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS = 15 * 60;
+
+async function getCustomerOAuthClient(): Promise<SupabaseClient> {
+  const config = getSupabaseAuthConfig();
+  if (!config.isConfigured) {
+    throw new Error(
+      "Supabase Auth is not fully configured. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
+    );
+  }
+
+  const cookieStore = await cookies();
+  const memoryStorage = new Map<string, string>();
+  const cookieNameForKey = (key: string) => key;
+  const isVerifierKey = (key: string) =>
+    key.startsWith(`${CUSTOMER_OAUTH_STORAGE_KEY}-`) &&
+    key.endsWith("-code-verifier");
+
+  const storage: SupportedStorage = {
+    getItem: async (key) => {
+      if (!isVerifierKey(key)) return memoryStorage.get(key) ?? null;
+      return cookieStore.get(cookieNameForKey(key))?.value ?? null;
+    },
+    setItem: async (key, value) => {
+      if (!isVerifierKey(key)) {
+        memoryStorage.set(key, value);
+        return;
+      }
+
+      cookieStore.set(cookieNameForKey(key), value, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS,
+      });
+    },
+    removeItem: async (key) => {
+      if (!isVerifierKey(key)) {
+        memoryStorage.delete(key);
+        return;
+      }
+
+      cookieStore.set(cookieNameForKey(key), "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+      });
+    },
+  };
+
+  return createClient(config.url, config.anonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      flowType: "pkce",
+      storageKey: CUSTOMER_OAUTH_STORAGE_KEY,
+      storage,
+      experimental: { appendPkceFlowIdToRedirects: true },
+    },
+  });
+}
 
 /**
  * Returns a server-side Supabase client dedicated to Auth operations.
@@ -157,7 +227,7 @@ export async function supabaseSignUp(params: {
     return {
       success: true,
       user: data.user,
-      requiresEmailConfirmation: true,
+      requiresEmailConfirmation: false,
     };
   } catch (err) {
     console.error("Supabase signUp exception:", err);
@@ -240,6 +310,98 @@ export async function supabaseSignIn(params: {
 /**
  * Signs out a customer from Supabase Auth if an access token is provided.
  */
+export type SocialProvider = "google" | "facebook";
+
+export async function supabaseSignInWithProvider(params: {
+  provider: SocialProvider;
+  redirectTo: string;
+}): Promise<{ success: boolean; url?: string; error?: string }> {
+  const config = getSupabaseAuthConfig();
+  if (!config.isConfigured) {
+    return {
+      success: false,
+      error: "Authentication service is temporarily unavailable. Please try again later.",
+    };
+  }
+
+  try {
+    const supabase = await getCustomerOAuthClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: params.provider,
+      options: {
+        redirectTo: params.redirectTo,
+        queryParams:
+          params.provider === "google"
+            ? {
+                access_type: "offline",
+                prompt: "consent",
+              }
+            : undefined,
+      },
+    });
+
+    if (error) {
+      return {
+        success: false,
+        error: error.message || "Social authentication could not be started.",
+      };
+    }
+
+    return {
+      success: true,
+      url: data?.url,
+    };
+  } catch (err) {
+    console.error("Supabase social sign-in exception:", err);
+    return {
+      success: false,
+      error: "Unable to start social sign-in at this time.",
+    };
+  }
+}
+
+export async function supabaseExchangeCodeForSession(
+  code: string,
+  flowId?: string
+): Promise<{
+  success: boolean;
+  user?: User;
+  error?: string;
+}> {
+  const config = getSupabaseAuthConfig();
+  if (!config.isConfigured) {
+    return {
+      success: false,
+      error: "Authentication service is temporarily unavailable. Please try again later.",
+    };
+  }
+
+  try {
+    const supabase = await getCustomerOAuthClient();
+    const { data, error } = await supabase.auth.exchangeCodeForSession(
+      code,
+      flowId ? { flowId } : undefined
+    );
+    if (error || !data.user) {
+      return {
+        success: false,
+        error: error?.message || "The provider callback could not be completed.",
+      };
+    }
+
+    return {
+      success: true,
+      user: data.user,
+    };
+  } catch (err) {
+    console.error("Supabase oauth exchange exception:", err);
+    return {
+      success: false,
+      error: "The provider callback could not be completed.",
+    };
+  }
+}
+
 export async function supabaseSignOut(accessToken?: string): Promise<void> {
   const config = getSupabaseAuthConfig();
   if (!config.isConfigured || !accessToken) return;
