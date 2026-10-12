@@ -60,6 +60,24 @@ export async function GET(request: Request) {
     return redirectToLogin(request.url, "oauth-callback-failed", next);
   }
 
+  const cookieNames = new Set(
+    (request.headers.get("cookie") ?? "")
+      .split(";")
+      .map((cookie) => cookie.trim().split("=", 1)[0])
+      .filter(Boolean)
+  );
+  console.info("CUSTOMER_OAUTH_CALLBACK_COOKIE_STATE:", {
+    hasFlowId: Boolean(flowId),
+    hasLegacyVerifier: cookieNames.has(
+      "primezora-customer-oauth-code-verifier"
+    ),
+    hasFlowVerifier: flowId
+      ? cookieNames.has(
+          `primezora-customer-oauth-flow-${flowId}-code-verifier`
+        )
+      : false,
+  });
+
   const signInResult = await supabaseExchangeCodeForSession(code, flowId);
   if (!signInResult.success || !signInResult.user) {
     console.error("CUSTOMER_OAUTH_EXCHANGE_FAILED:", signInResult.error);

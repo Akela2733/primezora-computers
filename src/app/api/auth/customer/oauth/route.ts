@@ -43,18 +43,34 @@ export async function POST(request: Request) {
     provider: normalizedProvider,
     redirectTo: callbackUrl.toString(),
   });
+  const cookieChanges = result.cookieChanges ?? [];
+  console.info("CUSTOMER_OAUTH_START_COOKIE_STATE:", {
+    provider: normalizedProvider,
+    cookieCount: cookieChanges.filter((cookie) => cookie.maxAge > 0).length,
+    hasLegacyVerifier: cookieChanges.some(
+      (cookie) =>
+        cookie.name === "primezora-customer-oauth-code-verifier" &&
+        cookie.maxAge > 0
+    ),
+    hasFlowVerifier: cookieChanges.some(
+      (cookie) =>
+        cookie.name.includes("-flow-") &&
+        cookie.name.endsWith("-code-verifier") &&
+        cookie.maxAge > 0
+    ),
+  });
 
   if (!result.success || !result.url) {
     const response = NextResponse.json(
       { error: result.error || "Social sign-in could not be started." },
       { status: 400 }
     );
-    applyCustomerOAuthCookieChanges(response, result.cookieChanges ?? []);
+    applyCustomerOAuthCookieChanges(response, cookieChanges);
     return response;
   }
 
   const response = NextResponse.json({ url: result.url });
-  applyCustomerOAuthCookieChanges(response, result.cookieChanges ?? []);
+  applyCustomerOAuthCookieChanges(response, cookieChanges);
 
   return response;
 }
