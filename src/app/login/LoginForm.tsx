@@ -14,7 +14,6 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { SiFacebook, SiGoogle } from "@icons-pack/react-simple-icons";
 
 type LoginFormProps = {
   nextPath?: string;
@@ -73,35 +72,6 @@ export default function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(authError ? normalizeAuthError(authError) : null);
   const [loading, setLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<"google" | "facebook" | null>(null);
-
-  const handleSocialSignIn = async (provider: "google" | "facebook") => {
-    setError(null);
-    setSocialLoading(provider);
-
-    try {
-      const res = await fetch("/api/auth/customer/oauth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          next: nextPath,
-        }),
-      });
-
-      const data: { error?: string; url?: string } = await res.json();
-      if (!res.ok || !data.url) {
-        setError(normalizeAuthError(data?.error || "Social sign-in could not be started."));
-        setSocialLoading(null);
-        return;
-      }
-
-      window.location.assign(data.url);
-    } catch {
-      setError("A network error occurred while starting social sign-in.");
-      setSocialLoading(null);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,34 +162,6 @@ export default function LoginForm({
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
       )}
-
-      <div className="mb-6">
-        <div className="mb-3 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.22em] text-white/40">
-          <div className="h-px flex-1 bg-white/[0.08]" />
-          <span>Or continue with</span>
-          <div className="h-px flex-1 bg-white/[0.08]" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => handleSocialSignIn("google")}
-            disabled={loading || socialLoading !== null}
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-sm font-medium text-white transition hover:border-amber-500/40 hover:bg-amber-500/5 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <SiGoogle size={16} className="text-emerald-400" />
-            {socialLoading === "google" ? "Connecting..." : "Google"}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialSignIn("facebook")}
-            disabled={loading || socialLoading !== null}
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-sm font-medium text-white transition hover:border-amber-500/40 hover:bg-amber-500/5 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <SiFacebook size={16} className="text-sky-400" />
-            {socialLoading === "facebook" ? "Connecting..." : "Facebook"}
-          </button>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
