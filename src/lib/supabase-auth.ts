@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 import {
   createClient,
   type SupabaseClient,
@@ -46,7 +47,31 @@ let supabaseAdminClientInstance: SupabaseClient | null = null;
 const CUSTOMER_OAUTH_STORAGE_KEY = "primezora-customer-oauth";
 const CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS = 15 * 60;
 
-async function getCustomerOAuthClient(): Promise<SupabaseClient> {
+export type CustomerOAuthCookieChange = {
+  name: string;
+  value: string;
+  maxAge: number;
+};
+
+export function applyCustomerOAuthCookieChanges(
+  response: NextResponse,
+  changes: readonly CustomerOAuthCookieChange[]
+): void {
+  for (const change of changes) {
+    response.cookies.set(change.name, change.value, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: change.maxAge,
+    });
+  }
+}
+
+async function getCustomerOAuthClient(): Promise<{
+  client: SupabaseClient;
+  getCookieChanges: () => CustomerOAuthCookieChange[];
+}> {
   const config = getSupabaseAuthConfig();
   if (!config.isConfigured) {
     throw new Error(
@@ -56,17 +81,20 @@ async function getCustomerOAuthClient(): Promise<SupabaseClient> {
 
   const cookieStore = await cookies();
   const memoryStorage = new Map<string, string>();
-  // Persist ALL keys that belong to this OAuth session to cookies so they
-  // survive across separate serverless function invocations (POST → GET).
-  // This includes PKCE verifier slot keys, the flow index, and the legacy fixed key.
+  const cookieChanges = new Map<string, CustomerOAuthCookieChange>();
+  // Persist PKCE verifier slots and the flow index across serverless requests.
   const isPersistentKey = (key: string) =>
-    key === CUSTOMER_OAUTH_STORAGE_KEY ||
     key.startsWith(`${CUSTOMER_OAUTH_STORAGE_KEY}-`);
+  const getPersistentItem = (key: string) => {
+    const change = cookieChanges.get(key);
+    if (change) return change.maxAge > 0 ? change.value : null;
+    return cookieStore.get(key)?.value ?? null;
+  };
 
   const storage: SupportedStorage = {
     getItem: async (key) => {
       if (!isPersistentKey(key)) return memoryStorage.get(key) ?? null;
-      const cookieValue = cookieStore.get(key)?.value;
+      const cookieValue = getPersistentItem(key);
       if (cookieValue) return cookieValue;
 
       // Resilient fallback: If Supabase requests a specific slot verifier
@@ -76,7 +104,9 @@ async function getCustomerOAuthClient(): Promise<SupabaseClient> {
         key.endsWith("-code-verifier") &&
         key !== `${CUSTOMER_OAUTH_STORAGE_KEY}-code-verifier`
       ) {
-        const legacyValue = cookieStore.get(`${CUSTOMER_OAUTH_STORAGE_KEY}-code-verifier`)?.value;
+        const legacyValue = getPersistentItem(
+          `${CUSTOMER_OAUTH_STORAGE_KEY}-code-verifier`
+        );
         if (legacyValue) return legacyValue;
       }
 
@@ -87,49 +117,34 @@ async function getCustomerOAuthClient(): Promise<SupabaseClient> {
 
       if (!isPersistentKey(key)) return;
 
-      try {
-        cookieStore.set(key, value, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS,
-        });
-      } catch (err) {
-        // In Next.js GET route handlers the cookie store may be read-only;
-        // memoryStorage provides best-effort fallback in the same invocation.
-        console.warn("CUSTOMER_OAUTH_COOKIE_SET_WARN:", key, err);
-      }
+      cookieChanges.set(key, {
+        name: key,
+        value,
+        maxAge: CUSTOMER_OAUTH_VERIFIER_MAX_AGE_SECONDS,
+      });
     },
     removeItem: async (key) => {
       memoryStorage.delete(key);
 
       if (!isPersistentKey(key)) return;
 
-      try {
-        cookieStore.set(key, "", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 0,
-        });
-      } catch {
-        // Cleanup is best-effort; never let it crash the code exchange.
-      }
+      cookieChanges.set(key, { name: key, value: "", maxAge: 0 });
     },
   };
 
-  return createClient(config.url, config.anonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      flowType: "pkce",
-      storageKey: CUSTOMER_OAUTH_STORAGE_KEY,
-      storage,
-      experimental: { appendPkceFlowIdToRedirects: true },
-    },
-  });
+  return {
+    client: createClient(config.url, config.anonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        flowType: "pkce",
+        storageKey: CUSTOMER_OAUTH_STORAGE_KEY,
+        storage,
+        experimental: { appendPkceFlowIdToRedirects: true },
+      },
+    }),
+    getCookieChanges: () => [...cookieChanges.values()],
+  };
 }
 
 /**
@@ -339,7 +354,12 @@ export type SocialProvider = "google" | "facebook";
 export async function supabaseSignInWithProvider(params: {
   provider: SocialProvider;
   redirectTo: string;
-}): Promise<{ success: boolean; url?: string; error?: string }> {
+}): Promise<{
+  success: boolean;
+  url?: string;
+  error?: string;
+  cookieChanges?: CustomerOAuthCookieChange[];
+}> {
   const config = getSupabaseAuthConfig();
   if (!config.isConfigured) {
     return {
@@ -349,7 +369,8 @@ export async function supabaseSignInWithProvider(params: {
   }
 
   try {
-    const supabase = await getCustomerOAuthClient();
+    const { client: supabase, getCookieChanges } =
+      await getCustomerOAuthClient();
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: params.provider,
       options: {
@@ -368,12 +389,14 @@ export async function supabaseSignInWithProvider(params: {
       return {
         success: false,
         error: error.message || "Social authentication could not be started.",
+        cookieChanges: getCookieChanges(),
       };
     }
 
     return {
       success: true,
       url: data?.url,
+      cookieChanges: getCookieChanges(),
     };
   } catch (err) {
     console.error("Supabase social sign-in exception:", err);
@@ -391,6 +414,7 @@ export async function supabaseExchangeCodeForSession(
   success: boolean;
   user?: User;
   error?: string;
+  cookieChanges?: CustomerOAuthCookieChange[];
 }> {
   const config = getSupabaseAuthConfig();
   if (!config.isConfigured) {
@@ -400,8 +424,11 @@ export async function supabaseExchangeCodeForSession(
     };
   }
 
+  let getCookieChanges = () => [] as CustomerOAuthCookieChange[];
   try {
-    const supabase = await getCustomerOAuthClient();
+    const oauthClient = await getCustomerOAuthClient();
+    getCookieChanges = oauthClient.getCookieChanges;
+    const supabase = oauthClient.client;
     const { data, error } = await supabase.auth.exchangeCodeForSession(
       code,
       flowId ? { flowId } : undefined
@@ -411,18 +438,21 @@ export async function supabaseExchangeCodeForSession(
       return {
         success: false,
         error: error?.message || "The provider callback could not be completed.",
+        cookieChanges: getCookieChanges(),
       };
     }
 
     return {
       success: true,
       user: data.user,
+      cookieChanges: getCookieChanges(),
     };
   } catch (err) {
     console.error("Supabase oauth exchange exception:", err);
     return {
       success: false,
       error: "The provider callback could not be completed.",
+      cookieChanges: getCookieChanges(),
     };
   }
 }

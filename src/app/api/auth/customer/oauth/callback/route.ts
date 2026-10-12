@@ -1,7 +1,5 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { setCustomerSessionCookie } from "@/lib/customer-auth";
 import {
   createCustomerSessionToken,
   CUSTOMER_SESSION_COOKIE,
@@ -10,7 +8,26 @@ import {
 import { CustomerIdentityLinkError, resolveCustomerIdentity } from "@/lib/customer-identity";
 import { prisma } from "@/lib/prisma";
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
-import { supabaseExchangeCodeForSession } from "@/lib/supabase-auth";
+import {
+  applyCustomerOAuthCookieChanges,
+  supabaseExchangeCodeForSession,
+} from "@/lib/supabase-auth";
+
+function redirectToLogin(
+  requestUrl: string,
+  error: string,
+  next: string,
+  cookieChanges: Parameters<typeof applyCustomerOAuthCookieChanges>[1] = []
+) {
+  const response = NextResponse.redirect(
+    new URL(
+      `/login?error=${encodeURIComponent(error)}&next=${encodeURIComponent(next)}`,
+      requestUrl
+    )
+  );
+  applyCustomerOAuthCookieChanges(response, cookieChanges);
+  return response;
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -33,32 +50,34 @@ export async function GET(request: Request) {
       description: url.searchParams.get("error_description"),
     });
 
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(loginError)}&next=${encodeURIComponent(next)}`, request.url)
-    );
+    return redirectToLogin(request.url, loginError, next);
   }
 
   if (!code) {
     console.error("CUSTOMER_OAUTH_CALLBACK_MISSING_CODE:", {
       hasFlowId: Boolean(flowId),
     });
-    return NextResponse.redirect(
-      new URL(`/login?error=oauth-callback-failed&next=${encodeURIComponent(next)}`, request.url)
-    );
+    return redirectToLogin(request.url, "oauth-callback-failed", next);
   }
 
   const signInResult = await supabaseExchangeCodeForSession(code, flowId);
   if (!signInResult.success || !signInResult.user) {
     console.error("CUSTOMER_OAUTH_EXCHANGE_FAILED:", signInResult.error);
-    return NextResponse.redirect(
-      new URL(`/login?error=oauth-callback-failed&next=${encodeURIComponent(next)}`, request.url)
+    return redirectToLogin(
+      request.url,
+      "oauth-callback-failed",
+      next,
+      signInResult.cookieChanges
     );
   }
 
   const email = (signInResult.user.email || "").trim().toLowerCase();
   if (!email) {
-    return NextResponse.redirect(
-      new URL(`/login?error=missing-email&next=${encodeURIComponent(next)}`, request.url)
+    return redirectToLogin(
+      request.url,
+      "missing-email",
+      next,
+      signInResult.cookieChanges
     );
   }
 
@@ -88,8 +107,6 @@ export async function GET(request: Request) {
       { allowEmailLink: false }
     );
 
-    await setCustomerSessionCookie(customer.id, signInResult.user.id, customer.email);
-
     const response = NextResponse.redirect(new URL(next, request.url));
     const token = await createCustomerSessionToken(
       customer.id,
@@ -103,32 +120,25 @@ export async function GET(request: Request) {
       path: "/",
       maxAge: CUSTOMER_SESSION_MAX_AGE_SECONDS,
     });
-
-    try {
-      const cookieStore = await cookies();
-      for (const cookie of cookieStore.getAll()) {
-        if (
-          cookie.name === "primezora-customer-oauth" ||
-          cookie.name.startsWith("primezora-customer-oauth-")
-        ) {
-          response.cookies.delete(cookie.name);
-        }
-      }
-    } catch {
-      // Best-effort cleanup
-    }
+    applyCustomerOAuthCookieChanges(response, signInResult.cookieChanges ?? []);
 
     return response;
   } catch (error) {
     if (error instanceof CustomerIdentityLinkError) {
-      return NextResponse.redirect(
-        new URL(`/login?error=account-link-required&next=${encodeURIComponent(next)}`, request.url)
+      return redirectToLogin(
+        request.url,
+        "account-link-required",
+        next,
+        signInResult.cookieChanges
       );
     }
 
     console.error("CUSTOMER_SOCIAL_AUTH_ERROR:", error);
-    return NextResponse.redirect(
-      new URL(`/login?error=oauth-callback-failed&next=${encodeURIComponent(next)}`, request.url)
+    return redirectToLogin(
+      request.url,
+      "oauth-callback-failed",
+      next,
+      signInResult.cookieChanges
     );
   }
 }

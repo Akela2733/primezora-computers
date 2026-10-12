@@ -1,8 +1,10 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { getSafeCustomerRedirectPath } from "@/lib/customer-redirect";
-import { supabaseSignInWithProvider } from "@/lib/supabase-auth";
+import {
+  applyCustomerOAuthCookieChanges,
+  supabaseSignInWithProvider,
+} from "@/lib/supabase-auth";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -43,28 +45,16 @@ export async function POST(request: Request) {
   });
 
   if (!result.success || !result.url) {
-    return NextResponse.json(
+    const response = NextResponse.json(
       { error: result.error || "Social sign-in could not be started." },
       { status: 400 }
     );
+    applyCustomerOAuthCookieChanges(response, result.cookieChanges ?? []);
+    return response;
   }
 
   const response = NextResponse.json({ url: result.url });
-  const cookieStore = await cookies();
-  for (const cookie of cookieStore.getAll()) {
-    if (
-      cookie.name === "primezora-customer-oauth" ||
-      cookie.name.startsWith("primezora-customer-oauth-")
-    ) {
-      response.cookies.set(cookie.name, cookie.value, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60,
-      });
-    }
-  }
+  applyCustomerOAuthCookieChanges(response, result.cookieChanges ?? []);
 
   return response;
 }
