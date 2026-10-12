@@ -11,15 +11,31 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   const flowId = url.searchParams.get("sb_flow_id") || undefined;
   const error = url.searchParams.get("error");
+  const errorCode = url.searchParams.get("error_code");
   const next = getSafeCustomerRedirectPath(url.searchParams.get("next"));
 
   if (error) {
+    const loginError =
+      errorCode === "flow_state_already_used"
+        ? "oauth-flow-already-used"
+        : error === "access_denied"
+          ? "oauth-callback-failed"
+          : error;
+    console.error("CUSTOMER_OAUTH_PROVIDER_ERROR:", {
+      error,
+      errorCode,
+      description: url.searchParams.get("error_description"),
+    });
+
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error === "access_denied" ? "oauth-callback-failed" : error)}&next=${encodeURIComponent(next)}`, request.url)
+      new URL(`/login?error=${encodeURIComponent(loginError)}&next=${encodeURIComponent(next)}`, request.url)
     );
   }
 
   if (!code) {
+    console.error("CUSTOMER_OAUTH_CALLBACK_MISSING_CODE:", {
+      hasFlowId: Boolean(flowId),
+    });
     return NextResponse.redirect(
       new URL(`/login?error=oauth-callback-failed&next=${encodeURIComponent(next)}`, request.url)
     );
@@ -27,6 +43,7 @@ export async function GET(request: Request) {
 
   const signInResult = await supabaseExchangeCodeForSession(code, flowId);
   if (!signInResult.success || !signInResult.user) {
+    console.error("CUSTOMER_OAUTH_EXCHANGE_FAILED:", signInResult.error);
     return NextResponse.redirect(
       new URL(`/login?error=oauth-callback-failed&next=${encodeURIComponent(next)}`, request.url)
     );

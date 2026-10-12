@@ -383,6 +383,7 @@ export async function supabaseExchangeCodeForSession(
       flowId ? { flowId } : undefined
     );
     if (error || !data.user) {
+      console.error("Supabase oauth exchange failed:", error?.message || "No user returned.");
       return {
         success: false,
         error: error?.message || "The provider callback could not be completed.",

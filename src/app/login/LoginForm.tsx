@@ -48,6 +48,10 @@ function normalizeAuthError(message?: string | null): string {
     return "Google or Facebook sign-in could not be completed. Please try again.";
   }
 
+  if (normalized === "oauth-flow-already-used") {
+    return "This Google or Facebook sign-in attempt has already been used. Start a new sign-in attempt and do not reload the provider page.";
+  }
+
   if (normalized === "missing-email") {
     return "Your sign-in provider did not return an email address. Please sign in with your email and password and complete your profile, or try again with an account that includes an email.";
   }
