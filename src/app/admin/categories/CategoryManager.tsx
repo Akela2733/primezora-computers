@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Edit2, Plus, X } from "lucide-react";
+import { Check, Edit2, Plus, Trash2, X } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 type ManagedCategory = {
   id: string;
@@ -180,8 +181,60 @@ export default function CategoryManager({
     }
   };
 
+  const deleteCategory = async (category: ManagedCategory) => {
+    if (pendingId || isSaving) return;
+
+    const confirmed = window.confirm(
+      `Delete "${category.name}"? Categories with matching products cannot be deleted.`
+    );
+    if (!confirmed) return;
+
+    setError("");
+    setNotice("");
+    setPendingId(category.id);
+
+    try {
+      const response = await fetch(
+        `/api/admin/categories/${encodeURIComponent(category.id)}`,
+        { method: "DELETE" }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete category.");
+      }
+
+      setCategories((current) =>
+        current.filter((item) => item.id !== category.id)
+      );
+      if (editingId === category.id) resetForm();
+      setNotice(`Category "${category.name}" deleted.`);
+      router.refresh();
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Failed to delete category."
+      );
+    } finally {
+      setPendingId(null);
+    }
+  };
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.5fr)]">
+    <div>
+      {(error || notice) && (
+        <p
+          role={error ? "alert" : "status"}
+          className={`mb-6 border px-4 py-3 text-xs leading-5 ${
+            error
+              ? "border-red-500/20 bg-red-500/[0.06] text-red-300"
+              : "border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-300"
+          }`}
+        >
+          {error || notice}
+        </p>
+      )}
+      <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.5fr)]">
       <section className="h-fit border border-white/[0.07] bg-[#030505] p-5 sm:p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
@@ -231,30 +284,14 @@ export default function CategoryManager({
               className="w-full resize-y border border-white/10 bg-white/[0.025] px-3 py-2.5 text-xs text-white/85 outline-none focus:border-amber-600/50"
             />
           </label>
-          <Field
-            label="Image URL (optional)"
+          <ImageUpload
+            label="Category Image (optional)"
             value={form.image}
-            maxLength={2048}
-            placeholder="/categories/components.jpg"
             onChange={(value) => updateField("image", value)}
+            allowUrlEntry={false}
+            uploadScope="categories"
+            previewDescription="Shown on category cards in the storefront."
           />
-
-          {error && (
-            <p
-              role="alert"
-              className="border border-red-500/20 bg-red-500/[0.06] px-3 py-2 text-xs text-red-300"
-            >
-              {error}
-            </p>
-          )}
-          {notice && (
-            <p
-              role="status"
-              className="border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2 text-xs text-emerald-300"
-            >
-              {notice}
-            </p>
-          )}
 
           <div className="flex gap-2 pt-1">
             <button
@@ -335,7 +372,7 @@ export default function CategoryManager({
                     {category.productCount} matching products
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => handleEdit(category)}
@@ -360,12 +397,22 @@ export default function CategoryManager({
                         ? "Deactivate"
                         : "Activate"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteCategory(category)}
+                    disabled={pendingId !== null || isSaving}
+                    className="inline-flex h-8 items-center gap-1.5 border border-red-500/20 px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-red-300 transition hover:border-red-500/45 hover:bg-red-500/[0.06] disabled:opacity-50"
+                  >
+                    <Trash2 size={12} />
+                    {pendingId === category.id ? "Working..." : "Delete"}
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+      </div>
     </div>
   );
 }

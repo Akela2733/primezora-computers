@@ -16,6 +16,9 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   required?: boolean;
+  allowUrlEntry?: boolean;
+  uploadScope?: "products" | "categories" | "storefront";
+  previewDescription?: string;
 }
 
 const MAX_SIZE_MB = 5;
@@ -32,6 +35,9 @@ export default function ImageUpload({
   onChange,
   label = "Product Image",
   required = false,
+  allowUrlEntry = true,
+  uploadScope = "products",
+  previewDescription = "Will be displayed on shop listing, gallery, and cart.",
 }: ImageUploadProps) {
   const [mode, setMode] = useState<"upload" | "url">("upload");
   const [isDragging, setIsDragging] = useState(false);
@@ -65,6 +71,7 @@ export default function ImageUpload({
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("scope", uploadScope);
 
       const response = await fetch("/api/admin/upload", {
         method: "POST",
@@ -137,33 +144,34 @@ export default function ImageUpload({
           {label} {required && <span className="text-amber-600">*</span>}
         </label>
 
-        {/* Mode Toggle */}
-        <div className="flex items-center gap-1 border border-white/[0.08] bg-[#030505] p-0.5">
-          <button
-            type="button"
-            onClick={() => setMode("upload")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
-              mode === "upload"
-                ? "bg-amber-600/15 text-amber-600"
-                : "text-white/40 hover:text-white/70"
-            }`}
-          >
-            <UploadCloud size={12} />
-            Upload File
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("url")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
-              mode === "url"
-                ? "bg-amber-600/15 text-amber-600"
-                : "text-white/40 hover:text-white/70"
-            }`}
-          >
-            <LinkIcon size={12} />
-            Direct URL
-          </button>
-        </div>
+        {allowUrlEntry && (
+          <div className="flex items-center gap-1 border border-white/[0.08] bg-[#030505] p-0.5">
+            <button
+              type="button"
+              onClick={() => setMode("upload")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
+                mode === "upload"
+                  ? "bg-amber-600/15 text-amber-600"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+            >
+              <UploadCloud size={12} />
+              Upload File
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("url")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
+                mode === "url"
+                  ? "bg-amber-600/15 text-amber-600"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+            >
+              <LinkIcon size={12} />
+              Direct URL
+            </button>
+          </div>
+        )}
       </div>
 
       {mode === "upload" ? (
@@ -272,7 +280,7 @@ export default function ImageUpload({
                   {value}
                 </p>
                 <p className="text-[9px] text-white/30">
-                  Will be displayed on shop listing, gallery, and cart.
+                  {previewDescription}
                 </p>
               </div>
             </div>

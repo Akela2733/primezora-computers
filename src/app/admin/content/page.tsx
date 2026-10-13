@@ -29,9 +29,9 @@ export default async function AdminContentPage() {
             Storefront Content
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/45">
-            Edit the database-backed homepage, about, contact, branding and footer
-            content as JSON. Image fields accept site paths or HTTPS URLs; links
-            accept site paths, HTTPS, email and telephone URLs.
+            Manage storefront branding and promotional images with local uploads,
+            and edit all page copy and settings in the JSON editor below. Uploaded
+            images are saved in shared storage and can be selected immediately.
           </p>
           {record && (
             <p className="mt-2 text-[10px] text-white/30">

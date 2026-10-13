@@ -16,6 +16,19 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
+    const rawScope = formData.get("scope");
+    const scope = rawScope === null ? "products" : rawScope;
+
+    if (
+      scope !== "products" &&
+      scope !== "categories" &&
+      scope !== "storefront"
+    ) {
+      return NextResponse.json(
+        { error: "Invalid image upload scope." },
+        { status: 400 }
+      );
+    }
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
@@ -57,7 +70,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const result = await uploadProductImage(buffer, normalizedMime);
+    const result = await uploadProductImage(buffer, normalizedMime, scope);
 
     if (!result.success) {
       return NextResponse.json(

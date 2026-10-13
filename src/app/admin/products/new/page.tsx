@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import ImageUpload from "@/components/admin/ImageUpload";
+import ProductGalleryEditor from "@/components/admin/ProductGalleryEditor";
 
 type ProductForm = {
   name: string;
@@ -21,6 +22,7 @@ type ProductForm = {
   price: string;
   oldPrice: string;
   image: string;
+  images: string[];
   badge: string;
   stockQuantity: string;
   featured: boolean;
@@ -35,6 +37,7 @@ const initialForm: ProductForm = {
   price: "",
   oldPrice: "",
   image: "",
+  images: [],
   badge: "",
   stockQuantity: "0",
   featured: false,
@@ -51,7 +54,7 @@ export default function NewProductPage() {
 
   const updateField = (
     field: keyof ProductForm,
-    value: string | boolean
+    value: string | boolean | string[]
   ) => {
     setForm((current) => ({
       ...current,
@@ -157,6 +160,7 @@ export default function NewProductPage() {
             price,
             oldPrice,
             image: form.image,
+            images: form.images,
             badge: form.badge,
             stockQuantity,
             featured: form.featured,
@@ -421,6 +425,19 @@ export default function NewProductPage() {
                   value={form.image}
                   onChange={(value) => updateField("image", value)}
                   required
+                  allowUrlEntry={false}
+                />
+                <ProductGalleryEditor
+                  images={form.images}
+                  onChange={(images) =>
+                    setForm((current) => ({
+                      ...current,
+                      images:
+                        typeof images === "function"
+                          ? images(current.images)
+                          : images,
+                    }))
+                  }
                 />
               </div>
 

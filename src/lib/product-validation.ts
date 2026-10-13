@@ -11,6 +11,7 @@ export type ProductWriteInput = {
   rating: number;
   reviews: number;
   image: string;
+  images: string[];
   badge: string | null;
   stockQuantity: number;
   featured: boolean;
@@ -24,6 +25,7 @@ export type ProductValidationResult =
   | { success: false; error: string };
 
 const MAX_DATABASE_INT = INPUT_LIMITS.checkout.databaseInteger;
+const MAX_PRODUCT_GALLERY_IMAGES = 20;
 
 function parseNonNegativeInteger(
   value: unknown
@@ -124,6 +126,25 @@ export function validateProductInput(
     typeof body.image === "string"
       ? body.image.trim()
       : "";
+  const images =
+    body.images === undefined
+      ? defaults.images ?? []
+      : body.images;
+  if (
+    !Array.isArray(images) ||
+    images.length > MAX_PRODUCT_GALLERY_IMAGES ||
+    images.some(
+      (galleryImage) =>
+        typeof galleryImage !== "string" ||
+        !galleryImage.trim() ||
+        exceedsTextLimit(galleryImage, INPUT_LIMITS.product.image)
+    )
+  ) {
+    return {
+      success: false,
+      error: `Product gallery must contain no more than ${MAX_PRODUCT_GALLERY_IMAGES} valid image paths.`,
+    };
+  }
 
   if (!name) {
     return { success: false, error: "Product name is required." };
@@ -255,6 +276,7 @@ export function validateProductInput(
       rating,
       reviews,
       image,
+      images: images.map((galleryImage: string) => galleryImage.trim()),
       badge,
       stockQuantity,
       featured,

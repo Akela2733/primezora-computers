@@ -161,10 +161,19 @@ export function validateImageFile(
 /**
  * Generates an unguessable, path-traversal-proof filename.
  */
-export function generateSafeImageFilename(extension: string): string {
+export function generateSafeImageFilename(
+  extension: string,
+  scope: "products" | "categories" | "storefront" = "products"
+): string {
   const timestamp = Date.now();
   const uuid = randomUUID().replace(/[^a-zA-Z0-9]/g, "");
-  return `prod_${timestamp}_${uuid}${extension}`;
+  const prefix =
+    scope === "categories"
+      ? "category"
+      : scope === "storefront"
+        ? "storefront"
+        : "prod";
+  return `${prefix}_${timestamp}_${uuid}${extension}`;
 }
 
 /**
@@ -195,11 +204,12 @@ export function getSupabaseStorageConfig() {
 async function uploadToSupabaseStorage(
   buffer: Buffer,
   filename: string,
-  mimeType: string
+  mimeType: string,
+  scope: "products" | "categories" | "storefront"
 ): Promise<{ url: string; filename: string }> {
   const { url, serviceKey, bucket } = getSupabaseStorageConfig();
 
-  const uploadEndpoint = `${url}/storage/v1/object/${bucket}/products/${filename}`;
+  const uploadEndpoint = `${url}/storage/v1/object/${bucket}/${scope}/${filename}`;
 
   const response = await fetch(uploadEndpoint, {
     method: "POST",
@@ -224,7 +234,7 @@ async function uploadToSupabaseStorage(
     throw new Error(errorMessage);
   }
 
-  const publicUrl = `${url}/storage/v1/object/public/${bucket}/products/${filename}`;
+  const publicUrl = `${url}/storage/v1/object/public/${bucket}/${scope}/${filename}`;
   return {
     url: publicUrl,
     filename,
@@ -236,13 +246,14 @@ async function uploadToSupabaseStorage(
  */
 async function uploadToLocalStorage(
   buffer: Buffer,
-  filename: string
+  filename: string,
+  scope: "products" | "categories" | "storefront"
 ): Promise<{ url: string; filename: string }> {
   const uploadDir = path.join(
     process.cwd(),
     "public",
     "uploads",
-    "products"
+    scope
   );
   await fs.mkdir(uploadDir, { recursive: true });
 
@@ -250,7 +261,7 @@ async function uploadToLocalStorage(
   await fs.writeFile(filePath, buffer);
 
   return {
-    url: `/uploads/products/${filename}`,
+    url: `/uploads/${scope}/${filename}`,
     filename,
   };
 }
@@ -261,7 +272,8 @@ async function uploadToLocalStorage(
  */
 export async function uploadProductImage(
   buffer: Buffer,
-  declaredMimeType: string
+  declaredMimeType: string,
+  scope: "products" | "categories" | "storefront" = "products"
 ): Promise<StorageUploadResult> {
   const validation = validateImageFile(buffer, declaredMimeType);
   if (!validation.valid || !validation.extension || !validation.mimeType) {
@@ -272,7 +284,7 @@ export async function uploadProductImage(
     };
   }
 
-  const safeFilename = generateSafeImageFilename(validation.extension);
+  const safeFilename = generateSafeImageFilename(validation.extension, scope);
   const supabaseConfig = getSupabaseStorageConfig();
 
   if (supabaseConfig.isConfigured) {
@@ -280,7 +292,8 @@ export async function uploadProductImage(
       const uploaded = await uploadToSupabaseStorage(
         buffer,
         safeFilename,
-        validation.mimeType
+        validation.mimeType,
+        scope
       );
       return {
         success: true,
@@ -303,7 +316,7 @@ export async function uploadProductImage(
 
   // Fallback to local storage
   try {
-    const uploaded = await uploadToLocalStorage(buffer, safeFilename);
+    const uploaded = await uploadToLocalStorage(buffer, safeFilename, scope);
     return {
       success: true,
       url: uploaded.url,
