@@ -5,6 +5,19 @@ configureDatabaseTarget();
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  async headers() {
+    return [
+      {
+        source: "/:path*.jfif",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "image/jpeg",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
