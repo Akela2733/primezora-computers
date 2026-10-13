@@ -45,11 +45,11 @@ type OrderResponse = {
 };
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  PENDING: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
-  CONFIRMED: "border-blue-500/20 bg-blue-500/10 text-blue-300",
-  PROCESSING: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
-  SHIPPED: "border-cyan-500/20 bg-cyan-500/10 text-cyan-300",
-  READY_FOR_PICKUP: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+  PENDING: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  CONFIRMED: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  PROCESSING: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  SHIPPED: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  READY_FOR_PICKUP: "border-amber-600/20 bg-amber-600/10 text-amber-600",
   COMPLETED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   CANCELLED: "border-rose-500/20 bg-rose-500/10 text-rose-300",
 };
@@ -100,7 +100,7 @@ export default function CustomerOrderDetailClient({
   }, [orderId, reloadKey]);
 
   return (
-    <main className="container-primezora min-h-[calc(100vh-76px)] py-10 text-white">
+    <main className="container-primezora min-h-[calc(100vh-76px)] py-10 text-white/90">
       <Link
         href="/account/orders"
         className="inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white/70"
@@ -115,24 +115,24 @@ export default function CustomerOrderDetailClient({
           <div className="h-64 animate-pulse rounded-2xl bg-white/[0.04]" />
         </div>
       ) : error ? (
-        <div role="alert" className="mt-8 rounded-2xl border border-rose-500/20 bg-[#080d13] p-10 text-center">
+        <div role="alert" className="mt-8 rounded-2xl border border-rose-500/20 bg-[#030505] p-10 text-center">
           <p className="text-sm text-rose-300">{error}</p>
           <button
             type="button"
             onClick={() => setReloadKey((key) => key + 1)}
-            className="mt-4 rounded-lg border border-white/10 px-4 py-2 text-xs text-white/70 hover:text-white"
+            className="mt-4 rounded-lg border border-white/10 px-4 py-2 text-xs text-white/70 hover:text-white/90"
           >
             Try again
           </button>
         </div>
       ) : order ? (
         <>
-          <header className="mt-7 rounded-2xl border border-white/[0.08] bg-[#080d13] p-6">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-400">
+          <header className="mt-7 rounded-2xl border border-white/[0.08] bg-[#030505] p-6">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Order Details
             </p>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
-              <h1 className="break-all font-mono text-xl font-bold text-white sm:text-2xl">
+              <h1 className="break-all font-mono text-xl font-bold text-white/90 sm:text-2xl">
                 {order.orderNumber}
               </h1>
               <span className={`rounded-full border px-3 py-1.5 font-display text-[9px] font-semibold uppercase tracking-wider ${STATUS_STYLES[order.status]}`}>
@@ -147,7 +147,7 @@ export default function CustomerOrderDetailClient({
 
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="space-y-5">
-              <section className="rounded-2xl border border-white/[0.08] bg-[#080d13] p-5">
+              <section className="rounded-2xl border border-white/[0.08] bg-[#030505] p-5">
                 <SectionTitle icon={<Package size={15} />} title="Products" />
                 <div className="mt-4 divide-y divide-white/[0.05]">
                   {order.items.map((item) => (
@@ -158,7 +158,7 @@ export default function CustomerOrderDetailClient({
                         width={64}
                         height={64}
                         unoptimized
-                        className="h-16 w-16 shrink-0 rounded-lg border border-white/[0.07] bg-black/20 object-contain p-1"
+                        className="h-16 w-16 shrink-0 rounded-lg border border-white/[0.07] bg-[#030505]/20 object-contain p-1"
                       />
                       <div className="min-w-0 flex-1">
                         <h2 className="text-sm font-semibold text-white/85">{item.productName}</h2>
@@ -174,7 +174,7 @@ export default function CustomerOrderDetailClient({
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-white/[0.08] bg-[#080d13] p-5">
+              <section className="rounded-2xl border border-white/[0.08] bg-[#030505] p-5">
                 <SectionTitle icon={<UserRound size={15} />} title="Customer" />
                 <dl className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
                   <Detail label="Name" value={order.customerName} />
@@ -183,7 +183,7 @@ export default function CustomerOrderDetailClient({
                 </dl>
               </section>
 
-              <section className="rounded-2xl border border-white/[0.08] bg-[#080d13] p-5">
+              <section className="rounded-2xl border border-white/[0.08] bg-[#030505] p-5">
                 <SectionTitle icon={<MapPin size={15} />} title="Delivery & Payment" />
                 <dl className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
                   <Detail
@@ -207,17 +207,17 @@ export default function CustomerOrderDetailClient({
                 </dl>
               </section>
 
-              <section className="rounded-2xl border border-white/[0.08] bg-[#080d13] p-5">
+              <section className="rounded-2xl border border-white/[0.08] bg-[#030505] p-5">
                 <SectionTitle icon={<ReceiptText size={15} />} title="Order Timeline" />
                 {order.statusHistory.length ? (
                   <ol className="mt-4 space-y-4">
                     {order.statusHistory.map((entry, index) => (
                       <li key={`${entry.createdAt}-${index}`} className="flex gap-3">
-                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-600" />
                         <div className="flex min-w-0 flex-1 flex-wrap justify-between gap-x-4 gap-y-1">
                           <p className="text-[10px] font-semibold uppercase tracking-wide text-white/75">
                             {getOrderStatusLabel(entry.fromStatus)}{" "}
-                            <span className="text-amber-300">→</span>{" "}
+                            <span className="text-amber-600">→</span>{" "}
                             {getOrderStatusLabel(entry.toStatus)}
                           </p>
                           <time className="text-[9px] text-white/35">
@@ -235,7 +235,7 @@ export default function CustomerOrderDetailClient({
               </section>
             </div>
 
-            <aside className="h-fit rounded-2xl border border-white/[0.08] bg-[#080d13] p-5 lg:sticky lg:top-24">
+            <aside className="h-fit rounded-2xl border border-white/[0.08] bg-[#030505] p-5 lg:sticky lg:top-24">
               <h2 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-white/75">
                 Order Summary
               </h2>
@@ -263,7 +263,7 @@ function SectionTitle({
 }) {
   return (
     <h2 className="flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-[0.14em] text-white/75">
-      <span className="text-amber-400">{icon}</span>
+      <span className="text-amber-600">{icon}</span>
       {title}
     </h2>
   );
@@ -290,7 +290,7 @@ function SummaryRow({
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-[10px] text-white/40">{label}</span>
-      <span className={`text-xs font-bold ${emphasized ? "text-amber-400" : "text-white/75"}`}>
+      <span className={`text-xs font-bold ${emphasized ? "text-amber-600" : "text-white/75"}`}>
         LKR {value.toLocaleString("en-LK")}
       </span>
     </div>

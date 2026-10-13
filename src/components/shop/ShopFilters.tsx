@@ -182,7 +182,7 @@ export function ShopFilters({
                 )
               }
               placeholder="0"
-              className="h-9 w-full border border-white/10 bg-white/[0.02] px-2.5 text-[10px] text-white outline-none transition focus:border-orange-500/50"
+              className="h-9 w-full border border-white/10 bg-white/[0.02] px-2.5 text-[10px] text-white/90 outline-none transition focus:border-amber-600/50"
             />
           </div>
 
@@ -201,7 +201,7 @@ export function ShopFilters({
                 )
               }
               placeholder="500000"
-              className="h-9 w-full border border-white/10 bg-white/[0.02] px-2.5 text-[10px] text-white outline-none transition focus:border-orange-500/50"
+              className="h-9 w-full border border-white/10 bg-white/[0.02] px-2.5 text-[10px] text-white/90 outline-none transition focus:border-amber-600/50"
             />
           </div>
         </div>
@@ -226,7 +226,7 @@ export function ShopFilters({
           <span
             className={`flex h-4 w-4 items-center justify-center border transition ${
               filters.inStock
-                ? "border-orange-500 bg-orange-500 text-black"
+                ? "border-amber-600 bg-amber-600 text-black"
                 : "border-white/15 bg-transparent"
             }`}
           >
@@ -242,7 +242,7 @@ export function ShopFilters({
         <button
           type="button"
           onClick={clearFilters}
-          className="flex h-10 w-full items-center justify-center gap-2 border border-white/10 text-[8px] font-bold uppercase tracking-[0.16em] text-white/40 transition hover:border-orange-500/40 hover:text-orange-400"
+          className="flex h-10 w-full items-center justify-center gap-2 border border-white/10 text-[8px] font-bold uppercase tracking-[0.16em] text-white/40 transition hover:border-amber-600/40 hover:text-amber-600"
         >
           <X size={12} />
           Clear Filters
@@ -259,7 +259,7 @@ export function ShopFilters({
           <div className="flex items-center gap-2">
             <SlidersHorizontal
               size={13}
-              className="text-orange-400"
+              className="text-amber-600"
             />
 
             <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
@@ -295,14 +295,14 @@ export function ShopFilters({
         {mobileOpen && (
           <div className="fixed inset-0 z-[100]">
             <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-[#030505]/70 backdrop-blur-sm"
               onClick={() => setMobileOpen(false)}
             />
 
-            <div className="absolute right-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto border-l border-white/10 bg-[#070a0d] p-5 shadow-2xl">
+            <div className="absolute right-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto border-l border-white/10 bg-[#030505] p-5 shadow-2xl">
               <div className="mb-7 flex items-center justify-between border-b border-white/[0.07] pb-4">
                 <div>
-                  <p className="text-[8px] uppercase tracking-[0.22em] text-orange-400">
+                  <p className="text-[8px] uppercase tracking-[0.22em] text-amber-600">
                     Primezora
                   </p>
 
@@ -316,7 +316,7 @@ export function ShopFilters({
                   onClick={() =>
                     setMobileOpen(false)
                   }
-                  className="flex h-8 w-8 items-center justify-center border border-white/10 text-white/50 hover:text-white"
+                  className="flex h-8 w-8 items-center justify-center border border-white/10 text-white/50 hover:text-white/90"
                 >
                   <X size={15} />
                 </button>
@@ -329,7 +329,7 @@ export function ShopFilters({
                 onClick={() =>
                   setMobileOpen(false)
                 }
-                className="mt-8 h-11 w-full bg-orange-500 text-[8px] font-bold uppercase tracking-[0.16em] text-black"
+                className="mt-8 h-11 w-full bg-amber-600 text-[8px] font-bold uppercase tracking-[0.16em] text-black"
               >
                 Show {resultCount} Products
               </button>
@@ -374,14 +374,14 @@ function FilterButton({
       onClick={onClick}
       className={`flex w-full items-center justify-between px-2 py-2 text-left text-[10px] transition ${
         active
-          ? "bg-orange-500/[0.08] text-orange-400"
+          ? "bg-amber-600/[0.08] text-amber-600"
           : "text-white/40 hover:bg-white/[0.03] hover:text-white/70"
       }`}
     >
       <span>{children}</span>
 
       {active && (
-        <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
       )}
     </button>
   );

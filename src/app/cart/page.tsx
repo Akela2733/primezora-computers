@@ -33,7 +33,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#05090f] text-white">
+      <main className="min-h-screen bg-[#030505] text-white/90">
         <section className="container-primezora flex min-h-[70vh] items-center justify-center py-16">
           <div className="w-full max-w-xl text-center">
 
@@ -42,13 +42,13 @@ export default function CartPage() {
             <div className="mx-auto flex h-20 w-20 items-center justify-center border border-white/[0.08] bg-white/[0.02]">
               <ShoppingBag
                 size={28}
-                className="text-orange-400"
+                className="text-amber-600"
               />
             </div>
 
             {/* Label */}
 
-            <p className="mt-8 text-[8px] font-bold uppercase tracking-[0.3em] text-orange-400">
+            <p className="mt-8 text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
               Your Shopping Cart
             </p>
 
@@ -66,7 +66,7 @@ export default function CartPage() {
 
             <Link
               href="/shop"
-              className="mx-auto mt-8 flex h-12 w-fit items-center gap-3 bg-orange-500 px-7 text-[9px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-orange-400"
+              className="mx-auto mt-8 flex h-12 w-fit items-center gap-3 bg-amber-600 px-7 text-[9px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-amber-600"
             >
               Continue Shopping
 
@@ -86,7 +86,7 @@ export default function CartPage() {
   */
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
 
       {/* =====================================================
           HEADER
@@ -98,7 +98,7 @@ export default function CartPage() {
 
           <div className="flex flex-col gap-3">
 
-            <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-orange-400">
+            <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
               Shopping Cart
             </p>
 
@@ -185,7 +185,7 @@ export default function CartPage() {
                 return (
                   <article
                     key={item.product.id}
-                    className="border border-white/[0.07] bg-white/[0.015] p-3 transition-colors hover:border-orange-500/20 sm:p-4"
+                    className="border border-white/[0.07] bg-white/[0.015] p-3 transition-colors hover:border-amber-600/20 sm:p-4"
                   >
 
                     <div className="grid gap-4 sm:grid-cols-[1fr_120px_120px] sm:items-center sm:gap-5">
@@ -200,10 +200,10 @@ export default function CartPage() {
 
                         <Link
                           href={`/products/${item.product.slug}`}
-                          className="relative h-24 w-24 shrink-0 overflow-hidden border border-white/[0.07] bg-[#080b0d] sm:h-28 sm:w-28"
+                          className="relative h-24 w-24 shrink-0 overflow-hidden border border-white/[0.07] bg-[#030505] sm:h-28 sm:w-28"
                         >
 
-                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.1),transparent_60%)]" />
+                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,119,6,0.1),transparent_60%)]" />
 
                           <Image
                             src={item.product.image}
@@ -220,13 +220,13 @@ export default function CartPage() {
 
                         <div className="flex min-w-0 flex-1 flex-col justify-center">
 
-                          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-orange-400">
+                          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-amber-600">
                             {item.product.brand}
                           </p>
 
                           <Link
                             href={`/products/${item.product.slug}`}
-                            className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-white/85 transition-colors hover:text-orange-400 sm:text-sm"
+                            className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-white/85 transition-colors hover:text-amber-600 sm:text-sm"
                           >
                             {item.product.name}
                           </Link>
@@ -237,7 +237,7 @@ export default function CartPage() {
 
                           <div className="mt-2 flex items-center gap-2 sm:hidden">
 
-                            <span className="text-xs font-bold text-orange-400">
+                            <span className="text-xs font-bold text-amber-600">
                               LKR{" "}
                               {item.product.price.toLocaleString(
                                 "en-LK"
@@ -286,7 +286,7 @@ export default function CartPage() {
                                 item.quantity - 1
                               )
                             }
-                            className="flex w-9 items-center justify-center text-white/35 transition-colors hover:text-orange-400"
+                            className="flex w-9 items-center justify-center text-white/35 transition-colors hover:text-amber-600"
                           >
                             <Minus size={12} />
                           </button>
@@ -304,7 +304,7 @@ export default function CartPage() {
                                 item.quantity + 1
                               )
                             }
-                            className="flex w-9 items-center justify-center text-white/35 transition-colors hover:text-orange-400"
+                            className="flex w-9 items-center justify-center text-white/35 transition-colors hover:text-amber-600"
                           >
                             <Plus size={12} />
                           </button>
@@ -320,7 +320,7 @@ export default function CartPage() {
 
                       <div className="hidden text-right sm:block">
 
-                        <span className="text-sm font-bold text-orange-400">
+                        <span className="text-sm font-bold text-amber-600">
                           LKR{" "}
                           {productTotal.toLocaleString(
                             "en-LK"
@@ -342,7 +342,7 @@ export default function CartPage() {
 
             <Link
               href="/shop"
-              className="mt-6 flex w-fit items-center gap-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/35 transition-colors hover:text-orange-400"
+              className="mt-6 flex w-fit items-center gap-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/35 transition-colors hover:text-amber-600"
             >
               <ArrowLeft size={12} />
 
@@ -358,13 +358,13 @@ export default function CartPage() {
 
           <aside className="lg:sticky lg:top-24 lg:h-fit">
 
-            <div className="border border-white/[0.08] bg-[#070c12]">
+            <div className="border border-white/[0.08] bg-[#030505]">
 
               {/* Summary header */}
 
               <div className="border-b border-white/[0.07] p-5 sm:p-6">
 
-                <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-orange-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-amber-600">
                   Order Summary
                 </p>
 
@@ -403,7 +403,7 @@ export default function CartPage() {
                       Delivery
                     </span>
 
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-orange-400">
+                    <span className="text-[9px] font-semibold uppercase tracking-wider text-amber-600">
                       Calculated at checkout
                     </span>
 
@@ -431,7 +431,7 @@ export default function CartPage() {
 
                   </div>
 
-                  <span className="text-2xl font-bold tracking-tight text-orange-400">
+                  <span className="text-2xl font-bold tracking-tight text-amber-600">
                     LKR{" "}
                     {subtotal.toLocaleString(
                       "en-LK"
@@ -445,7 +445,7 @@ export default function CartPage() {
 
                 <Link
                   href="/checkout"
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 bg-orange-500 text-[9px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-orange-400"
+                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 bg-amber-600 text-[9px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-amber-600"
                 >
                   Proceed to Checkout
 
@@ -459,7 +459,7 @@ export default function CartPage() {
 
                   <Truck
                     size={15}
-                    className="mt-0.5 shrink-0 text-orange-400"
+                    className="mt-0.5 shrink-0 text-amber-600"
                   />
 
                   <div>

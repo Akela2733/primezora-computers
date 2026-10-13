@@ -81,7 +81,7 @@ function FieldGroup({
             className="text-[11px] font-semibold uppercase tracking-wider text-white/40"
           >
             {field.label}
-            {field.required && <span className="ml-1 text-amber-400">*</span>}
+            {field.required && <span className="ml-1 text-amber-600">*</span>}
           </label>
           <input
             id={`profile-${field.key}`}
@@ -93,9 +93,9 @@ function FieldGroup({
             disabled={disabled}
             className="
               w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5
-              text-sm text-white placeholder-white/20
+              text-sm text-white/90 placeholder-white/20
               transition
-              focus:border-amber-500/50 focus:bg-white/[0.06] focus:outline-none focus:ring-1 focus:ring-amber-500/30
+              focus:border-amber-600/50 focus:bg-white/[0.06] focus:outline-none focus:ring-1 focus:ring-amber-600/30
               disabled:cursor-not-allowed disabled:opacity-50
             "
           />
@@ -186,10 +186,10 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
       {/* ---- Personal Info ---- */}
       <section>
         <div className="mb-5 flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-600/20 bg-amber-600/10 text-amber-600">
             <User size={15} />
           </div>
-          <h2 className="font-display text-sm font-semibold text-white">Personal Information</h2>
+          <h2 className="font-display text-sm font-semibold text-white/90">Personal Information</h2>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FieldGroup fields={PERSONAL_FIELDS.slice(0, 2)} values={form} onChange={handleChange} disabled={saving} />
@@ -217,10 +217,10 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
       {/* ---- Address ---- */}
       <section>
         <div className="mb-5 flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-600/20 bg-amber-600/10 text-amber-600">
             <MapPin size={15} />
           </div>
-          <h2 className="font-display text-sm font-semibold text-white">Shipping Address</h2>
+          <h2 className="font-display text-sm font-semibold text-white/90">Shipping Address</h2>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -257,11 +257,11 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
           type="submit"
           disabled={saving}
           className="
-            inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-2.5
+            inline-flex items-center gap-2 rounded-xl bg-amber-600 px-6 py-2.5
             font-display text-sm font-semibold text-black
-            shadow-[0_0_20px_rgba(245,158,11,0.25)]
+            shadow-[0_0_20px_rgba(217,119,6,0.25)]
             transition
-            hover:bg-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.35)]
+            hover:bg-amber-600 hover:shadow-[0_0_30px_rgba(217,119,6,0.35)]
             disabled:cursor-not-allowed disabled:opacity-60
           "
         >

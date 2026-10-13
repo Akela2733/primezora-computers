@@ -90,18 +90,18 @@ export default function CustomerDetailClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+    <main className="min-h-screen bg-[#030505] text-white/90">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
           <Link
             href="/admin/customers"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Customers
           </Link>
           <div className="mt-7">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Customer Profile
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold uppercase">
@@ -118,7 +118,7 @@ export default function CustomerDetailClient({
 
       <section className="container-primezora py-8">
         {error ? (
-          <div role="alert" className="border border-red-500/20 bg-[#080d13] p-8 text-center">
+          <div role="alert" className="border border-red-500/20 bg-[#030505] p-8 text-center">
             <p className="text-sm text-red-300">{error}</p>
             <button
               type="button"
@@ -126,7 +126,7 @@ export default function CustomerDetailClient({
                 setIsLoading(true);
                 setReloadKey((current) => current + 1);
               }}
-              className="mt-4 border border-white/10 px-4 py-2 text-[8px] font-bold uppercase tracking-[0.12em] text-white/50 hover:text-white"
+              className="mt-4 border border-white/10 px-4 py-2 text-[8px] font-bold uppercase tracking-[0.12em] text-white/50 hover:text-white/90"
             >
               Try Again
             </button>
@@ -139,9 +139,9 @@ export default function CustomerDetailClient({
               <Metric label="Customer Since" value={new Date(data.customer.createdAt).toLocaleDateString("en-LK")} />
             </div>
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="flex items-center gap-3 border-b border-white/[0.06] p-5">
-                <UserRound size={16} className="text-orange-400" />
+                <UserRound size={16} className="text-amber-600" />
                 <h2 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-white/75">
                   Profile Information
                 </h2>
@@ -155,10 +155,10 @@ export default function CustomerDetailClient({
               </dl>
             </section>
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] p-5">
                 <div className="flex items-center gap-3">
-                  <ShoppingBag size={16} className="text-orange-400" />
+                  <ShoppingBag size={16} className="text-amber-600" />
                   <h2 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-white/75">
                     Order History
                   </h2>
@@ -196,7 +196,7 @@ export default function CustomerDetailClient({
                             <td className="px-4 py-4">
                               <Link
                                 href={`/admin/orders/${order.id}`}
-                                className="font-mono text-[9px] font-bold text-orange-300 hover:text-orange-200"
+                                className="font-mono text-[9px] font-bold text-amber-600 hover:text-amber-600"
                               >
                                 {order.orderNumber}
                               </Link>
@@ -259,9 +259,9 @@ export default function CustomerDetailClient({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-white/[0.07] bg-[#080d13] p-4">
+    <div className="border border-white/[0.07] bg-[#030505] p-4">
       <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-white/35">{label}</p>
-      <p className="mt-4 font-display text-xl font-bold text-orange-300">{value}</p>
+      <p className="mt-4 font-display text-xl font-bold text-amber-600">{value}</p>
     </div>
   );
 }
@@ -285,16 +285,16 @@ function Heading({ children }: { children: React.ReactNode }) {
 
 function CustomerDetailLoading() {
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       <section className="container-primezora py-8">
         <div className="h-3 w-24 animate-pulse bg-white/[0.06]" />
         <div className="mt-8 h-9 w-52 animate-pulse bg-white/[0.06]" />
         <div className="mt-8 grid gap-3 md:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="h-24 animate-pulse border border-white/[0.07] bg-[#080d13]" />
+            <div key={index} className="h-24 animate-pulse border border-white/[0.07] bg-[#030505]" />
           ))}
         </div>
-        <div className="mt-5 h-72 animate-pulse border border-white/[0.07] bg-[#080d13]" />
+        <div className="mt-5 h-72 animate-pulse border border-white/[0.07] bg-[#030505]" />
       </section>
     </main>
   );

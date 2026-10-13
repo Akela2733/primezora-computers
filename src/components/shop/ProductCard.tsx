@@ -30,12 +30,12 @@ export function ProductCard({
 
   const badgeStyle =
     product.badge === "NEW"
-      ? "border-emerald-300/30 bg-emerald-500/80 text-[#041109]"
+      ? "border-emerald-300/30 bg-emerald-500/80 text-[#030505]"
       : product.badge === "BEST SELLER"
-        ? "border-sky-300/30 bg-sky-400/80 text-[#041016]"
+        ? "border-amber-600/30 bg-amber-600/80 text-[#030505]"
         : product.badge === "SALE"
-          ? "border-red-300/30 bg-red-600/85 text-white"
-          : "border-amber-300/30 bg-amber-500/85 text-[#160c02]";
+          ? "border-red-300/30 bg-red-600/85 text-white/90"
+          : "border-amber-600/30 bg-amber-600/85 text-[#030505]";
 
   const handleWishlist = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -48,11 +48,11 @@ export function ProductCard({
 
   return (
     <article
-      className="group relative flex h-full min-w-0 flex-col overflow-hidden border border-white/10 bg-[#060809] transition-colors duration-300 hover:border-amber-500/40"
+      className="group relative flex h-full min-w-0 flex-col overflow-hidden border border-white/10 bg-[#030505] transition-colors duration-300 hover:border-amber-600/40"
     >
       {/* Product Image */}
-      <div className="relative aspect-[1.03] overflow-hidden border-b border-white/[0.06] bg-[#080b0c]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(216,126,29,0.12),transparent_58%),linear-gradient(145deg,#111719,#070909_65%)]" />
+      <div className="relative aspect-[1.03] overflow-hidden border-b border-white/[0.06] bg-[#030505]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(217,119,6,0.12),transparent_58%),linear-gradient(145deg,#030505,#070909_65%)]" />
 
         <Link
           href={`/products/${product.slug}`}
@@ -71,7 +71,7 @@ export function ProductCard({
 
         {/* Badge */}
         {!isPurchasable ? (
-          <span className="absolute left-3 top-3 z-10 rounded-full border border-white/10 bg-black/80 px-2 py-1 font-display text-[7px] font-bold uppercase tracking-[0.08em] text-white/60">
+          <span className="absolute left-3 top-3 z-10 rounded-full border border-white/10 bg-[#030505]/80 px-2 py-1 font-display text-[7px] font-bold uppercase tracking-[0.08em] text-white/60">
             OUT OF STOCK
           </span>
         ) : product.badge ? (
@@ -94,15 +94,15 @@ export function ProductCard({
           onClick={handleWishlist}
           className={`absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border backdrop-blur transition-all duration-200 ${
             wishlisted
-              ? "border-orange-500/40 bg-orange-500/15 text-orange-400"
-              : "border-white/15 bg-black/40 text-white/65 hover:border-orange-400/40 hover:text-orange-300"
+              ? "border-amber-600/40 bg-amber-600/15 text-amber-600"
+              : "border-white/15 bg-[#030505]/40 text-white/65 hover:border-amber-600/40 hover:text-amber-600"
           }`}
         >
           <Heart
             size={14}
             className={
               wishlisted
-                ? "fill-orange-400 text-orange-400"
+                ? "fill-amber-600 text-amber-600"
                 : ""
             }
           />
@@ -113,7 +113,7 @@ export function ProductCard({
       <div className="flex flex-1 flex-col p-3 sm:p-3.5">
         <Link
           href={`/products/${product.slug}`}
-          className="min-h-10 text-[11px] font-medium leading-[1.4] text-white/85 transition hover:text-amber-300 sm:text-xs"
+          className="min-h-10 text-[11px] font-medium leading-[1.4] text-white/85 transition hover:text-amber-600 sm:text-xs"
         >
           {product.name}
         </Link>
@@ -131,7 +131,7 @@ export function ProductCard({
                     Math.round(
                       product.rating
                     )
-                      ? "fill-amber-500 text-amber-500"
+                      ? "fill-amber-600 text-amber-600"
                       : "text-white/15"
                   }
                 />
@@ -146,7 +146,7 @@ export function ProductCard({
 
         {/* Price */}
         <div className="mt-auto flex items-baseline gap-2 pt-2">
-          <span className="font-display text-xs font-bold text-[#e9932e] sm:text-sm">
+          <span className="font-display text-xs font-bold text-amber-600 sm:text-sm">
             LKR{" "}
             {product.price.toLocaleString(
               "en-LK"

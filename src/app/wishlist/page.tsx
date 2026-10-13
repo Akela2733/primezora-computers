@@ -35,23 +35,23 @@ export default function WishlistPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-white/[0.07]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.10),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(217,119,6,0.10),transparent_45%)]" />
 
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-amber-600/60 to-transparent" />
 
         <div className="container-primezora relative py-14 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-orange-500/20 bg-orange-500/[0.05]">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-amber-600/20 bg-amber-600/[0.05]">
               <Heart
                 size={20}
-                className="text-orange-400"
+                className="text-amber-600"
               />
             </div>
 
-            <p className="mt-5 text-[8px] font-bold uppercase tracking-[0.3em] text-orange-400">
+            <p className="mt-5 text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
               Primezora Technologies
             </p>
 
@@ -70,15 +70,15 @@ export default function WishlistPage() {
       {/* Empty State */}
       {items.length === 0 && (
         <section className="container-primezora py-16 sm:py-24">
-          <div className="mx-auto max-w-xl border border-white/[0.08] bg-[#080d13] px-6 py-14 text-center sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-orange-500/20 bg-orange-500/[0.05]">
+          <div className="mx-auto max-w-xl border border-white/[0.08] bg-[#030505] px-6 py-14 text-center sm:px-10">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-amber-600/20 bg-amber-600/[0.05]">
               <Heart
                 size={24}
-                className="text-orange-400/70"
+                className="text-amber-600/70"
               />
             </div>
 
-            <p className="mt-7 text-[8px] font-bold uppercase tracking-[0.25em] text-orange-400">
+            <p className="mt-7 text-[8px] font-bold uppercase tracking-[0.25em] text-amber-600">
               Your Wishlist
             </p>
 
@@ -93,7 +93,7 @@ export default function WishlistPage() {
 
             <Link
               href="/shop"
-              className="mt-7 inline-flex h-11 items-center gap-2 bg-orange-500 px-6 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-orange-400"
+              className="mt-7 inline-flex h-11 items-center gap-2 bg-amber-600 px-6 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
             >
               Explore Products
               <ShoppingCart size={13} />
@@ -145,10 +145,10 @@ export default function WishlistPage() {
           </div>
 
           {/* Saved product actions */}
-          <div className="mt-10 border border-white/[0.08] bg-[#080d13] p-5 sm:p-6">
+          <div className="mt-10 border border-white/[0.08] bg-[#030505] p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-orange-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-amber-600">
                   Ready to Buy?
                 </p>
 
@@ -173,7 +173,7 @@ export default function WishlistPage() {
                           product
                         )
                       }
-                      className="inline-flex h-9 items-center gap-2 border border-white/[0.1] px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/60 transition hover:border-orange-500/30 hover:text-orange-400"
+                      className="inline-flex h-9 items-center gap-2 border border-white/[0.1] px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/60 transition hover:border-amber-600/30 hover:text-amber-600"
                     >
                       <ShoppingCart
                         size={11}
@@ -186,7 +186,7 @@ export default function WishlistPage() {
                 <button
                   type="button"
                   onClick={handleAddAllToCart}
-                  className="inline-flex h-10 items-center justify-center gap-2 bg-orange-500 px-5 text-[8px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-orange-400"
+                  className="inline-flex h-10 items-center justify-center gap-2 bg-amber-600 px-5 text-[8px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-600"
                 >
                   <ShoppingCart size={12} />
                   Add All to Cart
@@ -199,7 +199,7 @@ export default function WishlistPage() {
           <div className="mt-8">
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 text-[8px] font-bold uppercase tracking-[0.15em] text-white/30 transition hover:text-orange-400"
+              className="inline-flex items-center gap-2 text-[8px] font-bold uppercase tracking-[0.15em] text-white/30 transition hover:text-amber-600"
             >
               <ArrowLeft size={12} />
               Continue Shopping

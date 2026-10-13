@@ -134,17 +134,17 @@ export default function ImageUpload({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <label className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">
-          {label} {required && <span className="text-orange-400">*</span>}
+          {label} {required && <span className="text-amber-600">*</span>}
         </label>
 
         {/* Mode Toggle */}
-        <div className="flex items-center gap-1 border border-white/[0.08] bg-[#05090f] p-0.5">
+        <div className="flex items-center gap-1 border border-white/[0.08] bg-[#030505] p-0.5">
           <button
             type="button"
             onClick={() => setMode("upload")}
             className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
               mode === "upload"
-                ? "bg-orange-500/15 text-orange-400"
+                ? "bg-amber-600/15 text-amber-600"
                 : "text-white/40 hover:text-white/70"
             }`}
           >
@@ -156,7 +156,7 @@ export default function ImageUpload({
             onClick={() => setMode("url")}
             className={`flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition ${
               mode === "url"
-                ? "bg-orange-500/15 text-orange-400"
+                ? "bg-amber-600/15 text-amber-600"
                 : "text-white/40 hover:text-white/70"
             }`}
           >
@@ -176,8 +176,8 @@ export default function ImageUpload({
             onClick={() => !isUploading && fileInputRef.current?.click()}
             className={`relative flex min-h-[160px] cursor-pointer flex-col items-center justify-center border-2 border-dashed p-6 text-center transition ${
               isDragging
-                ? "border-orange-500 bg-orange-500/10"
-                : "border-white/[0.1] bg-[#05090f] hover:border-white/20"
+                ? "border-amber-600 bg-amber-600/10"
+                : "border-white/[0.1] bg-[#030505] hover:border-white/20"
             } ${isUploading ? "pointer-events-none opacity-60" : ""}`}
           >
             <input
@@ -190,7 +190,7 @@ export default function ImageUpload({
 
             {isUploading ? (
               <div className="flex flex-col items-center gap-2">
-                <Loader2 size={24} className="animate-spin text-orange-400" />
+                <Loader2 size={24} className="animate-spin text-amber-600" />
                 <p className="font-display text-xs font-semibold text-white/75">
                   Uploading and processing image...
                 </p>
@@ -200,12 +200,12 @@ export default function ImageUpload({
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center border border-white/[0.08] bg-white/[0.03] text-orange-400">
+                <div className="flex h-10 w-10 items-center justify-center border border-white/[0.08] bg-white/[0.03] text-amber-600">
                   <UploadCloud size={20} />
                 </div>
                 <p className="font-display text-xs font-semibold uppercase tracking-wider text-white/80">
                   Drag & Drop image here, or{" "}
-                  <span className="text-orange-400 underline">browse</span>
+                  <span className="text-amber-600 underline">browse</span>
                 </p>
                 <p className="text-[10px] text-white/35">
                   Supports JPEG, PNG, WebP, AVIF, GIF (Max {MAX_SIZE_MB}MB)
@@ -221,7 +221,7 @@ export default function ImageUpload({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="https://... or /products/item.jpg"
-            className="w-full border border-white/[0.08] bg-[#05090f] px-4 py-3 text-xs text-white placeholder:text-white/20 focus:border-orange-500 focus:outline-none"
+            className="w-full border border-white/[0.08] bg-[#030505] px-4 py-3 text-xs text-white/90 placeholder:text-white/20 focus:border-amber-600 focus:outline-none"
           />
           <p className="text-[9px] text-white/30">
             Paste a public image URL or a local path within `/products/`.
@@ -246,10 +246,10 @@ export default function ImageUpload({
 
       {/* Image Preview & Details */}
       {value && (
-        <div className="border border-white/[0.07] bg-[#05090f] p-4">
+        <div className="border border-white/[0.07] bg-[#030505] p-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08] bg-black/40">
+              <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-white/[0.08] bg-[#030505]/40">
                 <img
                   src={value}
                   alt="Product preview"
@@ -265,7 +265,7 @@ export default function ImageUpload({
               </div>
 
               <div className="min-w-0 space-y-1">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-orange-400">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-amber-600">
                   Active Image
                 </p>
                 <p className="break-all font-mono text-[10px] text-white/60">

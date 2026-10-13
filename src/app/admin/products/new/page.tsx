@@ -188,23 +188,23 @@ export default function NewProductPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
 
       {/* Header */}
 
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
 
           <Link
             href="/admin/products"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Products
           </Link>
 
           <div className="mt-7">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Product Management
             </p>
 
@@ -235,18 +235,18 @@ export default function NewProductPage() {
 
             {/* Basic information */}
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
 
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                     <Package size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                       Product
                     </p>
 
@@ -315,7 +315,7 @@ export default function NewProductPage() {
                       }
                       rows={6}
                       placeholder="Describe this product..."
-                      className="w-full resize-none border border-white/[0.08] bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-white/15 focus:border-orange-500/50"
+                      className="w-full resize-none border border-white/[0.08] bg-[#030505]/20 px-4 py-3 text-sm text-white/90 outline-none placeholder:text-white/15 focus:border-amber-600/50"
                     />
                   </label>
                 </div>
@@ -326,11 +326,11 @@ export default function NewProductPage() {
 
             {/* Pricing */}
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
 
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
 
-                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                   Pricing
                 </p>
 
@@ -392,18 +392,18 @@ export default function NewProductPage() {
 
             {/* Image */}
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
 
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                     <ImageIcon size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                       Media
                     </p>
 
@@ -432,11 +432,11 @@ export default function NewProductPage() {
 
           <aside className="lg:sticky lg:top-24 lg:h-fit">
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
 
               <div className="border-b border-white/[0.06] p-5">
 
-                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                   Settings
                 </p>
 
@@ -454,7 +454,7 @@ export default function NewProductPage() {
 
                     <Star
                       size={16}
-                      className="text-orange-400"
+                      className="text-amber-600"
                     />
 
                     <div>
@@ -481,7 +481,7 @@ export default function NewProductPage() {
                         event.target.checked
                       )
                     }
-                    className="h-4 w-4 accent-orange-500"
+                    className="h-4 w-4 accent-amber-600"
                   />
 
                 </label>
@@ -495,7 +495,7 @@ export default function NewProductPage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex h-13 w-full items-center justify-center gap-2 bg-orange-500 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-13 w-full items-center justify-center gap-2 bg-amber-600 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
 
                   <Save size={15} />
@@ -508,7 +508,7 @@ export default function NewProductPage() {
 
                 <Link
                   href="/admin/products"
-                  className="flex h-12 items-center justify-center border border-white/[0.08] text-[9px] font-bold uppercase tracking-[0.16em] text-white/40 transition hover:border-white/20 hover:text-white"
+                  className="flex h-12 items-center justify-center border border-white/[0.08] text-[9px] font-bold uppercase tracking-[0.16em] text-white/40 transition hover:border-white/20 hover:text-white/90"
                 >
                   Cancel
                 </Link>
@@ -550,7 +550,7 @@ function Field({
         {label}
 
         {required && (
-          <span className="ml-1 text-orange-400">
+          <span className="ml-1 text-amber-600">
             *
           </span>
         )}
@@ -564,7 +564,7 @@ function Field({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="h-12 w-full border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none transition placeholder:text-white/15 focus:border-orange-500/50"
+        className="h-12 w-full border border-white/[0.08] bg-[#030505]/20 px-4 text-sm text-white/90 outline-none transition placeholder:text-white/15 focus:border-amber-600/50"
       />
 
     </label>

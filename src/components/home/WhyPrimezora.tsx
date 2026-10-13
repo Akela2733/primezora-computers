@@ -33,7 +33,7 @@ const reasons = [
 
 export function WhyPrimezora() {
   return (
-    <section className="relative isolate overflow-hidden border-y border-amber-500/15 bg-[#030505] text-white">
+    <section className="relative isolate overflow-hidden border-y border-amber-600/15 bg-[#030505] text-white/90">
       <Image
         src="/banners/why%20primezora.jfif"
         alt="Gamer enjoying a PC setup"
@@ -46,7 +46,7 @@ export function WhyPrimezora() {
 
       <div className="container-primezora relative grid min-h-68 gap-6 py-8 sm:py-10 lg:grid-cols-[0.95fr_1.1fr_1.35fr] lg:items-stretch lg:gap-5 lg:py-7">
         <div className="flex flex-col items-start justify-center border-b border-white/10 pb-6 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
-          <p className="mb-3 font-display text-[8px] font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+          <p className="mb-3 font-display text-[8px] font-semibold uppercase tracking-[0.24em] text-amber-600/80">
             Why Primezora
           </p>
           <h2 className="font-display text-[27px] font-bold uppercase leading-[1.05] sm:text-[32px]">
@@ -60,10 +60,10 @@ export function WhyPrimezora() {
           </p>
           <Link
             href="/about"
-            className="group mt-4 inline-flex h-9 items-center gap-3 border border-amber-500/60 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-amber-500 hover:text-[#100a03]"
+            className="group mt-4 inline-flex h-9 items-center gap-3 border border-amber-600/60 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white/90 transition hover:bg-amber-600 hover:text-[#030505]"
           >
             Learn More
-            <ArrowRight size={12} className="text-amber-400 transition-transform group-hover:translate-x-1 group-hover:text-[#100a03]" />
+            <ArrowRight size={12} className="text-amber-600 transition-transform group-hover:translate-x-1 group-hover:text-[#030505]" />
           </Link>
         </div>
 
@@ -75,7 +75,7 @@ export function WhyPrimezora() {
                 index % 2 === 1 ? "border-l border-white/10" : ""
               } ${index > 1 ? "border-t border-white/10" : ""}`}
             >
-              <Icon size={23} strokeWidth={1.7} className="mb-1 text-[#e88720]" />
+              <Icon size={23} strokeWidth={1.7} className="mb-1 text-amber-600" />
               <h3 className="font-display text-[9px] font-semibold leading-[1.35] text-white/90 sm:text-[10px]">
                 {title}
               </h3>

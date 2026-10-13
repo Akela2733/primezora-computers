@@ -131,7 +131,7 @@ export default function ProductActions({
 
       <Link
         href={`/admin/products/${productId}/edit`}
-        className="inline-flex h-8 items-center justify-center border border-white/[0.08] px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/45 transition hover:border-orange-500/40 hover:text-orange-400"
+        className="inline-flex h-8 items-center justify-center border border-white/[0.08] px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/45 transition hover:border-amber-600/40 hover:text-amber-600"
       >
         Edit
       </Link>
@@ -142,7 +142,7 @@ export default function ProductActions({
         disabled={pendingAction !== null}
         className={`inline-flex h-8 items-center justify-center border px-3 text-[8px] font-bold uppercase tracking-[0.12em] transition ${
           inStock
-            ? "border-yellow-500/20 text-yellow-400 hover:border-yellow-500/50"
+            ? "border-amber-600/20 text-amber-600 hover:border-amber-600/50"
             : "border-green-500/20 text-green-400 hover:border-green-500/50"
         }`}
       >

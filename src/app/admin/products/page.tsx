@@ -97,16 +97,16 @@ export default async function AdminProductsPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
 
       {/* Header */}
 
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
 
           <Link
             href="/admin"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Admin Dashboard
@@ -115,7 +115,7 @@ export default async function AdminProductsPage({
           <div className="mt-7 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
 
             <div>
-              <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+              <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
                 Store Management
               </p>
 
@@ -130,7 +130,7 @@ export default async function AdminProductsPage({
 
             <Link
               href="/admin/products/new"
-              className="inline-flex h-12 items-center justify-center gap-2 bg-orange-500 px-6 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-orange-400"
+              className="inline-flex h-12 items-center justify-center gap-2 bg-amber-600 px-6 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
             >
               <Plus size={15} />
               Add Product
@@ -166,7 +166,7 @@ export default async function AdminProductsPage({
 
       <section className="container-primezora py-10">
 
-        <div className="overflow-hidden border border-white/[0.07] bg-[#080d13]">
+        <div className="overflow-hidden border border-white/[0.07] bg-[#030505]">
 
           {/* Toolbar */}
 
@@ -175,7 +175,7 @@ export default async function AdminProductsPage({
             <form
               method="get"
               action="/admin/products"
-              className="flex h-11 max-w-md flex-1 items-center gap-3 border border-white/[0.07] bg-black/20 px-4"
+              className="flex h-11 max-w-md flex-1 items-center gap-3 border border-white/[0.07] bg-[#030505]/20 px-4"
             >
               <Search
                 size={15}
@@ -187,12 +187,12 @@ export default async function AdminProductsPage({
                 defaultValue={searchQuery}
                 placeholder="Search products..."
                 aria-label="Search products"
-                className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/20"
+                className="w-full bg-transparent text-xs text-white/90 outline-none placeholder:text-white/20"
               />
 
               <button
                 type="submit"
-                className="text-[8px] font-bold uppercase tracking-[0.12em] text-orange-400"
+                className="text-[8px] font-bold uppercase tracking-[0.12em] text-amber-600"
               >
                 Search
               </button>
@@ -252,7 +252,7 @@ export default async function AdminProductsPage({
 
                       <div className="flex items-center gap-4">
 
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-white/[0.07] bg-black/20">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-white/[0.07] bg-[#030505]/20">
 
                           <img
                             src={product.image}
@@ -284,7 +284,7 @@ export default async function AdminProductsPage({
 
                     <td className="px-5 py-4">
 
-                      <p className="text-xs font-bold text-orange-400">
+                      <p className="text-xs font-bold text-amber-600">
                         LKR{" "}
                         {product.price.toLocaleString(
                           "en-LK"
@@ -325,7 +325,7 @@ export default async function AdminProductsPage({
                             product.inStock && product.stockQuantity > 0
                               ? "bg-emerald-400"
                               : product.inStock
-                                ? "bg-yellow-400"
+                                ? "bg-amber-600"
                                 : "bg-red-400"
                           }`}
                         />
@@ -371,7 +371,7 @@ export default async function AdminProductsPage({
 
                 <div className="flex gap-4">
 
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/[0.07] bg-black/20">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/[0.07] bg-[#030505]/20">
 
                     <img
                       src={product.image}
@@ -391,7 +391,7 @@ export default async function AdminProductsPage({
                       {product.brand}
                     </p>
 
-                    <p className="mt-3 text-xs font-bold text-orange-400">
+                    <p className="mt-3 text-xs font-bold text-amber-600">
                       LKR{" "}
                       {product.price.toLocaleString(
                         "en-LK"
@@ -422,7 +422,7 @@ export default async function AdminProductsPage({
                   </div>
 
                   {product.featured && (
-                    <div className="flex items-center gap-1 text-[9px] uppercase text-orange-400">
+                    <div className="flex items-center gap-1 text-[9px] uppercase text-amber-600">
                       <Star size={11} />
                       Featured
                     </div>
@@ -476,7 +476,7 @@ export default async function AdminProductsPage({
                 <button
                   type="submit"
                   disabled={pagination.page <= 1}
-                  className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white/55 transition enabled:hover:text-white disabled:cursor-not-allowed disabled:text-white/20"
+                  className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white/55 transition enabled:hover:text-white/90 disabled:cursor-not-allowed disabled:text-white/20"
                 >
                   <ChevronLeft size={14} /> Previous
                 </button>
@@ -504,7 +504,7 @@ export default async function AdminProductsPage({
                 <button
                   type="submit"
                   disabled={pagination.page >= pagination.totalPages}
-                  className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white/55 transition enabled:hover:text-white disabled:cursor-not-allowed disabled:text-white/20"
+                  className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white/55 transition enabled:hover:text-white/90 disabled:cursor-not-allowed disabled:text-white/20"
                 >
                   Next <ChevronRight size={14} />
                 </button>

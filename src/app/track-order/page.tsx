@@ -97,10 +97,10 @@ export default function TrackOrderPage() {
   const cancelled = order?.status === "CANCELLED";
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       <section className="border-b border-white/[0.07]">
         <div className="container-primezora py-14 text-center sm:py-20">
-          <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-orange-400">
+          <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
             Primezora Technologies
           </p>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.03em] sm:text-5xl">
@@ -115,7 +115,7 @@ export default function TrackOrderPage() {
       <section className="container-primezora py-10 sm:py-14">
         <form
           onSubmit={handleSubmit}
-          className="mx-auto max-w-2xl border border-white/[0.08] bg-[#080d13] p-4 sm:p-6"
+          className="mx-auto max-w-2xl border border-white/[0.08] bg-[#030505] p-4 sm:p-6"
         >
           <label
             htmlFor="order-number"
@@ -132,7 +132,7 @@ export default function TrackOrderPage() {
             value={orderNumber}
             onChange={(event) => setOrderNumber(event.target.value)}
             placeholder="e.g. PRZ-..."
-            className="h-12 w-full border border-white/[0.08] bg-black/30 px-4 text-xs uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/25 focus:border-orange-500/40"
+            className="h-12 w-full border border-white/[0.08] bg-[#030505]/30 px-4 text-xs uppercase tracking-[0.08em] text-white/90 outline-none placeholder:text-white/25 focus:border-amber-600/40"
           />
 
           <label
@@ -150,13 +150,13 @@ export default function TrackOrderPage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
-            className="h-12 w-full border border-white/[0.08] bg-black/30 px-4 text-xs text-white outline-none placeholder:text-white/25 focus:border-orange-500/40"
+            className="h-12 w-full border border-white/[0.08] bg-[#030505]/30 px-4 text-xs text-white/90 outline-none placeholder:text-white/25 focus:border-amber-600/40"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 flex h-12 w-full items-center justify-center gap-2 bg-orange-500 px-7 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-orange-400 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+            className="mt-4 flex h-12 w-full items-center justify-center gap-2 bg-amber-600 px-7 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-amber-600 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
           >
             <Search size={14} />
             {loading ? "Looking up order..." : "Track Order"}
@@ -173,10 +173,10 @@ export default function TrackOrderPage() {
 
       {order && (
         <section className="container-primezora pb-20">
-          <div className="mx-auto max-w-4xl border border-white/[0.08] bg-[#080d13]">
+          <div className="mx-auto max-w-4xl border border-white/[0.08] bg-[#030505]">
             <div className="flex flex-col gap-4 border-b border-white/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
               <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-orange-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-amber-600">
                   Order Details
                 </p>
                 <h2 className="mt-2 font-display text-xl font-bold tracking-wide sm:text-2xl">
@@ -189,7 +189,7 @@ export default function TrackOrderPage() {
                   })}
                 </p>
               </div>
-              <span className="w-fit border border-orange-500/20 bg-orange-500/[0.05] px-3 py-2 text-[8px] font-bold uppercase tracking-[0.15em] text-orange-400">
+              <span className="w-fit border border-amber-600/20 bg-amber-600/[0.05] px-3 py-2 text-[8px] font-bold uppercase tracking-[0.15em] text-amber-600">
                 {formatStatus(order.status)}
               </span>
             </div>
@@ -211,10 +211,10 @@ export default function TrackOrderPage() {
                         key={step.status}
                         className={`border p-4 ${
                           current
-                            ? "border-orange-500/40 bg-orange-500/[0.06]"
+                            ? "border-amber-600/40 bg-amber-600/[0.06]"
                             : completed
                               ? "border-emerald-500/20 bg-emerald-500/[0.03]"
-                              : "border-white/[0.07] bg-black/10"
+                              : "border-white/[0.07] bg-[#030505]/10"
                         }`}
                       >
                         <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10">
@@ -228,7 +228,7 @@ export default function TrackOrderPage() {
                           {step.title}
                         </p>
                         {current && (
-                          <p className="mt-1 text-[8px] uppercase tracking-wider text-orange-400">
+                          <p className="mt-1 text-[8px] uppercase tracking-wider text-amber-600">
                             Current status
                           </p>
                         )}
@@ -253,7 +253,7 @@ export default function TrackOrderPage() {
                           Quantity: {item.quantity}
                         </p>
                       </div>
-                      <p className="shrink-0 text-xs text-orange-400">
+                      <p className="shrink-0 text-xs text-amber-600">
                         {formatMoney(item.productPrice * item.quantity)}
                       </p>
                     </li>
@@ -272,9 +272,9 @@ export default function TrackOrderPage() {
                     <dt>Delivery</dt>
                     <dd>{formatMoney(order.deliveryFee)}</dd>
                   </div>
-                  <div className="flex justify-between gap-3 border-t border-white/[0.07] pt-3 font-bold text-white">
+                  <div className="flex justify-between gap-3 border-t border-white/[0.07] pt-3 font-bold text-white/90">
                     <dt>Total</dt>
-                    <dd className="text-orange-400">{formatMoney(order.total)}</dd>
+                    <dd className="text-amber-600">{formatMoney(order.total)}</dd>
                   </div>
                 </dl>
                 <p className="mt-4 text-[9px] capitalize text-white/40">
@@ -286,7 +286,7 @@ export default function TrackOrderPage() {
 
           <Link
             href="/account/orders"
-            className="mx-auto mt-6 flex w-fit items-center gap-2 text-[9px] uppercase tracking-wider text-white/50 transition hover:text-orange-400"
+            className="mx-auto mt-6 flex w-fit items-center gap-2 text-[9px] uppercase tracking-wider text-white/50 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             View my orders

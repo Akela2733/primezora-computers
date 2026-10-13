@@ -111,12 +111,12 @@ export default function InventoryStockEditor({
             setError("");
             setSaved(false);
           }}
-          className="h-9 w-24 border border-white/[0.08] bg-black/20 px-3 text-xs text-white outline-none focus:border-orange-500/50"
+          className="h-9 w-24 border border-white/[0.08] bg-[#030505]/20 px-3 text-xs text-white/90 outline-none focus:border-amber-600/50"
         />
         <button
           type="submit"
           disabled={isSaving}
-          className="inline-flex h-9 items-center justify-center gap-1.5 border border-orange-500/25 px-3 text-[8px] font-bold uppercase tracking-[0.1em] text-orange-300 transition hover:border-orange-500/50 disabled:cursor-wait disabled:opacity-50"
+          className="inline-flex h-9 items-center justify-center gap-1.5 border border-amber-600/25 px-3 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-600 transition hover:border-amber-600/50 disabled:cursor-wait disabled:opacity-50"
         >
           <Save size={12} />
           {isSaving ? "Saving" : "Save"}

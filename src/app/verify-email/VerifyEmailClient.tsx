@@ -107,29 +107,29 @@ export default function VerifyEmailClient({
   const showResend = !verified && !alreadyUsed;
 
   return (
-    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-[#05090f] px-4 py-12 text-white">
+    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-[#030505] px-4 py-12 text-white/90">
       <section
         aria-labelledby="verify-email-heading"
-        className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)] sm:p-8"
+        className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#030505]/90 p-6 text-center shadow-[0_20px_60px_rgba(3,5,5,0.6)] sm:p-8"
       >
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-600/20 bg-amber-600/10 text-amber-600">
           {verified ? <CheckCircle2 size={27} aria-hidden="true" /> : <ShieldCheck size={27} aria-hidden="true" />}
         </div>
-        <h1 id="verify-email-heading" className="text-2xl font-bold tracking-tight text-white">
+        <h1 id="verify-email-heading" className="text-2xl font-bold tracking-tight text-white/90">
           {verified ? "Email verified" : "Verify your email"}
         </h1>
 
         {verificationStatus === null && (
           <>
             <p className="mt-4 text-sm leading-6 text-white/70">
-              If you received a verification message at <span className="font-medium text-white">{email || "your email address"}</span>, open its link and confirm below. You will sign in separately after verification.
+              If you received a verification message at <span className="font-medium text-white/90">{email || "your email address"}</span>, open its link and confirm below. You will sign in separately after verification.
             </p>
             <button
               type="button"
               onClick={verifyEmail}
               disabled={loading}
               aria-busy={loading}
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : "Verify email address"}
             </button>
@@ -149,7 +149,7 @@ export default function VerifyEmailClient({
         )}
 
         {alreadyUsed && (
-          <div role="status" aria-live="polite" className="mt-5 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-left text-sm leading-6 text-blue-100">
+          <div role="status" aria-live="polite" className="mt-5 rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-left text-sm leading-6 text-amber-600">
             {message}
           </div>
         )}
@@ -163,7 +163,7 @@ export default function VerifyEmailClient({
 
         {showResend && (
           <div className="mt-6 rounded-xl border border-white/[0.08] bg-white/[0.025] p-4 text-left">
-            <p className="text-sm font-medium text-white">Need a new verification link?</p>
+            <p className="text-sm font-medium text-white/90">Need a new verification link?</p>
             <ResendConfirmationForm
               initialEmail={email}
               nextPath={nextPath}
@@ -181,13 +181,13 @@ export default function VerifyEmailClient({
         <nav aria-label="Account verification actions" className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href={loginUrl}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white transition hover:border-amber-500/40 hover:text-amber-300"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-amber-600/40 hover:text-amber-600"
           >
             {verified || alreadyUsed ? "Continue to sign in" : "Return to sign in"}
           </Link>
           <Link
             href={changeEmailUrl}
-            className="rounded-xl border border-amber-500/30 px-4 py-3 text-sm font-medium text-amber-200 transition hover:bg-amber-500/10"
+            className="rounded-xl border border-amber-600/30 px-4 py-3 text-sm font-medium text-amber-600 transition hover:bg-amber-600/10"
           >
             Change email
           </Link>

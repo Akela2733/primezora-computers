@@ -7,7 +7,7 @@ export function ShopHero() {
 
       {/* Background */}
 
-      <div className="absolute inset-0 bg-[#05090f]" />
+      <div className="absolute inset-0 bg-[#030505]" />
 
       {/* Grid */}
 
@@ -32,7 +32,7 @@ export function ShopHero() {
           w-[420px]
           -translate-y-1/2
           rounded-full
-          bg-blue-600/[0.08]
+          bg-amber-600/[0.08]
           blur-[120px]
         "
       />
@@ -48,7 +48,7 @@ export function ShopHero() {
           h-[350px]
           w-[350px]
           rounded-full
-          bg-orange-500/[0.035]
+          bg-amber-600/[0.035]
           blur-[110px]
         "
       />
@@ -84,7 +84,7 @@ export function ShopHero() {
               className="text-white/15"
             />
 
-            <span className="text-orange-400">
+            <span className="text-amber-600">
               Shop
             </span>
 
@@ -103,11 +103,11 @@ export function ShopHero() {
               font-semibold
               uppercase
               tracking-[0.3em]
-              text-orange-400
+              text-amber-600
             "
           >
 
-            <span className="h-px w-7 bg-orange-500" />
+            <span className="h-px w-7 bg-amber-600" />
 
             Primezora Store
 
@@ -133,7 +133,7 @@ export function ShopHero() {
             Find the right
             <br />
 
-            <span className="text-orange-400">
+            <span className="text-amber-600">
               gear for your setup.
             </span>
           </h1>
@@ -161,7 +161,7 @@ export function ShopHero() {
           <div className="mt-8 flex flex-wrap gap-7">
 
             <div>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-white/90">
                 100+
               </p>
 
@@ -173,7 +173,7 @@ export function ShopHero() {
             <div className="h-8 w-px bg-white/[0.08]" />
 
             <div>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-white/90">
                 20+
               </p>
 
@@ -185,7 +185,7 @@ export function ShopHero() {
             <div className="h-8 w-px bg-white/[0.08]" />
 
             <div>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-white/90">
                 Islandwide
               </p>
 

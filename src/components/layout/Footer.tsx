@@ -30,9 +30,9 @@ const helpLinks: [string, string][] = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-amber-500/10 bg-[#030607]">
+    <footer className="relative overflow-hidden border-t border-amber-600/10 bg-[#030505]">
       <div className="primezora-grid pointer-events-none absolute inset-0 opacity-[0.08]" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(ellipse_at_15%_50%,rgba(207,121,28,0.055),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(ellipse_at_15%_50%,rgba(217,119,6,0.055),transparent_60%)]" />
 
       <div className="container-primezora relative">
         <div className="grid items-start gap-7 py-7 sm:grid-cols-2 sm:gap-x-10 lg:grid-cols-[1.35fr_0.8fr_1fr_1.2fr_1.25fr] lg:items-center lg:gap-7 lg:py-8">
@@ -92,12 +92,12 @@ export function Footer() {
                 type="email"
                 aria-label="Your email address"
                 placeholder="Your email address"
-                className="min-w-0 flex-1 bg-transparent text-[9px] text-white outline-none placeholder:text-white/35"
+                className="min-w-0 flex-1 bg-transparent text-[9px] text-white/90 outline-none placeholder:text-white/35"
               />
               <button
                 type="button"
                 aria-label="Subscribe to updates"
-                className="flex h-6 w-7 shrink-0 items-center justify-center text-amber-400 transition hover:bg-amber-500/10 hover:text-amber-200"
+                className="flex h-6 w-7 shrink-0 items-center justify-center text-amber-600 transition hover:bg-amber-600/10 hover:text-amber-600"
               >
                 <ArrowRight size={13} />
               </button>
@@ -105,11 +105,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-amber-500/10 py-3 text-[8px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-amber-600/10 py-3 text-[8px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Primezora Technologies. All rights reserved.</p>
           <p>
             Powered by <span className="text-white/60">Passion</span>
-            <span className="px-2 text-amber-500/70">/</span>
+            <span className="px-2 text-amber-600/70">/</span>
             Built for Gamers
           </p>
         </div>
@@ -139,7 +139,7 @@ function FooterColumn({
       <ul className="mt-3 space-y-1.5">
         {links.map(([label, href]) => (
           <li key={label}>
-            <Link href={href} className="text-[9px] text-white/45 transition hover:text-amber-300">
+            <Link href={href} className="text-[9px] text-white/45 transition hover:text-amber-600">
               {label}
             </Link>
           </li>
@@ -160,8 +160,8 @@ function ContactItem({
 }) {
   return (
     <li>
-      <Link href={href} className="flex items-center gap-2 text-[9px] text-white/45 transition hover:text-amber-300">
-        <span className="shrink-0 text-amber-500/80">{icon}</span>
+      <Link href={href} className="flex items-center gap-2 text-[9px] text-white/45 transition hover:text-amber-600">
+        <span className="shrink-0 text-amber-600/80">{icon}</span>
         {children}
       </Link>
     </li>
@@ -186,7 +186,7 @@ function SocialLink({
       title={label}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noreferrer" : undefined}
-      className="flex h-6 w-6 items-center justify-center rounded-sm text-white/60 transition hover:bg-amber-500/10 hover:text-amber-300"
+      className="flex h-6 w-6 items-center justify-center rounded-sm text-white/60 transition hover:bg-amber-600/10 hover:text-amber-600"
     >
       {children}
     </a>

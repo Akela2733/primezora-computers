@@ -16,7 +16,7 @@ function BrandGroup({ hidden = false }: { hidden?: boolean }) {
       {brands.map((brand) => (
         <div
           key={brand.name}
-          className="flex h-9 min-w-24 shrink-0 items-center justify-center border-r border-white/10 px-5 text-white/55 transition-colors hover:text-white sm:min-w-32 sm:px-7"
+          className="flex h-9 min-w-24 shrink-0 items-center justify-center border-r border-white/10 px-5 text-white/55 transition-colors hover:text-white/90 sm:min-w-32 sm:px-7"
         >
           <span className={`whitespace-nowrap font-display text-[11px] sm:text-xs ${brand.style}`}>
             {brand.name}
@@ -31,7 +31,7 @@ export function TrustedBrands() {
   return (
     <section
       aria-labelledby="trusted-brands-heading"
-      className="overflow-hidden border-y border-white/10 bg-[#030607] py-3.5 sm:py-4"
+      className="overflow-hidden border-y border-white/10 bg-[#030505] py-3.5 sm:py-4"
     >
       <div className="container-primezora grid items-center gap-3 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-5">
         <h2

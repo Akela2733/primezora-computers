@@ -26,11 +26,11 @@ type OrderListResponse = {
 };
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  PENDING: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
-  CONFIRMED: "border-blue-500/20 bg-blue-500/10 text-blue-300",
-  PROCESSING: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
-  SHIPPED: "border-cyan-500/20 bg-cyan-500/10 text-cyan-300",
-  READY_FOR_PICKUP: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+  PENDING: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  CONFIRMED: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  PROCESSING: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  SHIPPED: "border-amber-600/20 bg-amber-600/10 text-amber-600",
+  READY_FOR_PICKUP: "border-amber-600/20 bg-amber-600/10 text-amber-600",
   COMPLETED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   CANCELLED: "border-rose-500/20 bg-rose-500/10 text-rose-300",
 };
@@ -71,7 +71,7 @@ export default function CustomerOrdersClient() {
   }, [page, reloadKey]);
 
   return (
-    <main className="container-primezora min-h-[calc(100vh-76px)] py-10 text-white">
+    <main className="container-primezora min-h-[calc(100vh-76px)] py-10 text-white/90">
       <Link
         href="/account"
         className="inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white/70"
@@ -81,7 +81,7 @@ export default function CustomerOrdersClient() {
       </Link>
 
       <header className="mb-8 mt-7">
-        <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-400">
+        <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
           Customer Account
         </p>
         <h1 className="mt-2 font-display text-2xl font-bold uppercase">My Orders</h1>
@@ -90,7 +90,7 @@ export default function CustomerOrdersClient() {
         </p>
       </header>
 
-      <section className="rounded-2xl border border-white/[0.08] bg-[#080d13]">
+      <section className="rounded-2xl border border-white/[0.08] bg-[#030505]">
         {isLoading ? (
           <div className="space-y-3 p-6" aria-label="Loading orders">
             {[1, 2, 3].map((row) => (
@@ -107,7 +107,7 @@ export default function CustomerOrdersClient() {
                 setError("");
                 setReloadKey((key) => key + 1);
               }}
-              className="mt-4 rounded-lg border border-white/10 px-4 py-2 text-xs text-white/70 hover:text-white"
+              className="mt-4 rounded-lg border border-white/10 px-4 py-2 text-xs text-white/70 hover:text-white/90"
             >
               Try again
             </button>
@@ -117,13 +117,13 @@ export default function CustomerOrdersClient() {
             {data.orders.map((order) => (
               <article
                 key={order.id}
-                className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-amber-500/20"
+                className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-amber-600/20"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.05] pb-3">
                   <div>
                     <Link
                       href={`/account/orders/${order.id}`}
-                      className="font-mono text-xs font-semibold text-amber-400 hover:text-amber-300"
+                      className="font-mono text-xs font-semibold text-amber-600 hover:text-amber-600"
                     >
                       {order.orderNumber}
                     </Link>
@@ -146,13 +146,13 @@ export default function CustomerOrdersClient() {
                     {order.itemCount} {order.itemCount === 1 ? "item" : "items"} ·{" "}
                     {order.deliveryMethod === "pickup" ? "Pickup" : "Delivery"}
                   </span>
-                  <span className="font-display font-bold text-white">
+                  <span className="font-display font-bold text-white/90">
                     LKR {order.total.toLocaleString("en-LK")}
                   </span>
                 </div>
                 <Link
                   href={`/account/orders/${order.id}`}
-                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-300 hover:text-amber-200"
+                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-600 hover:text-amber-600"
                 >
                   View order <ChevronRight size={13} />
                 </Link>
@@ -170,7 +170,7 @@ export default function CustomerOrdersClient() {
             </p>
             <Link
               href="/shop"
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/20"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-600/10 px-4 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-600/20"
             >
               <Package size={13} /> Explore products
             </Link>

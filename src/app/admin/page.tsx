@@ -71,12 +71,12 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       {/* Header */}
 
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-10">
-          <p className="font-display text-[9px] uppercase tracking-[0.32em] text-orange-400">
+          <p className="font-display text-[9px] uppercase tracking-[0.32em] text-amber-600">
             Primezora Technologies
           </p>
 
@@ -124,7 +124,7 @@ export default async function AdminDashboard() {
         </div>
 
         <section className="mt-8" aria-labelledby="order-stats-heading">
-          <p className="font-display text-[9px] uppercase tracking-[0.28em] text-orange-400">
+          <p className="font-display text-[9px] uppercase tracking-[0.28em] text-amber-600">
             Order Overview
           </p>
           <h2 id="order-stats-heading" className="mt-3 font-display text-xl font-bold uppercase">
@@ -147,17 +147,17 @@ export default async function AdminDashboard() {
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">
 
-          <div className="border border-orange-500/20 bg-orange-500/[0.04] p-6">
+          <div className="border border-amber-600/20 bg-amber-600/[0.04] p-6">
 
             <div className="flex items-start gap-4">
 
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                 <AlertTriangle size={18} />
               </div>
 
               <div className="flex-1">
 
-                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                   Inventory Alert
                 </p>
 
@@ -172,7 +172,7 @@ export default async function AdminDashboard() {
 
                 <Link
                   href="/admin/inventory?status=low-stock"
-                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-orange-400 transition hover:text-orange-300"
+                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-amber-600 transition hover:text-amber-600"
                 >
                   Manage Inventory
                   <ArrowRight size={12} />
@@ -184,17 +184,17 @@ export default async function AdminDashboard() {
 
           </div>
 
-          <div className="border border-blue-500/20 bg-blue-500/[0.04] p-6">
+          <div className="border border-amber-600/20 bg-amber-600/[0.04] p-6">
 
             <div className="flex items-start gap-4">
 
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-blue-500/20 bg-blue-500/10 text-blue-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                 <ShoppingBag size={18} />
               </div>
 
               <div className="flex-1">
 
-                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-blue-400">
+                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                   Orders
                 </p>
 
@@ -208,7 +208,7 @@ export default async function AdminDashboard() {
 
                 <Link
                   href="/admin/orders"
-                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-blue-400 transition hover:text-blue-300"
+                  className="mt-4 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-amber-600 transition hover:text-amber-600"
                 >
                   View Orders
                   <ArrowRight size={12} />
@@ -226,7 +226,7 @@ export default async function AdminDashboard() {
 
         <div className="mt-8">
 
-          <p className="font-display text-[9px] uppercase tracking-[0.28em] text-orange-400">
+          <p className="font-display text-[9px] uppercase tracking-[0.28em] text-amber-600">
             Management
           </p>
 
@@ -288,7 +288,7 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="border border-white/[0.07] bg-[#080d13] p-5">
+    <div className="border border-white/[0.07] bg-[#030505] p-5">
 
       <div className="flex items-center justify-between">
 
@@ -296,7 +296,7 @@ function StatCard({
           {label}
         </p>
 
-        <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+        <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
           {icon}
         </div>
 
@@ -329,10 +329,10 @@ function AdminLink({
   return (
     <Link
       href={href}
-      className="group border border-white/[0.07] bg-[#080d13] p-6 transition hover:border-orange-500/30 hover:bg-orange-500/[0.03]"
+      className="group border border-white/[0.07] bg-[#030505] p-6 transition hover:border-amber-600/30 hover:bg-amber-600/[0.03]"
     >
 
-      <div className="flex h-11 w-11 items-center justify-center border border-white/[0.08] text-orange-400 transition group-hover:border-orange-500/30 group-hover:bg-orange-500/10">
+      <div className="flex h-11 w-11 items-center justify-center border border-white/[0.08] text-amber-600 transition group-hover:border-amber-600/30 group-hover:bg-amber-600/10">
         {icon}
       </div>
 
@@ -344,7 +344,7 @@ function AdminLink({
         {description}
       </p>
 
-      <div className="mt-5 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-orange-400">
+      <div className="mt-5 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-amber-600">
         Open
         <ArrowRight size={12} />
       </div>

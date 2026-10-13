@@ -64,19 +64,19 @@ export default async function AdminOrderDetailPage({
   if (!order) notFound();
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+    <main className="min-h-screen bg-[#030505] text-white/90">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
           <Link
             href="/admin/orders"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Orders
           </Link>
           <div className="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+              <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
                 Order Management
               </p>
               <h1 className="mt-3 break-all font-display text-2xl font-bold uppercase sm:text-3xl">
@@ -102,7 +102,7 @@ export default async function AdminOrderDetailPage({
       <section className="container-primezora py-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="space-y-5">
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<UserRound size={15} />} title="Customer" />
               <dl className="grid gap-5 p-5 sm:grid-cols-2">
                 <Detail label="Name" value={order.customerName} />
@@ -111,7 +111,7 @@ export default async function AdminOrderDetailPage({
               </dl>
             </section>
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<MapPin size={15} />} title="Delivery" />
               <dl className="grid gap-5 p-5 sm:grid-cols-2">
                 <Detail
@@ -135,7 +135,7 @@ export default async function AdminOrderDetailPage({
               </dl>
             </section>
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<Package size={15} />} title="Order Items" />
               {order.items.length === 0 ? (
                 <p className="p-5 text-xs text-white/40">This order has no item records.</p>
@@ -162,10 +162,10 @@ export default async function AdminOrderDetailPage({
                                   width={48}
                                   height={48}
                                   unoptimized
-                                  className="h-12 w-12 shrink-0 border border-white/[0.07] bg-black/30 object-contain p-1"
+                                  className="h-12 w-12 shrink-0 border border-white/[0.07] bg-[#030505]/30 object-contain p-1"
                                 />
                               ) : (
-                                <div className="h-12 w-12 shrink-0 border border-white/[0.07] bg-black/30" />
+                                <div className="h-12 w-12 shrink-0 border border-white/[0.07] bg-[#030505]/30" />
                               )}
                               <div>
                                 <p className="text-xs font-semibold text-white/75">{item.productName}</p>
@@ -188,7 +188,7 @@ export default async function AdminOrderDetailPage({
               )}
             </section>
 
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<Package size={15} />} title="Order Timeline" />
               <ol className="space-y-0 px-5 py-4">
                 <TimelineItem
@@ -211,7 +211,7 @@ export default async function AdminOrderDetailPage({
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:h-fit">
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<Banknote size={15} />} title="Summary" />
               <div className="space-y-4 p-5">
                 <SummaryRow label="Subtotal" value={order.subtotal} />
@@ -241,7 +241,7 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-center gap-3 border-b border-white/[0.06] p-5">
-      <span className="text-orange-400">{icon}</span>
+      <span className="text-amber-600">{icon}</span>
       <h2 className="font-display text-xs font-bold uppercase tracking-[0.14em] text-white/75">
         {title}
       </h2>
@@ -270,7 +270,7 @@ function SummaryRow({
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-[9px] uppercase tracking-[0.12em] text-white/35">{label}</span>
-      <span className={`text-xs font-bold ${emphasized ? "text-orange-400" : "text-white/70"}`}>
+      <span className={`text-xs font-bold ${emphasized ? "text-amber-600" : "text-white/70"}`}>
         LKR {value.toLocaleString("en-LK")}
       </span>
     </div>
@@ -293,7 +293,7 @@ function TimelineItem({
       ? "bg-red-400"
       : status === "COMPLETED"
         ? "bg-emerald-400"
-        : "bg-orange-400";
+        : "bg-amber-600";
 
   return (
     <li className="flex gap-4">

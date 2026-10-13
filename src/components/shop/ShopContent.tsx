@@ -182,14 +182,14 @@ export function ShopContent({
               })
             }
             placeholder="Search products..."
-            className="h-11 w-full border border-white/10 bg-white/[0.02] pl-9 pr-9 text-[10px] text-white outline-none transition placeholder:text-white/20 focus:border-orange-500/40"
+            className="h-11 w-full border border-white/10 bg-white/[0.02] pl-9 pr-9 text-[10px] text-white/90 outline-none transition placeholder:text-white/20 focus:border-amber-600/40"
           />
 
           {hasSearch && (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-orange-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-amber-600"
             >
               <X size={13} />
             </button>
@@ -212,7 +212,7 @@ export function ShopContent({
                     .value as SortOption,
                 })
               }
-              className="h-11 appearance-none border border-white/10 bg-[#080b0d] px-3 pr-8 text-[9px] text-white/60 outline-none focus:border-orange-500/40"
+              className="h-11 appearance-none border border-white/10 bg-[#030505] px-3 pr-8 text-[9px] text-white/60 outline-none focus:border-amber-600/40"
             >
               <option value="featured">
                 Featured
@@ -252,7 +252,7 @@ export function ShopContent({
           <button
             type="button"
             onClick={clearSearch}
-            className="flex items-center gap-1.5 border border-orange-500/20 bg-orange-500/[0.06] px-2.5 py-1.5 text-[8px] text-orange-400"
+            className="flex items-center gap-1.5 border border-amber-600/20 bg-amber-600/[0.06] px-2.5 py-1.5 text-[8px] text-amber-600"
           >
             &quot;{filters.search}&quot;
 
@@ -313,7 +313,7 @@ function EmptyProducts({
       <button
         type="button"
         onClick={onClear}
-        className="mt-6 h-10 bg-orange-500 px-5 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-orange-400"
+        className="mt-6 h-10 bg-amber-600 px-5 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
       >
         Clear All Filters
       </button>

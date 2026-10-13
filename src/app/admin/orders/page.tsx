@@ -163,18 +163,18 @@ export default async function AdminOrdersPage({
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+    <main className="min-h-screen bg-[#030505] text-white/90">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Admin Dashboard
           </Link>
           <div className="mt-7">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Store Management
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold uppercase">
@@ -188,13 +188,13 @@ export default async function AdminOrdersPage({
       </section>
 
       <section className="container-primezora py-8">
-        <div className="overflow-hidden border border-white/[0.07] bg-[#080d13]">
+        <div className="overflow-hidden border border-white/[0.07] bg-[#030505]">
           <form
             action="/admin/orders"
             method="get"
             className="grid gap-3 border-b border-white/[0.06] p-4 sm:grid-cols-2 xl:grid-cols-[minmax(240px,1fr)_190px_190px_170px_110px_auto]"
           >
-            <label className="flex h-11 items-center gap-3 border border-white/[0.07] bg-black/20 px-4 sm:col-span-2 xl:col-span-1">
+            <label className="flex h-11 items-center gap-3 border border-white/[0.07] bg-[#030505]/20 px-4 sm:col-span-2 xl:col-span-1">
               <Search size={15} className="shrink-0 text-white/25" />
               <input
                 type="search"
@@ -203,14 +203,14 @@ export default async function AdminOrdersPage({
                 maxLength={100}
                 placeholder="Order, customer, email or phone..."
                 aria-label="Search orders"
-                className="min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-white/20"
+                className="min-w-0 flex-1 bg-transparent text-xs text-white/90 outline-none placeholder:text-white/20"
               />
             </label>
             <select
               name="status"
               defaultValue={selectedStatus ?? ""}
               aria-label="Filter by status"
-              className="h-11 border border-white/[0.07] bg-[#080d13] px-3 text-xs text-white/70"
+              className="h-11 border border-white/[0.07] bg-[#030505] px-3 text-xs text-white/70"
             >
               <option value="">All statuses</option>
               {ORDER_STATUS_OPTIONS.map((option) => (
@@ -221,7 +221,7 @@ export default async function AdminOrdersPage({
               name="paymentMethod"
               defaultValue={selectedPayment}
               aria-label="Filter by payment method"
-              className="h-11 border border-white/[0.07] bg-[#080d13] px-3 text-xs text-white/70"
+              className="h-11 border border-white/[0.07] bg-[#030505] px-3 text-xs text-white/70"
             >
               <option value="">All payment methods</option>
               <option value="cod">Cash on Delivery</option>
@@ -231,7 +231,7 @@ export default async function AdminOrdersPage({
               name="dateRange"
               defaultValue={selectedDateRange}
               aria-label="Filter by date"
-              className="h-11 border border-white/[0.07] bg-[#080d13] px-3 text-xs text-white/70"
+              className="h-11 border border-white/[0.07] bg-[#030505] px-3 text-xs text-white/70"
             >
               {DATE_FILTERS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -241,7 +241,7 @@ export default async function AdminOrdersPage({
               name="pageSize"
               defaultValue={String(pageSize)}
               aria-label="Orders per page"
-              className="h-11 border border-white/[0.07] bg-[#080d13] px-3 text-xs text-white/70"
+              className="h-11 border border-white/[0.07] bg-[#030505] px-3 text-xs text-white/70"
             >
               {PAGE_SIZES.map((size) => (
                 <option key={size} value={size}>{size} / page</option>
@@ -249,7 +249,7 @@ export default async function AdminOrdersPage({
             </select>
             <button
               type="submit"
-              className="h-11 bg-orange-500 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-orange-400"
+              className="h-11 bg-amber-600 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-600"
             >
               Apply
             </button>
@@ -261,7 +261,7 @@ export default async function AdminOrdersPage({
               {total > 0 ? ` · Page ${page} of ${totalPages}` : ""}
             </p>
             {safeQuery && (
-              <p className="text-[10px] text-orange-300/70">
+              <p className="text-[10px] text-amber-600/70">
                 Search: <span className="font-semibold">{safeQuery}</span>
               </p>
             )}
@@ -309,7 +309,7 @@ export default async function AdminOrdersPage({
                       <td className="px-4 py-4">
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="font-mono text-[10px] font-bold text-orange-300 transition hover:text-orange-200"
+                          className="font-mono text-[10px] font-bold text-amber-600 transition hover:text-amber-600"
                         >
                           {order.orderNumber}
                         </Link>
@@ -337,10 +337,10 @@ export default async function AdminOrdersPage({
                       <td className="px-4 py-4"><StatusBadge status={order.status} /></td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3 text-[8px] font-bold uppercase tracking-[0.1em]">
-                          <Link href={`/admin/orders/${order.id}`} className="text-white/65 hover:text-white">
+                          <Link href={`/admin/orders/${order.id}`} className="text-white/65 hover:text-white/90">
                             View
                           </Link>
-                          <Link href={`/admin/orders/${order.id}#status-controls`} className="text-orange-300 hover:text-orange-200">
+                          <Link href={`/admin/orders/${order.id}#status-controls`} className="text-amber-600 hover:text-amber-600">
                             Update Status
                           </Link>
                         </div>
@@ -360,7 +360,7 @@ export default async function AdminOrdersPage({
               <Link
                 href={pageHref(Math.max(1, page - 1))}
                 aria-disabled={page <= 1}
-                className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] ${page <= 1 ? "pointer-events-none text-white/20" : "text-white/55 hover:text-white"}`}
+                className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] ${page <= 1 ? "pointer-events-none text-white/20" : "text-white/55 hover:text-white/90"}`}
               >
                 <ChevronLeft size={14} /> Previous
               </Link>
@@ -368,7 +368,7 @@ export default async function AdminOrdersPage({
               <Link
                 href={pageHref(Math.min(totalPages, page + 1))}
                 aria-disabled={page >= totalPages}
-                className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] ${page >= totalPages ? "pointer-events-none text-white/20" : "text-white/55 hover:text-white"}`}
+                className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] ${page >= totalPages ? "pointer-events-none text-white/20" : "text-white/55 hover:text-white/90"}`}
               >
                 Next <ChevronRight size={14} />
               </Link>
@@ -396,8 +396,8 @@ function StatusBadge({ status }: { status: OrderStatus }) {
       : status === "CANCELLED"
         ? "border-red-500/20 bg-red-500/[0.05] text-red-300"
         : status === "PENDING"
-          ? "border-amber-500/20 bg-amber-500/[0.05] text-amber-300"
-          : "border-blue-500/20 bg-blue-500/[0.05] text-blue-300";
+          ? "border-amber-600/20 bg-amber-600/[0.05] text-amber-600"
+          : "border-amber-600/20 bg-amber-600/[0.05] text-amber-600";
 
   return (
     <span className={`inline-flex border px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] ${color}`}>

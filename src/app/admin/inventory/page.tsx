@@ -165,19 +165,19 @@ export default async function AdminInventoryPage({
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+    <main className="min-h-screen bg-[#030505] text-white/90">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Admin Dashboard
           </Link>
 
           <div className="mt-7">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Store Management
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold uppercase">
@@ -202,12 +202,12 @@ export default async function AdminInventoryPage({
       )}
 
       <section className="container-primezora py-8">
-        <div className="overflow-hidden border border-white/[0.07] bg-[#080d13]">
+        <div className="overflow-hidden border border-white/[0.07] bg-[#030505]">
           <div className="flex flex-col gap-4 border-b border-white/[0.06] p-4 lg:flex-row lg:items-center lg:justify-between">
             <form
               action="/admin/inventory"
               method="get"
-              className="flex h-11 w-full max-w-md items-center gap-3 border border-white/[0.07] bg-black/20 px-4"
+              className="flex h-11 w-full max-w-md items-center gap-3 border border-white/[0.07] bg-[#030505]/20 px-4"
             >
               {status !== "all" && (
                 <input type="hidden" name="status" value={status} />
@@ -219,11 +219,11 @@ export default async function AdminInventoryPage({
                 defaultValue={searchQuery}
                 aria-label="Search inventory"
                 placeholder="Search product, brand, slug or ID..."
-                className="min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-white/20"
+                className="min-w-0 flex-1 bg-transparent text-xs text-white/90 outline-none placeholder:text-white/20"
               />
               <button
                 type="submit"
-                className="text-[8px] font-bold uppercase tracking-[0.12em] text-orange-400"
+                className="text-[8px] font-bold uppercase tracking-[0.12em] text-amber-600"
               >
                 Search
               </button>
@@ -240,8 +240,8 @@ export default async function AdminInventoryPage({
                   aria-current={status === item.value ? "page" : undefined}
                   className={`px-3 py-2 text-[8px] font-bold uppercase tracking-[0.12em] transition ${
                     status === item.value
-                      ? "bg-orange-500 text-black"
-                      : "text-white/40 hover:text-white"
+                      ? "bg-amber-600 text-black"
+                      : "text-white/40 hover:text-white/90"
                   }`}
                 >
                   {item.label}
@@ -287,7 +287,7 @@ export default async function AdminInventoryPage({
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-white/[0.07] bg-black/20">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-white/[0.07] bg-[#030505]/20">
                             <img
                               src={product.image}
                               alt={product.name}
@@ -313,7 +313,7 @@ export default async function AdminInventoryPage({
                           inStock={product.inStock}
                         />
                       </td>
-                      <td className="px-4 py-3 text-xs font-bold text-orange-400">
+                      <td className="px-4 py-3 text-xs font-bold text-amber-600">
                         LKR {product.price.toLocaleString("en-LK")}
                       </td>
                       <td className="px-4 py-3">
@@ -346,14 +346,14 @@ function Metric({
   tone: "neutral" | "green" | "amber" | "red";
 }) {
   const valueClass = {
-    neutral: "text-white",
+    neutral: "text-white/90",
     green: "text-emerald-400",
-    amber: "text-amber-400",
+    amber: "text-amber-600",
     red: "text-red-400",
   }[tone];
 
   return (
-    <div className="border border-white/[0.07] bg-[#080d13] p-4">
+    <div className="border border-white/[0.07] bg-[#030505] p-4">
       <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-white/35">
         {label}
       </p>
@@ -393,7 +393,7 @@ function StockStatus({
       : !inStock
         ? "border-white/10 bg-white/[0.03] text-white/45"
         : stockQuantity <= LOW_STOCK_THRESHOLD
-          ? "border-amber-500/20 bg-amber-500/[0.05] text-amber-300"
+          ? "border-amber-600/20 bg-amber-600/[0.05] text-amber-600"
           : "border-emerald-500/20 bg-emerald-500/[0.05] text-emerald-300";
 
   return (

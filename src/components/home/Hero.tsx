@@ -22,7 +22,7 @@ const benefits = [
 
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-[#030505] text-white">
+    <section className="relative isolate overflow-hidden bg-[#030505] text-white/90">
       <Image
         src="/banners/hero-background.png"
         alt="Amber-lit gaming PC setup with monitor, keyboard, and headset"
@@ -37,15 +37,15 @@ export function Hero() {
 
       <div className="container-primezora relative flex min-h-[720px] flex-col justify-between gap-12 pb-7 pt-20 sm:min-h-[680px] sm:pt-24 lg:min-h-[min(760px,calc(100svh-120px))] lg:pt-24">
         <div className="max-w-[570px]">
-          <p className="mb-5 font-display text-[9px] font-semibold uppercase tracking-[0.3em] text-amber-300/80 sm:text-[10px]">
+          <p className="mb-5 font-display text-[9px] font-semibold uppercase tracking-[0.3em] text-amber-600/80 sm:text-[10px]">
             Build <span className="px-2 text-amber-600">/</span> Game{" "}
             <span className="px-2 text-amber-600">/</span> Upgrade
           </p>
 
-          <h1 className="font-display text-[38px] font-bold uppercase leading-[1.08] text-white sm:text-6xl lg:text-[64px]">
+          <h1 className="font-display text-[38px] font-bold uppercase leading-[1.08] text-white/90 sm:text-6xl lg:text-[64px]">
             Your One Stop
             <br />
-            <span className="text-[#f49a32]">Tech &amp; Gaming</span>
+            <span className="text-amber-600">Tech &amp; Gaming</span>
             <br />
             Store
           </h1>
@@ -57,10 +57,10 @@ export function Hero() {
 
           <Link
             href="/shop"
-            className="group mt-7 inline-flex h-11 items-center gap-3 border border-[#e88720]/80 bg-black/20 px-5 font-display text-[10px] font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#e88720] hover:text-[#100a03]"
+            className="group mt-7 inline-flex h-11 items-center gap-3 border border-amber-600/80 bg-[#030505]/20 px-5 font-display text-[10px] font-semibold uppercase tracking-[0.1em] text-white/90 transition hover:bg-amber-600 hover:text-[#030505]"
           >
             Shop Now
-            <ArrowRight size={15} className="text-[#f49a32] transition-transform group-hover:translate-x-1 group-hover:text-[#100a03]" />
+            <ArrowRight size={15} className="text-amber-600 transition-transform group-hover:translate-x-1 group-hover:text-[#030505]" />
           </Link>
         </div>
 
@@ -72,7 +72,7 @@ export function Hero() {
                 index > 0 ? "sm:border-l sm:border-white/10 sm:pl-5" : ""
               }`}
             >
-              <Icon size={21} className="shrink-0 text-[#e88720]" strokeWidth={1.8} />
+              <Icon size={21} className="shrink-0 text-amber-600" strokeWidth={1.8} />
               <div>
                 <p className="font-display text-[10px] font-semibold text-white/90 sm:text-[11px]">
                   {title}

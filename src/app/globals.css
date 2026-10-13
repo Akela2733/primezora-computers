@@ -1,24 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050816;
-  --background-secondary: #071024;
+  --background: #030505;
+  --background-secondary: #030505;
 
-  --surface: #081126;
-  --surface-light: #0c1730;
+  --surface: #030505;
+  --surface-light: #030505;
 
-  --primary: #245cff;
-  --primary-light: #3b82ff;
-  --primary-dark: #1010c0;
+  --primary: #d97706;
+  --primary-light: #d97706;
+  --primary-dark: #d97706;
 
-  --purple: #7c3aed;
-  --blue-glow: #3030ff;
+  --white: rgba(255, 255, 255, 0.9);
+  --gray: rgba(255, 255, 255, 0.9);
+  --gray-light: rgba(255, 255, 255, 0.9);
 
-  --white: #f4f4f4;
-  --gray: #8d99b5;
-  --gray-light: #c7cede;
-
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.15);
 }
 
 * {
@@ -33,18 +30,7 @@ body {
   margin: 0;
   min-height: 100vh;
 
-  background:
-    radial-gradient(
-      circle at 80% 0%,
-      rgba(48, 48, 255, 0.13),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 0% 40%,
-      rgba(0, 140, 255, 0.07),
-      transparent 25%
-    ),
-    var(--background);
+  background: var(--background);
 
   color: var(--white);
 
@@ -81,7 +67,7 @@ button {
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.35);
+  background: rgba(217,119,6, 0.35);
 }
 
 /* --------------------------------
@@ -106,7 +92,7 @@ button {
 /* Glass panels */
 
 .primezora-glass {
-  background: rgba(8, 17, 38, 0.72);
+  background: rgba(3,5,5, 0.95);
   border: 1px solid var(--border);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -135,9 +121,9 @@ button {
   background:
     linear-gradient(
       100deg,
-      #ffffff 5%,
-      #4c8dff 48%,
-      #8b5cf6 95%
+      rgba(255, 255, 255, 0.9) 5%,
+      #d97706 48%,
+      rgba(255, 255, 255, 0.9) 95%
     );
 
   -webkit-background-clip: text;
@@ -146,18 +132,18 @@ button {
   color: transparent;
 }
 
-/* Blue glow */
+/* Amber glow */
 
 .primezora-blue-glow {
   box-shadow:
-    0 0 70px rgba(37, 92, 255, 0.18);
+    0 0 70px rgba(217,119,6, 0.18);
 }
 
-/* Purple glow */
+/* Additional amber glow */
 
 .primezora-purple-glow {
   box-shadow:
-    0 0 80px rgba(124, 58, 237, 0.16);
+    0 0 80px rgba(217,119,6, 0.16);
 }
 
 /* Product card */
@@ -174,22 +160,22 @@ button {
   transform: translateY(-4px);
 
   border-color:
-    rgba(59, 130, 246, 0.4);
+    rgba(217,119,6, 0.4);
 
   background:
-    rgba(12, 25, 52, 0.92);
+    rgba(3,5,5, 0.92);
 
   box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.22);
+    0 18px 50px rgba(3,5,5, 0.22);
 }
 
 /* Thin glowing border */
 
 .primezora-border-glow {
-  border: 1px solid rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(217,119,6, 0.18);
 
   box-shadow:
-    inset 0 0 30px rgba(37, 92, 255, 0.025);
+    inset 0 0 30px rgba(217,119,6, 0.025);
 }
 
 /* Hide scrollbar */

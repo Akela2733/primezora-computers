@@ -40,21 +40,21 @@ export default async function CategoryPage({
   const categoryProducts = productRecords.map(toProductView);
 
   return (
-    <main className="min-h-screen bg-[#05090f] px-4 py-12 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#030505] px-4 py-12 text-white/90 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-orange-400/80">
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-600/80">
               Shop by category
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-white/90">
               {category.displayName}
             </h1>
           </div>
 
           <Link
             href="/shop"
-            className="text-[10px] font-bold uppercase tracking-[0.16em] text-orange-400 transition hover:text-orange-300"
+            className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-600 transition hover:text-amber-600"
           >
             Back to all products
           </Link>
@@ -67,7 +67,7 @@ export default async function CategoryPage({
             ))}
           </div>
         ) : (
-          <div className="border border-white/8 bg-[#080d13] px-6 py-14 text-center">
+          <div className="border border-white/8 bg-[#030505] px-6 py-14 text-center">
             <h2 className="font-display text-lg font-bold uppercase tracking-[0.12em] text-white/80">
               No products in this category yet
             </h2>

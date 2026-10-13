@@ -110,7 +110,7 @@ export default function ResendConfirmationForm({
               setError(null);
             }}
             placeholder="you@example.com"
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 pl-10 pr-3.5 text-sm text-white placeholder-white/30 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 pl-10 pr-3.5 text-sm text-white/90 placeholder-white/30 focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/50"
           />
         </div>
 
@@ -121,7 +121,7 @@ export default function ResendConfirmationForm({
             className={`flex items-start gap-2 rounded-xl border p-3 text-xs leading-5 ${
               messageIsSent
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                : "border-blue-500/30 bg-blue-500/10 text-blue-200"
+                : "border-amber-600/30 bg-amber-600/10 text-amber-600"
             }`}
           >
             {messageIsSent ? (
@@ -148,7 +148,7 @@ export default function ResendConfirmationForm({
           type="submit"
           disabled={loading || cooldownSeconds > 0}
           aria-busy={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
             <>

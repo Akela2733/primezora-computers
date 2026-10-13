@@ -240,15 +240,15 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[#05090f] text-white">
+      <main className="min-h-screen bg-[#030505] text-white/90">
         <section className="container-primezora flex min-h-[70vh] items-center justify-center py-20">
-          <div className="w-full max-w-lg border border-white/[0.08] bg-[#080d13] p-8 text-center">
+          <div className="w-full max-w-lg border border-white/[0.08] bg-[#030505] p-8 text-center">
             <Package
               size={38}
-              className="mx-auto text-orange-400"
+              className="mx-auto text-amber-600"
             />
 
-            <p className="mt-6 font-display text-[10px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="mt-6 font-display text-[10px] uppercase tracking-[0.3em] text-amber-600">
               Checkout
             </p>
 
@@ -263,7 +263,7 @@ export default function CheckoutPage() {
 
             <Link
               href="/shop"
-              className="mt-8 inline-flex h-12 items-center justify-center bg-orange-500 px-7 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-400"
+              className="mt-8 inline-flex h-12 items-center justify-center bg-amber-600 px-7 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-amber-600"
             >
               Browse Products
             </Link>
@@ -274,20 +274,20 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       {/* Header */}
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-10">
           <Link
             href="/cart"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/40 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/40 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Back to Cart
           </Link>
 
           <div className="mt-8">
-            <p className="font-display text-[9px] uppercase tracking-[0.32em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.32em] text-amber-600">
               Primezora Checkout
             </p>
 
@@ -311,15 +311,15 @@ export default function CheckoutPage() {
           {/* LEFT */}
           <div className="space-y-6">
             {/* Customer Information */}
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                     <CreditCard size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                       Step 01
                     </p>
 
@@ -387,15 +387,15 @@ export default function CheckoutPage() {
             </section>
 
             {/* Delivery Method */}
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                     <Truck size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                       Step 02
                     </p>
 
@@ -443,15 +443,15 @@ export default function CheckoutPage() {
 
             {/* Address */}
             {deliveryMethod === "delivery" && (
-              <section className="border border-white/[0.07] bg-[#080d13]">
+              <section className="border border-white/[0.07] bg-[#030505]">
                 <div className="border-b border-white/[0.06] p-5 sm:p-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                    <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                       <MapPin size={16} />
                     </div>
 
                     <div>
-                      <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                      <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                         Delivery
                       </p>
 
@@ -527,15 +527,15 @@ export default function CheckoutPage() {
 
             {/* Pickup */}
             {deliveryMethod === "pickup" && (
-              <section className="border border-orange-500/20 bg-orange-500/[0.04] p-5 sm:p-6">
+              <section className="border border-amber-600/20 bg-amber-600/[0.04] p-5 sm:p-6">
                 <div className="flex gap-4">
                   <Store
                     size={20}
-                    className="mt-1 shrink-0 text-orange-400"
+                    className="mt-1 shrink-0 text-amber-600"
                   />
 
                   <div>
-                    <p className="font-display text-[10px] font-bold uppercase tracking-[0.18em] text-orange-400">
+                    <p className="font-display text-[10px] font-bold uppercase tracking-[0.18em] text-amber-600">
                       Store Pickup
                     </p>
 
@@ -565,15 +565,15 @@ export default function CheckoutPage() {
             )}
 
             {/* Payment */}
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="border-b border-white/[0.06] p-5 sm:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-orange-500/20 bg-orange-500/10 text-orange-400">
+                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
                     <Banknote size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
                       Step 03
                     </p>
 
@@ -623,18 +623,18 @@ export default function CheckoutPage() {
 
             {/* Error */}
             {authenticationRequired ? (
-              <div className="border border-amber-500/20 bg-amber-500/[0.06] px-5 py-4 text-xs leading-6 text-amber-200">
+              <div className="border border-amber-600/20 bg-amber-600/[0.06] px-5 py-4 text-xs leading-6 text-amber-600">
                 <p>Your session expired. Sign in to place your order; your cart is still saved.</p>
                 <div className="mt-3 flex flex-wrap gap-4">
                   <Link
                     href="/login?next=%2Fcheckout"
-                    className="font-semibold text-amber-400 underline underline-offset-4 hover:text-amber-300"
+                    className="font-semibold text-amber-600 underline underline-offset-4 hover:text-amber-600"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/register?next=%2Fcheckout"
-                    className="font-semibold text-amber-400 underline underline-offset-4 hover:text-amber-300"
+                    className="font-semibold text-amber-600 underline underline-offset-4 hover:text-amber-600"
                   >
                     Create an account
                   </Link>
@@ -649,9 +649,9 @@ export default function CheckoutPage() {
 
           {/* RIGHT */}
           <aside className="lg:sticky lg:top-24 lg:h-fit">
-            <section className="border border-white/[0.07] bg-[#080d13]">
+            <section className="border border-white/[0.07] bg-[#030505]">
               <div className="border-b border-white/[0.06] p-5">
-                <p className="font-display text-[9px] uppercase tracking-[0.25em] text-orange-400">
+                <p className="font-display text-[9px] uppercase tracking-[0.25em] text-amber-600">
                   Order Summary
                 </p>
 
@@ -666,7 +666,7 @@ export default function CheckoutPage() {
                     key={item.product.id}
                     className="flex gap-3 border-b border-white/[0.05] p-4"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-white/[0.07] bg-black/20">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-white/[0.07] bg-[#030505]/20">
                       <img
                         src={item.product.image}
                         alt={
@@ -687,7 +687,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
 
-                    <p className="shrink-0 text-xs font-bold text-orange-400">
+                    <p className="shrink-0 text-xs font-bold text-amber-600">
                       LKR{" "}
                       {(
                         item.product.price *
@@ -726,7 +726,7 @@ export default function CheckoutPage() {
                     Total
                   </span>
 
-                  <span className="font-display text-xl font-bold text-orange-400">
+                  <span className="font-display text-xl font-bold text-amber-600">
                     LKR{" "}
                     {total.toLocaleString(
                       "en-LK"
@@ -737,7 +737,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-4 flex h-14 w-full items-center justify-center gap-2 bg-orange-500 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 flex h-14 w-full items-center justify-center gap-2 bg-amber-600 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     "Processing..."
@@ -786,7 +786,7 @@ function InputField({
       <span className="mb-2 block text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">
         {label}
         {required && (
-          <span className="ml-1 text-orange-400">
+          <span className="ml-1 text-amber-600">
             *
           </span>
         )}
@@ -799,7 +799,7 @@ function InputField({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="h-12 w-full border border-white/[0.08] bg-black/20 px-4 text-sm text-white outline-none transition placeholder:text-white/15 focus:border-orange-500/50"
+        className="h-12 w-full border border-white/[0.08] bg-[#030505]/20 px-4 text-sm text-white/90 outline-none transition placeholder:text-white/15 focus:border-amber-600/50"
       />
     </label>
   );
@@ -830,12 +830,12 @@ function DeliveryOption({
       onClick={onClick}
       className={`relative text-left border p-4 transition ${
         selected
-          ? "border-orange-500/60 bg-orange-500/[0.07]"
-          : "border-white/[0.07] bg-black/10 hover:border-white/15"
+          ? "border-amber-600/60 bg-amber-600/[0.07]"
+          : "border-white/[0.07] bg-[#030505]/10 hover:border-white/15"
       }`}
     >
       {selected && (
-        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-black">
+        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-black">
           <Check size={11} />
         </div>
       )}
@@ -843,7 +843,7 @@ function DeliveryOption({
       <div
         className={`flex h-9 w-9 items-center justify-center border ${
           selected
-            ? "border-orange-500/30 bg-orange-500/10 text-orange-400"
+            ? "border-amber-600/30 bg-amber-600/10 text-amber-600"
             : "border-white/10 text-white/40"
         }`}
       >
@@ -861,7 +861,7 @@ function DeliveryOption({
       <p
         className={`mt-3 font-display text-[10px] font-bold ${
           selected
-            ? "text-orange-400"
+            ? "text-amber-600"
             : "text-white/40"
         }`}
       >
@@ -894,12 +894,12 @@ function PaymentOption({
       onClick={onClick}
       className={`relative text-left border p-4 transition ${
         selected
-          ? "border-orange-500/60 bg-orange-500/[0.07]"
-          : "border-white/[0.07] bg-black/10 hover:border-white/15"
+          ? "border-amber-600/60 bg-amber-600/[0.07]"
+          : "border-white/[0.07] bg-[#030505]/10 hover:border-white/15"
       }`}
     >
       {selected && (
-        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-black">
+        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-black">
           <Check size={11} />
         </div>
       )}
@@ -907,7 +907,7 @@ function PaymentOption({
       <div
         className={`flex h-9 w-9 items-center justify-center border ${
           selected
-            ? "border-orange-500/30 bg-orange-500/10 text-orange-400"
+            ? "border-amber-600/30 bg-amber-600/10 text-amber-600"
             : "border-white/10 text-white/40"
         }`}
       >

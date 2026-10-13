@@ -90,18 +90,18 @@ export default function CustomersClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
-      <section className="border-b border-white/[0.06] bg-[#060a0f]">
+    <main className="min-h-screen bg-[#030505] text-white/90">
+      <section className="border-b border-white/[0.06] bg-[#030505]">
         <div className="container-primezora py-8">
           <Link
             href="/admin"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-orange-400"
+            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/35 transition hover:text-amber-600"
           >
             <ArrowLeft size={13} />
             Admin Dashboard
           </Link>
           <div className="mt-7">
-            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-orange-400">
+            <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
               Store Management
             </p>
             <h1 className="mt-3 font-display text-3xl font-bold uppercase">
@@ -115,11 +115,11 @@ export default function CustomersClient() {
       </section>
 
       <section className="container-primezora py-8">
-        <div className="overflow-hidden border border-white/[0.07] bg-[#080d13]">
+        <div className="overflow-hidden border border-white/[0.07] bg-[#030505]">
           <div className="flex flex-col gap-4 border-b border-white/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
             <form
               onSubmit={handleSearch}
-              className="flex h-11 w-full max-w-xl items-center gap-3 border border-white/[0.07] bg-black/20 px-4"
+              className="flex h-11 w-full max-w-xl items-center gap-3 border border-white/[0.07] bg-[#030505]/20 px-4"
             >
               <Search size={15} className="shrink-0 text-white/25" />
               <input
@@ -129,11 +129,11 @@ export default function CustomersClient() {
                 maxLength={INPUT_LIMITS.customer.search}
                 aria-label="Search customers by name, email or phone"
                 placeholder="Search name, email or phone..."
-                className="min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-white/20"
+                className="min-w-0 flex-1 bg-transparent text-xs text-white/90 outline-none placeholder:text-white/20"
               />
               <button
                 type="submit"
-                className="text-[8px] font-bold uppercase tracking-[0.12em] text-orange-400"
+                className="text-[8px] font-bold uppercase tracking-[0.12em] text-amber-600"
               >
                 Search
               </button>
@@ -154,7 +154,7 @@ export default function CustomersClient() {
                   setIsLoading(true);
                   setReloadKey((current) => current + 1);
                 }}
-                className="mt-4 border border-white/10 px-4 py-2 text-[8px] font-bold uppercase tracking-[0.12em] text-white/50 hover:text-white"
+                className="mt-4 border border-white/10 px-4 py-2 text-[8px] font-bold uppercase tracking-[0.12em] text-white/50 hover:text-white/90"
               >
                 Try Again
               </button>
@@ -196,7 +196,7 @@ export default function CustomersClient() {
                         <td className="px-4 py-4">
                           <Link
                             href={`/admin/customers/${customer.id}`}
-                            className="text-xs font-semibold text-orange-300 transition hover:text-orange-200"
+                            className="text-xs font-semibold text-amber-600 transition hover:text-amber-600"
                           >
                             {customer.name}
                           </Link>

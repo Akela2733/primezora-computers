@@ -99,7 +99,7 @@ export default function OrderStatusControl({
             }
             aria-label="Next order status"
             disabled={isSaving}
-            className="h-11 min-w-0 flex-1 border border-white/[0.08] bg-[#080d13] px-3 text-[9px] uppercase tracking-[0.1em] text-white/70 outline-none focus:border-orange-500/50 disabled:opacity-50"
+            className="h-11 min-w-0 flex-1 border border-white/[0.08] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/70 outline-none focus:border-amber-600/50 disabled:opacity-50"
           >
             {allowedStatuses.map((value) => {
               const option = ORDER_STATUS_OPTIONS.find(
@@ -115,7 +115,7 @@ export default function OrderStatusControl({
           <button
             type="submit"
             disabled={isSaving}
-            className="h-11 border border-orange-500/30 bg-orange-500 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-orange-400 disabled:cursor-wait disabled:opacity-50"
+            className="h-11 border border-amber-600/30 bg-amber-600 px-5 text-[9px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-600 disabled:cursor-wait disabled:opacity-50"
           >
             {isSaving ? "Saving..." : "Update Status"}
           </button>

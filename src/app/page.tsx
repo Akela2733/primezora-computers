@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* <section className="container-primezora py-32">
 
-        <p className="text-xs uppercase tracking-[0.3em] text-blue-400">
+        <p className="text-xs uppercase tracking-[0.3em] text-amber-600">
           Primezora Technologies
         </p>
 

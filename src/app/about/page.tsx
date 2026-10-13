@@ -2,12 +2,12 @@ import Link from "next/link";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#05090f] px-4 py-16 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#030505] px-4 py-16 text-white/90 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-orange-400/80">
+        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-600/80">
           About Primezora
         </p>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-white/90">
           Built for performance-driven setups.
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-7 text-white/60">
@@ -22,8 +22,8 @@ export default function AboutPage() {
             ["Fast local support", "We help customers choose the right setup for their workflows and goals."],
             ["Trusted delivery", "We keep your order process simple from browsing to checkout."],
           ].map(([title, description]) => (
-            <div key={title} className="rounded-2xl border border-white/10 bg-[#080b0d] p-6">
-              <h2 className="text-lg font-semibold text-white">{title}</h2>
+            <div key={title} className="rounded-2xl border border-white/10 bg-[#030505] p-6">
+              <h2 className="text-lg font-semibold text-white/90">{title}</h2>
               <p className="mt-3 text-sm leading-6 text-white/55">{description}</p>
             </div>
           ))}
@@ -32,7 +32,7 @@ export default function AboutPage() {
         <div className="mt-10">
           <Link
             href="/shop"
-            className="inline-flex items-center justify-center rounded-md bg-orange-500 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-orange-400"
+            className="inline-flex items-center justify-center rounded-md bg-amber-600 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
           >
             Explore the store
           </Link>

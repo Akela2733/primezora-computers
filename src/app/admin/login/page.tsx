@@ -47,7 +47,7 @@ export default async function AdminLoginPage({
   const initialTab = rawTab === "forgot" ? "forgot" : "login";
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white flex flex-col justify-center">
+    <main className="min-h-screen bg-[#030505] text-white/90 flex flex-col justify-center">
       <AdminLoginForm
         nextPath={nextPath}
         loggedOut={isLoggedOut}

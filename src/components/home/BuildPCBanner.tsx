@@ -104,7 +104,7 @@ export function BuildPCBanner() {
           <article
             aria-roledescription="carousel"
             aria-label="Gaming accessories promotions"
-            className="group relative isolate min-h-55 overflow-hidden border border-white/10 bg-[#070909] sm:min-h-62.5"
+            className="group relative isolate min-h-55 overflow-hidden border border-white/10 bg-[#030505] sm:min-h-62.5"
           >
             <Image
               key={slide.image}
@@ -128,10 +128,10 @@ export function BuildPCBanner() {
               <p className="mb-2 font-display text-[7px] font-semibold uppercase tracking-[0.18em] text-white/65 sm:text-[8px]">
                 {slide.eyebrow}
               </p>
-              <h2 className="font-display text-[22px] font-bold uppercase leading-[1.05] text-white sm:text-[28px]">
+              <h2 className="font-display text-[22px] font-bold uppercase leading-[1.05] text-white/90 sm:text-[28px]">
                 {slide.firstLine}
                 <br />
-                {slide.secondPrefix} <span className="text-[#f1972e]">{slide.accent}</span>
+                {slide.secondPrefix} <span className="text-amber-600">{slide.accent}</span>
               </h2>
               <p className="mt-2 max-w-55 text-[9px] leading-[1.45] text-white/65 sm:text-[10px]">
                 {slide.description}
@@ -139,7 +139,7 @@ export function BuildPCBanner() {
               <div className="mt-3">
                 <Link
                   href={slide.href}
-                  className="group/link inline-flex w-fit items-center gap-2 border-b border-[#e88720]/70 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-[#f3a03e] transition hover:text-amber-200 sm:text-[9px]"
+                  className="group/link inline-flex w-fit items-center gap-2 border-b border-amber-600/70 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-amber-600 transition hover:text-amber-600 sm:text-[9px]"
                 >
                   {slide.action}
                   <ArrowRight size={12} className="transition-transform group-hover/link:translate-x-1" />
@@ -148,7 +148,7 @@ export function BuildPCBanner() {
             </div>
           </article>
 
-          <article className="group relative isolate min-h-55 overflow-hidden border border-white/10 bg-[#070909] sm:min-h-62.5">
+          <article className="group relative isolate min-h-55 overflow-hidden border border-white/10 bg-[#030505] sm:min-h-62.5">
             <Image
               key={pcSlide.image}
               src={pcSlide.image}
@@ -171,10 +171,10 @@ export function BuildPCBanner() {
               <p className="mb-2 font-display text-[7px] font-semibold uppercase tracking-[0.18em] text-white/65 sm:text-[8px]">
                 {pcSlide.eyebrow}
               </p>
-              <h2 className="font-display text-[22px] font-bold uppercase leading-[1.05] text-white sm:text-[28px]">
+              <h2 className="font-display text-[22px] font-bold uppercase leading-[1.05] text-white/90 sm:text-[28px]">
                 {pcSlide.firstLine}
                 <br />
-                <span className="text-[#f1972e]">{pcSlide.accent}</span>
+                <span className="text-amber-600">{pcSlide.accent}</span>
               </h2>
               <p className="mt-2 max-w-55 text-[9px] leading-[1.45] text-white/65 sm:text-[10px]">
                 {pcSlide.description}
@@ -182,7 +182,7 @@ export function BuildPCBanner() {
               <div className="mt-3">
                 <Link
                   href={pcSlide.href}
-                  className="group/link inline-flex w-fit items-center gap-2 border-b border-[#e88720]/70 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-[#f3a03e] transition hover:text-amber-200 sm:text-[9px]"
+                  className="group/link inline-flex w-fit items-center gap-2 border-b border-amber-600/70 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-amber-600 transition hover:text-amber-600 sm:text-[9px]"
                 >
                   {pcSlide.action}
                   <ArrowRight size={12} className="transition-transform group-hover/link:translate-x-1" />

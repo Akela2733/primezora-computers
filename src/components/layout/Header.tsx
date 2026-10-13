@@ -20,7 +20,7 @@ export function Header() {
     useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-amber-500/[0.14] bg-[#030505]/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-amber-600/[0.14] bg-[#030505]/95 backdrop-blur-xl">
 
       {/* ================================
           MAIN HEADER
@@ -74,12 +74,12 @@ export function Header() {
                   pl-11
                   pr-4
                   text-sm
-                  text-white
+                  text-white/90
                   outline-none
 
                   placeholder:text-white/25
 
-                  focus:border-amber-500/50
+                  focus:border-amber-600/50
                   focus:bg-white/[0.055]
                 "
               />
@@ -96,16 +96,16 @@ export function Header() {
             {/* Delivery */}
 
             {/* <details className="group relative hidden lg:block">
-              <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-lg border border-blue-400/15 bg-blue-500/[0.04] px-3 py-2 text-white/75 transition hover:border-blue-400/30 hover:bg-blue-500/[0.08] [&::-webkit-details-marker]:hidden">
-                <span className="relative flex h-8 w-8 items-center justify-center rounded-md border border-blue-400/20 bg-blue-500/10 text-blue-300">
+              <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-lg border border-amber-600/15 bg-amber-600/[0.04] px-3 py-2 text-white/75 transition hover:border-amber-600/30 hover:bg-amber-600/[0.08] [&::-webkit-details-marker]:hidden">
+                <span className="relative flex h-8 w-8 items-center justify-center rounded-md border border-amber-600/20 bg-amber-600/10 text-amber-600">
                   <MapPin size={15} />
-                  <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-[#050816] bg-emerald-400" />
+                  <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-[#030505] bg-emerald-400" />
                 </span>
                 <span className="flex flex-col items-start gap-0.5">
                   <span className="font-display text-[8px] font-medium tracking-[0.1em] text-white/40">
                     Islandwide Delivery
                   </span>
-                  <span className="font-display text-[11px] font-semibold tracking-[0.02em] text-white">
+                  <span className="font-display text-[11px] font-semibold tracking-[0.02em] text-white/90">
                     Sri Lanka
                   </span>
                 </span>
@@ -115,11 +115,11 @@ export function Header() {
                 />
               </summary>
 
-              <div className="absolute right-0 top-[calc(100%+12px)] z-50 w-[288px] overflow-hidden rounded-lg border border-blue-400/20 bg-[#071022]/[0.98] shadow-[0_18px_55px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/70 to-transparent" />
+              <div className="absolute right-0 top-[calc(100%+12px)] z-50 w-[288px] overflow-hidden rounded-lg border border-amber-600/20 bg-[#030505]/[0.98] shadow-[0_18px_55px_rgba(3,5,5,0.55)] backdrop-blur-xl">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-600/70 to-transparent" />
                 <div className="p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-display text-[9px] font-medium tracking-[0.12em] text-blue-200/65">
+                    <span className="font-display text-[9px] font-medium tracking-[0.12em] text-amber-600/65">
                       SHIPPING COVERAGE
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2 py-1 font-display text-[8px] tracking-[0.06em] text-emerald-300">
@@ -128,11 +128,11 @@ export function Header() {
                     </span>
                   </div>
                   <div className="mt-4 flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-300">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-amber-600/10 text-amber-600">
                       <Truck size={17} />
                     </div>
                     <div>
-                      <p className="font-display text-sm font-semibold text-white">
+                      <p className="font-display text-sm font-semibold text-white/90">
                         Sri Lanka
                       </p>
                       <p className="mt-1 text-xs leading-5 text-white/50">
@@ -144,10 +144,10 @@ export function Header() {
                 <div className="border-t border-white/[0.07] p-3">
                   <Link
                     href="/contact"
-                    className="flex items-center justify-between rounded-md px-2 py-2 text-xs text-white/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="flex items-center justify-between rounded-md px-2 py-2 text-xs text-white/65 transition hover:bg-white/[0.04] hover:text-white/90"
                   >
                     <span>Delivery questions?</span>
-                    <span className="font-display inline-flex items-center gap-1.5 font-medium text-blue-300">
+                    <span className="font-display inline-flex items-center gap-1.5 font-medium text-amber-600">
                       Contact us <ArrowRight size={13} />
                     </span>
                   </Link>
@@ -168,7 +168,7 @@ export function Header() {
                 transition
 
                 hover:bg-white/[0.05]
-                hover:text-white
+                hover:text-white/90
 
                 sm:block
               "
@@ -190,7 +190,7 @@ export function Header() {
                 transition
 
                 hover:bg-white/[0.05]
-                hover:text-white
+                hover:text-white/90
               "
             >
 
@@ -211,7 +211,7 @@ export function Header() {
                 transition
 
                 hover:bg-white/[0.05]
-                hover:text-white
+                hover:text-white/90
               "
             >
 
@@ -231,13 +231,13 @@ export function Header() {
 
                   rounded-full
 
-                  bg-[#f49a32]
+                  bg-amber-600
 
                   px-1
 
                   text-[9px]
                   font-bold
-                  text-white
+                  text-white/90
                 "
               >
                 0
@@ -260,7 +260,7 @@ export function Header() {
                 text-white/60
 
                 hover:bg-white/[0.05]
-                hover:text-white
+                hover:text-white/90
 
                 md:hidden
               "
@@ -321,11 +321,11 @@ export function Header() {
                 text-xs
                 font-semibold
                 tracking-[0.04em]
-                text-blue-400
+                text-amber-600
 
                 transition
 
-                hover:text-blue-300
+                hover:text-amber-600
               "
             >
               DEALS
@@ -348,7 +348,7 @@ export function Header() {
           className="
             border-t
             border-white/[0.07]
-            bg-[#071022]
+            bg-[#030505]
             md:hidden
           "
         >
@@ -455,7 +455,7 @@ function NavLink({
 
         transition
 
-        hover:text-white
+        hover:text-white/90
       "
     >
       {label}
@@ -495,7 +495,7 @@ function MobileLink({
         transition
 
         hover:bg-white/[0.05]
-        hover:text-white
+        hover:text-white/90
       "
     >
       {label}

@@ -23,12 +23,12 @@ function SearchPageContent({
   ];
 
   return (
-    <main className="min-h-screen bg-[#05080b] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
       {/* HERO */}
-      <section className="border-b border-white/[0.06] bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.10),transparent_42%)]">
+      <section className="border-b border-white/[0.06] bg-[radial-gradient(circle_at_50%_0%,rgba(217,119,6,0.10),transparent_42%)]">
         <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <p className="font-display text-[9px] font-bold uppercase tracking-[0.28em] text-orange-400">
+            <p className="font-display text-[9px] font-bold uppercase tracking-[0.28em] text-amber-600">
               PRIMEZORA / SEARCH
             </p>
 
@@ -51,7 +51,7 @@ function SearchPageContent({
             <div className="relative">
               <Search
                 size={19}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-orange-400"
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-amber-600"
               />
 
               <input
@@ -60,12 +60,12 @@ function SearchPageContent({
                 defaultValue={query}
                 autoFocus
                 placeholder="Search products, brands or categories..."
-                className="h-14 w-full border border-white/10 bg-white/[0.045] pl-12 pr-28 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-orange-500/50 focus:bg-white/[0.06]"
+                className="h-14 w-full border border-white/10 bg-white/[0.045] pl-12 pr-28 text-sm text-white/90 outline-none transition placeholder:text-white/25 focus:border-amber-600/50 focus:bg-white/[0.06]"
               />
 
               <button
                 type="submit"
-                className="absolute right-2 top-2 flex h-10 items-center justify-center bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-orange-400"
+                className="absolute right-2 top-2 flex h-10 items-center justify-center bg-amber-600 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-amber-600"
               >
                 Search
               </button>
@@ -82,7 +82,7 @@ function SearchPageContent({
               <Link
                 key={item}
                 href={`/search?q=${encodeURIComponent(item)}`}
-                className="border border-white/10 bg-white/[0.025] px-3 py-1.5 text-[10px] text-white/50 transition hover:border-orange-500/30 hover:text-orange-300"
+                className="border border-white/10 bg-white/[0.025] px-3 py-1.5 text-[10px] text-white/50 transition hover:border-amber-600/30 hover:text-amber-600"
               >
                 {item}
               </Link>
@@ -95,10 +95,10 @@ function SearchPageContent({
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {!query ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center border border-dashed border-white/10 bg-white/[0.015] px-6 text-center">
-            <div className="flex h-16 w-16 items-center justify-center border border-orange-500/20 bg-orange-500/[0.06]">
+            <div className="flex h-16 w-16 items-center justify-center border border-amber-600/20 bg-amber-600/[0.06]">
               <Search
                 size={25}
-                className="text-orange-400/70"
+                className="text-amber-600/70"
               />
             </div>
 
@@ -120,14 +120,14 @@ function SearchPageContent({
                   Search results
                 </p>
 
-                <h2 className="mt-2 font-display text-lg font-bold uppercase tracking-tight text-white sm:text-xl">
+                <h2 className="mt-2 font-display text-lg font-bold uppercase tracking-tight text-white/90 sm:text-xl">
                   {results.length}{" "}
                   {results.length === 1 ? "Product" : "Products"}
                 </h2>
 
                 <p className="mt-1 text-xs text-white/35">
                   Results for{" "}
-                  <span className="text-orange-300">
+                  <span className="text-amber-600">
                     &quot;{query}&quot;
                   </span>
                 </p>
@@ -135,7 +135,7 @@ function SearchPageContent({
 
               <Link
                 href="/search"
-                className="inline-flex w-fit items-center gap-2 border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-white/45 transition hover:border-orange-500/30 hover:text-orange-300"
+                className="inline-flex w-fit items-center gap-2 border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-white/45 transition hover:border-amber-600/30 hover:text-amber-600"
               >
                 <X size={12} />
                 Clear Search
@@ -171,7 +171,7 @@ function SearchPageContent({
 
                 <Link
                   href="/shop"
-                  className="mt-6 inline-flex items-center gap-2 bg-orange-500 px-5 py-3 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-orange-400"
+                  className="mt-6 inline-flex items-center gap-2 bg-amber-600 px-5 py-3 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-amber-600"
                 >
                   <ArrowLeft size={13} />
                   Browse Shop

@@ -217,7 +217,7 @@ export default function ShopPageClient() {
             </div>
 
             {totalProducts > 0 && (
-              <span className="hidden text-[8px] uppercase tracking-[0.14em] text-orange-400/70 sm:block">
+              <span className="hidden text-[8px] uppercase tracking-[0.14em] text-amber-600/70 sm:block">
                 Page {safePage} /{" "}
                 {totalPages}
               </span>
@@ -332,7 +332,7 @@ function Pagination({
             currentPage - 1
           )
         }
-        className="flex h-9 min-w-9 items-center justify-center border border-white/10 px-3 text-[8px] uppercase tracking-[0.1em] text-white/40 transition hover:border-orange-500/30 hover:text-orange-400 disabled:pointer-events-none disabled:opacity-20"
+        className="flex h-9 min-w-9 items-center justify-center border border-white/10 px-3 text-[8px] uppercase tracking-[0.1em] text-white/40 transition hover:border-amber-600/30 hover:text-amber-600 disabled:pointer-events-none disabled:opacity-20"
       >
         Prev
       </button>
@@ -411,7 +411,7 @@ function Pagination({
             currentPage + 1
           )
         }
-        className="flex h-9 min-w-9 items-center justify-center border border-white/10 px-3 text-[8px] uppercase tracking-[0.1em] text-white/40 transition hover:border-orange-500/30 hover:text-orange-400 disabled:pointer-events-none disabled:opacity-20"
+        className="flex h-9 min-w-9 items-center justify-center border border-white/10 px-3 text-[8px] uppercase tracking-[0.1em] text-white/40 transition hover:border-amber-600/30 hover:text-amber-600 disabled:pointer-events-none disabled:opacity-20"
       >
         Next
       </button>
@@ -438,8 +438,8 @@ function PageButton({
       }
       className={`flex h-9 w-9 items-center justify-center border text-[9px] font-bold transition ${
         active
-          ? "border-orange-500 bg-orange-500 text-black"
-          : "border-white/10 text-white/40 hover:border-orange-500/30 hover:text-orange-400"
+          ? "border-amber-600 bg-amber-600 text-black"
+          : "border-white/10 text-white/40 hover:border-amber-600/30 hover:text-amber-600"
       }`}
     >
       {page}
@@ -458,7 +458,7 @@ function EmptyState({
 }) {
   return (
     <div className="flex min-h-[380px] flex-col items-center justify-center border border-white/[0.07] bg-white/[0.015] px-6 text-center">
-      <div className="flex h-14 w-14 items-center justify-center border border-white/10 text-orange-400/50">
+      <div className="flex h-14 w-14 items-center justify-center border border-white/10 text-amber-600/50">
         <span className="text-lg">
           0
         </span>
@@ -477,7 +477,7 @@ function EmptyState({
       <button
         type="button"
         onClick={onClear}
-        className="mt-6 h-10 bg-orange-500 px-5 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-orange-400"
+        className="mt-6 h-10 bg-amber-600 px-5 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
       >
         Clear Filters
       </button>

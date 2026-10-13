@@ -25,7 +25,7 @@ export function AdminHeaderBar() {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-white/[0.08] bg-[#04070c]/90 backdrop-blur-md sticky top-0 z-40">
+    <header className="border-b border-white/[0.08] bg-[#030505]/90 backdrop-blur-md sticky top-0 z-40">
       <div className="container-primezora flex h-14 items-center justify-between gap-4">
         {/* Left: Brand & Badge */}
         <div className="flex items-center gap-3">
@@ -33,11 +33,11 @@ export function AdminHeaderBar() {
             href="/admin"
             className="flex items-center gap-2 group"
           >
-            <div className="flex h-7 w-7 items-center justify-center border border-orange-500/30 bg-orange-500/10 text-orange-400 group-hover:border-orange-500/60 transition">
+            <div className="flex h-7 w-7 items-center justify-center border border-amber-600/30 bg-amber-600/10 text-amber-600 group-hover:border-amber-600/60 transition">
               <ShieldCheck size={14} />
             </div>
-            <span className="font-display text-[10px] font-bold uppercase tracking-[0.25em] text-white">
-              Primezora <span className="text-orange-400">Admin</span>
+            <span className="font-display text-[10px] font-bold uppercase tracking-[0.25em] text-white/90">
+              Primezora <span className="text-amber-600">Admin</span>
             </span>
           </Link>
 
@@ -47,7 +47,7 @@ export function AdminHeaderBar() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] text-white/40 hover:text-white transition"
+            className="hidden md:inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] text-white/40 hover:text-white/90 transition"
           >
             <span>Live Store</span>
             <ExternalLink size={10} />
@@ -68,8 +68,8 @@ export function AdminHeaderBar() {
                 href={item.href}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.15em] transition border ${
                   isActive
-                    ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
-                    : "border-transparent text-white/45 hover:text-white hover:border-white/10"
+                    ? "border-amber-600/40 bg-amber-600/10 text-amber-600"
+                    : "border-transparent text-white/45 hover:text-white/90 hover:border-white/10"
                 }`}
               >
                 <Icon size={12} />

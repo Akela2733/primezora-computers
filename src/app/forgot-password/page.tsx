@@ -23,8 +23,8 @@ export default async function ForgotPasswordPage({
   const nextPath = getSafeCustomerRedirectPath(rawNext);
 
   return (
-    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-[#05090f] px-4 py-12 text-white">
-      <div className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-[#030505] px-4 py-12 text-white/90">
+      <div className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#030505]/90 p-8 text-center shadow-[0_20px_60px_rgba(3,5,5,0.6)]">
         <h1 className="text-2xl font-bold">Password recovery unavailable</h1>
         <p className="mt-4 text-sm leading-6 text-white/60">
           We do not currently have an active email delivery service configured for customer password resets.
@@ -36,13 +36,13 @@ export default async function ForgotPasswordPage({
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             href={`/login?next=${encodeURIComponent(nextPath)}`}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white transition hover:border-amber-500/40 hover:text-amber-300"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-amber-600/40 hover:text-amber-600"
           >
             Back to sign in
           </Link>
           <a
             href="mailto:support@primezora.com"
-            className="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500"
+            className="rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600"
           >
             Contact support
           </a>

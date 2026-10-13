@@ -131,7 +131,7 @@ export default function ShopClient({
   ]);
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
 
       {/* =====================================================
           HERO
@@ -141,7 +141,7 @@ export default function ShopClient({
 
         <div className="container-primezora py-14 sm:py-20">
 
-          <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-orange-400">
+          <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
             Primezora Store
           </p>
 
@@ -164,7 +164,7 @@ export default function ShopClient({
             </div>
 
             <div className="text-left lg:text-right">
-              <p className="font-display text-2xl font-bold text-orange-400">
+              <p className="font-display text-2xl font-bold text-amber-600">
                 {products.length}
               </p>
 
@@ -201,7 +201,7 @@ export default function ShopClient({
                   setSearch(event.target.value)
                 }
                 placeholder="Search products..."
-                className="h-11 w-full border border-white/[0.1] bg-white/[0.02] px-4 text-xs text-white outline-none placeholder:text-white/25 focus:border-orange-500/50"
+                className="h-11 w-full border border-white/[0.1] bg-white/[0.02] px-4 text-xs text-white/90 outline-none placeholder:text-white/25 focus:border-amber-600/50"
               />
 
             </div>
@@ -216,7 +216,7 @@ export default function ShopClient({
                 onChange={(event) =>
                   setCategory(event.target.value)
                 }
-                className="h-11 border border-white/[0.1] bg-[#080d13] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-orange-500/50"
+                className="h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50"
               >
                 <option value="ALL">
                   All Categories
@@ -240,7 +240,7 @@ export default function ShopClient({
                 onChange={(event) =>
                   setBrand(event.target.value)
                 }
-                className="h-11 border border-white/[0.1] bg-[#080d13] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-orange-500/50"
+                className="h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50"
               >
                 <option value="ALL">
                   All Brands
@@ -264,7 +264,7 @@ export default function ShopClient({
                 onChange={(event) =>
                   setSort(event.target.value)
                 }
-                className="col-span-2 h-11 border border-white/[0.1] bg-[#080d13] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-orange-500/50 sm:col-span-1"
+                className="col-span-2 h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50 sm:col-span-1"
               >
                 <option value="featured">
                   Featured
@@ -322,7 +322,7 @@ export default function ShopClient({
                 setCategory("ALL");
                 setBrand("ALL");
               }}
-              className="text-[8px] font-bold uppercase tracking-[0.15em] text-orange-400 hover:text-orange-300"
+              className="text-[8px] font-bold uppercase tracking-[0.15em] text-amber-600 hover:text-amber-600"
             >
               Clear filters
             </button>
@@ -365,7 +365,7 @@ export default function ShopClient({
                 setCategory("ALL");
                 setBrand("ALL");
               }}
-              className="mt-5 border border-orange-500/30 px-5 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-orange-400 transition hover:bg-orange-500 hover:text-black"
+              className="mt-5 border border-amber-600/30 px-5 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-amber-600 transition hover:bg-amber-600 hover:text-black"
             >
               Reset Filters
             </button>

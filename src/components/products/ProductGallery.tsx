@@ -27,7 +27,7 @@ export default function ProductGallery({
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square overflow-hidden border border-white/[0.07] bg-[#080d13]">
+      <div className="relative aspect-square overflow-hidden border border-white/[0.07] bg-[#030505]">
         <Image
           src={activeImage}
           alt={productName}
@@ -48,7 +48,7 @@ export default function ProductGallery({
               onClick={() => setActiveIndex(index)}
               className={`relative aspect-square overflow-hidden border transition ${
                 activeIndex === index
-                  ? "border-orange-500"
+                  ? "border-amber-600"
                   : "border-white/[0.07] hover:border-white/20"
               }`}
               aria-label={`View product image ${index + 1}`}

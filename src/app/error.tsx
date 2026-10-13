@@ -8,8 +8,8 @@ export default function ApplicationError({
 }) {
   return (
     <main className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-12">
-      <section className="w-full max-w-xl border border-white/8 bg-[#080d13] p-8 text-center text-white">
-        <p className="font-display text-[9px] uppercase tracking-[0.25em] text-orange-400">
+      <section className="w-full max-w-xl border border-white/8 bg-[#030505] p-8 text-center text-white/90">
+        <p className="font-display text-[9px] uppercase tracking-[0.25em] text-amber-600">
           Service temporarily unavailable
         </p>
         <h1 className="mt-3 font-display text-2xl font-bold">
@@ -21,7 +21,7 @@ export default function ApplicationError({
         <button
           type="button"
           onClick={reset}
-          className="mt-7 border border-amber-500 bg-amber-500 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-black transition hover:bg-amber-400"
+          className="mt-7 border border-amber-600 bg-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-black transition hover:bg-amber-600"
         >
           Try again
         </button>

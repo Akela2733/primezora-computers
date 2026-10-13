@@ -68,7 +68,7 @@ const isWishlisted = isInWishlist(
   };
 
   return (
-    <main className="min-h-screen bg-[#05090f] text-white">
+    <main className="min-h-screen bg-[#030505] text-white/90">
 
       {/* =====================================================
           BREADCRUMB + PRODUCT
@@ -82,7 +82,7 @@ const isWishlisted = isInWishlist(
 
           <Link
             href="/"
-            className="transition-colors hover:text-orange-400"
+            className="transition-colors hover:text-amber-600"
           >
             Home
           </Link>
@@ -91,7 +91,7 @@ const isWishlisted = isInWishlist(
 
           <Link
             href="/shop"
-            className="transition-colors hover:text-orange-400"
+            className="transition-colors hover:text-amber-600"
           >
             Shop
           </Link>
@@ -102,14 +102,14 @@ const isWishlisted = isInWishlist(
             href={`/shop?category=${encodeURIComponent(
               product.category
             )}`}
-            className="transition-colors hover:text-orange-400"
+            className="transition-colors hover:text-amber-600"
           >
             {product.category}
           </Link>
 
           <ChevronRight size={11} />
 
-          <span className="max-w-[220px] truncate text-orange-400/70">
+          <span className="max-w-[220px] truncate text-amber-600/70">
             {product.name}
           </span>
 
@@ -153,14 +153,14 @@ const isWishlisted = isInWishlist(
 
             {/* Brand */}
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-orange-400">
+            <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-amber-600">
               {product.brand}
             </p>
 
 
             {/* Product name */}
 
-            <h1 className="mt-3 max-w-xl text-3xl font-bold leading-[1.08] tracking-[-0.025em] text-white sm:text-4xl xl:text-[42px]">
+            <h1 className="mt-3 max-w-xl text-3xl font-bold leading-[1.08] tracking-[-0.025em] text-white/90 sm:text-4xl xl:text-[42px]">
               {product.name}
             </h1>
 
@@ -178,7 +178,7 @@ const isWishlisted = isInWishlist(
                     className={
                       star <=
                       Math.round(product.rating)
-                        ? "fill-orange-400 text-orange-400"
+                        ? "fill-amber-600 text-amber-600"
                         : "text-white/15"
                     }
                   />
@@ -208,7 +208,7 @@ const isWishlisted = isInWishlist(
 
             <div className="flex flex-wrap items-center gap-3">
 
-              <span className="text-3xl font-bold tracking-tight text-orange-400 sm:text-[34px]">
+              <span className="text-3xl font-bold tracking-tight text-amber-600 sm:text-[34px]">
                 LKR{" "}
                 {product.price.toLocaleString(
                   "en-LK"
@@ -302,7 +302,7 @@ const isWishlisted = isInWishlist(
                       type="button"
                       aria-label="Decrease quantity"
                       onClick={decreaseQuantity}
-                      className="flex w-10 items-center justify-center text-white/40 transition-colors hover:text-orange-400"
+                      className="flex w-10 items-center justify-center text-white/40 transition-colors hover:text-amber-600"
                     >
                       <Minus size={14} />
                     </button>
@@ -315,7 +315,7 @@ const isWishlisted = isInWishlist(
                       type="button"
                       aria-label="Increase quantity"
                       onClick={increaseQuantity}
-                      className="flex w-10 items-center justify-center text-white/40 transition-colors hover:text-orange-400"
+                      className="flex w-10 items-center justify-center text-white/40 transition-colors hover:text-amber-600"
                     >
                       <Plus size={14} />
                     </button>
@@ -334,7 +334,7 @@ const isWishlisted = isInWishlist(
                       !isPurchasable ||
                       quantity > stockQuantity
                     }
-                    className="flex h-12 flex-1 items-center justify-center gap-2 bg-orange-500 px-5 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
+                    className="flex h-12 flex-1 items-center justify-center gap-2 bg-amber-600 px-5 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
                   >
                     <ShoppingCart size={14} />
 
@@ -350,15 +350,15 @@ const isWishlisted = isInWishlist(
                   onClick={() => toggleWishlist(product)}
                   className={`flex h-12 w-12 items-center justify-center border transition ${
                     isWishlisted
-                      ? "border-orange-500/40 bg-orange-500/10 text-orange-400"
-                      : "border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-500/30 hover:text-orange-400"
+                      ? "border-amber-600/40 bg-amber-600/10 text-amber-600"
+                      : "border-white/10 bg-white/[0.03] text-white/50 hover:border-amber-600/30 hover:text-amber-600"
                   }`}
                 >
                   <Heart
                     size={18}
                     className={
                       isWishlisted
-                        ? "fill-orange-400 text-orange-400"
+                        ? "fill-amber-600 text-amber-600"
                         : ""
                     }
                   />
@@ -409,7 +409,7 @@ const isWishlisted = isInWishlist(
           PRODUCT INFORMATION
       ===================================================== */}
 
-      <section className="border-y border-white/[0.07] bg-[#060a0f]">
+      <section className="border-y border-white/[0.07] bg-[#030505]">
 
         <div className="container-primezora py-12 sm:py-16">
 
@@ -419,7 +419,7 @@ const isWishlisted = isInWishlist(
 
             <div>
 
-              <p className="text-[8px] uppercase tracking-[0.28em] text-orange-400">
+              <p className="text-[8px] uppercase tracking-[0.28em] text-amber-600">
                 Product information
               </p>
 
@@ -555,7 +555,7 @@ const isWishlisted = isInWishlist(
 
               <div>
 
-                <p className="text-[8px] uppercase tracking-[0.28em] text-orange-400">
+                <p className="text-[8px] uppercase tracking-[0.28em] text-amber-600">
                   Explore more
                 </p>
 
@@ -567,7 +567,7 @@ const isWishlisted = isInWishlist(
 
               <Link
                 href="/shop"
-                className="hidden items-center gap-2 text-[8px] font-bold uppercase tracking-[0.18em] text-white/35 transition-colors hover:text-orange-400 sm:flex"
+                className="hidden items-center gap-2 text-[8px] font-bold uppercase tracking-[0.18em] text-white/35 transition-colors hover:text-amber-600 sm:flex"
               >
                 View All Products
 
@@ -616,7 +616,7 @@ function ServiceFeature({
   return (
     <div className="border-b border-white/[0.07] p-4 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
 
-      <div className="text-orange-400">
+      <div className="text-amber-600">
         {icon}
       </div>
 
@@ -684,7 +684,7 @@ function TrustItem({
   return (
     <div className="border-b border-white/[0.07] p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
 
-      <div className="text-orange-400">
+      <div className="text-amber-600">
         {icon}
       </div>
 

@@ -118,12 +118,12 @@ export default function LoginForm({
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#070b12]/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-8">
+    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#030505]/90 p-6 shadow-[0_20px_60px_rgba(3,5,5,0.6)] backdrop-blur-2xl sm:p-8">
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-600/20 bg-amber-600/10 text-amber-600 shadow-[0_0_25px_rgba(217,119,6,0.15)]">
           <ShieldCheck size={28} />
         </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-white/90">
           Sign In
         </h1>
         <p className="mt-2 text-sm text-white/50">
@@ -134,15 +134,15 @@ export default function LoginForm({
       </div>
 
       {loggedOut && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-xs text-blue-300">
-          <CheckCircle2 size={17} className="shrink-0 text-blue-400" />
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-xs text-amber-600">
+          <CheckCircle2 size={17} className="shrink-0 text-amber-600" />
           <div className="flex-1 leading-relaxed">You have been logged out safely.</div>
         </div>
       )}
 
       {registered && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 text-xs text-blue-200">
-          <CheckCircle2 size={17} className="shrink-0 text-blue-300" />
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-xs text-amber-600">
+          <CheckCircle2 size={17} className="shrink-0 text-amber-600" />
           <div className="flex-1 leading-relaxed">
             Your account is ready. Sign in below or{" "}
             <a
@@ -187,7 +187,7 @@ export default function LoginForm({
                 setError(null);
               }}
               placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
             />
           </div>
         </div>
@@ -199,7 +199,7 @@ export default function LoginForm({
             </label>
             <Link
               href={`/forgot-password?next=${encodeURIComponent(nextPath)}`}
-              className="text-[11px] font-medium text-amber-400 transition hover:text-amber-300 hover:underline"
+              className="text-[11px] font-medium text-amber-600 transition hover:text-amber-600 hover:underline"
             >
               Forgot password?
             </Link>
@@ -220,13 +220,13 @@ export default function LoginForm({
                 setError(null);
               }}
               placeholder="Enter your password"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white placeholder-white/20 transition focus:border-amber-500/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
             />
             <button
               type="button"
               aria-label={showPassword ? "Hide password" : "Show password"}
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition hover:text-white/90"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -238,7 +238,7 @@ export default function LoginForm({
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-amber-500 disabled:opacity-50"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -258,7 +258,7 @@ export default function LoginForm({
         Don&apos;t have an account?{" "}
         <Link
           href={`/register?next=${encodeURIComponent(nextPath)}`}
-          className="font-medium text-amber-400 transition hover:text-amber-300 hover:underline"
+          className="font-medium text-amber-600 transition hover:text-amber-600 hover:underline"
         >
           Create One
         </Link>

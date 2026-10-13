@@ -29,11 +29,11 @@ export default async function ProfilePage() {
       <div className="mx-auto max-w-2xl">
         {/* Page header */}
         <div className="mb-8 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/25 bg-amber-500/10 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-600/25 bg-amber-600/10 text-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.15)]">
             <User size={22} />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-white/90">
               Edit Profile
             </h1>
             <p className="mt-0.5 text-xs text-white/40">
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* Editor card */}
-        <div className="rounded-2xl border border-white/[0.08] bg-[#080d13] p-6 md:p-8 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#030505] p-6 md:p-8 backdrop-blur-xl">
           <ProfileEditor
             initialProfile={{
               id: customer.id,
