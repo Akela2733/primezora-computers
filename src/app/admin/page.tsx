@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   ArrowRight,
   FileText,
+  Tags,
 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
@@ -236,6 +237,13 @@ export default async function AdminDashboard() {
           </h2>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
+
+            <AdminLink
+              href="/admin/categories"
+              icon={<Tags size={20} />}
+              title="Categories"
+              description="Create, edit and activate the categories shown in the storefront."
+            />
 
             <AdminLink
               href="/admin/products"

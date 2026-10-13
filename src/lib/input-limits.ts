@@ -34,6 +34,14 @@ export const INPUT_LIMITS = {
     badge: 100,
     search: 100,
   },
+  category: {
+    id: 191,
+    name: 100,
+    slug: 100,
+    description: 1_000,
+    image: 2_048,
+    search: 100,
+  },
   catalog: {
     search: 100,
     category: 100,
