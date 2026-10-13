@@ -6,6 +6,7 @@ import {
   Banknote,
   AlertTriangle,
   ArrowRight,
+  FileText,
 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
@@ -241,6 +242,13 @@ export default async function AdminDashboard() {
               icon={<Package size={20} />}
               title="Products"
               description="Add, edit, remove and manage product inventory."
+            />
+
+            <AdminLink
+              href="/admin/content"
+              icon={<FileText size={20} />}
+              title="Storefront Content"
+              description="Edit homepage banners, page copy and contact details."
             />
 
             <AdminLink

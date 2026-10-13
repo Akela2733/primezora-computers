@@ -3,25 +3,22 @@ import { Search, X, ArrowLeft } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { getStorefrontContent } from "@/lib/storefront-content";
 import { ProductCard } from "@/components/shop/ProductCard";
 import type { Product } from "@/types/product";
+import type { StorefrontContent } from "@/lib/storefront-content";
 
 function SearchPageContent({
   query,
   results,
+  popularSearches,
+  content,
 }: {
   query: string;
   results: Product[];
+  popularSearches: string[];
+  content: StorefrontContent["search"];
 }) {
-
-  const popularSearches = [
-    "RTX 4060",
-    "Ryzen",
-    "Gaming",
-    "Keyboard",
-    "Mouse",
-  ];
-
   return (
     <main className="min-h-screen bg-[#030505] text-white/90">
       {/* HERO */}
@@ -29,16 +26,15 @@ function SearchPageContent({
         <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <p className="font-display text-[9px] font-bold uppercase tracking-[0.28em] text-amber-600">
-              PRIMEZORA / SEARCH
+              {content.eyebrow}
             </p>
 
             <h1 className="mt-4 font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl lg:text-5xl">
-              Find Your Gear
+              {content.title}
             </h1>
 
             <p className="mt-4 max-w-xl text-sm leading-6 text-white/45">
-              Search PC components, gaming accessories and technology
-              products available at Primezora Technologies.
+              {content.description}
             </p>
           </div>
 
@@ -59,7 +55,7 @@ function SearchPageContent({
                 name="q"
                 defaultValue={query}
                 autoFocus
-                placeholder="Search products, brands or categories..."
+                placeholder={content.inputPlaceholder}
                 className="h-14 w-full border border-white/10 bg-white/[0.045] pl-12 pr-28 text-sm text-white/90 outline-none transition placeholder:text-white/25 focus:border-amber-600/50 focus:bg-white/[0.06]"
               />
 
@@ -67,7 +63,7 @@ function SearchPageContent({
                 type="submit"
                 className="absolute right-2 top-2 flex h-10 items-center justify-center bg-amber-600 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-amber-600"
               >
-                Search
+                {content.submitLabel}
               </button>
             </div>
           </form>
@@ -75,7 +71,7 @@ function SearchPageContent({
           {/* POPULAR SEARCHES */}
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <span className="mr-1 text-[9px] uppercase tracking-[0.15em] text-white/25">
-              Popular:
+              {content.popularLabel}
             </span>
 
             {popularSearches.map((item) => (
@@ -103,12 +99,11 @@ function SearchPageContent({
             </div>
 
             <h2 className="mt-6 font-display text-sm font-bold uppercase tracking-[0.12em] text-white/80">
-              Start Searching
+              {content.startTitle}
             </h2>
 
             <p className="mt-2 max-w-md text-xs leading-5 text-white/35">
-              Search for a product, brand or category to explore the
-              Primezora catalog.
+              {content.startDescription}
             </p>
           </div>
         ) : (
@@ -117,16 +112,18 @@ function SearchPageContent({
             <div className="mb-7 flex flex-col gap-4 border-b border-white/[0.06] pb-5 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.16em] text-white/30">
-                  Search results
+                  {content.resultsLabel}
                 </p>
 
                 <h2 className="mt-2 font-display text-lg font-bold uppercase tracking-tight text-white/90 sm:text-xl">
                   {results.length}{" "}
-                  {results.length === 1 ? "Product" : "Products"}
+                  {results.length === 1
+                    ? content.singularProductLabel
+                    : content.pluralProductsLabel}
                 </h2>
 
                 <p className="mt-1 text-xs text-white/35">
-                  Results for{" "}
+                  {content.resultForLabel}{" "}
                   <span className="text-amber-600">
                     &quot;{query}&quot;
                   </span>
@@ -138,7 +135,7 @@ function SearchPageContent({
                 className="inline-flex w-fit items-center gap-2 border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.12em] text-white/45 transition hover:border-amber-600/30 hover:text-amber-600"
               >
                 <X size={12} />
-                Clear Search
+                {content.clearLabel}
               </Link>
             </div>
 
@@ -161,12 +158,11 @@ function SearchPageContent({
                 </div>
 
                 <h2 className="mt-6 font-display text-sm font-bold uppercase tracking-[0.12em] text-white/75">
-                  No Products Found
+                  {content.noProductsTitle}
                 </h2>
 
                 <p className="mt-2 max-w-md text-xs leading-5 text-white/35">
-                  We couldn&apos;t find anything matching &quot;{query}&quot;.
-                  Try another product name, brand or category.
+                  {content.noProductsDescription.replace("{query}", query)}
                 </p>
 
                 <Link
@@ -174,7 +170,7 @@ function SearchPageContent({
                   className="mt-6 inline-flex items-center gap-2 bg-amber-600 px-5 py-3 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-amber-600"
                 >
                   <ArrowLeft size={13} />
-                  Browse Shop
+                  {content.browseShopLabel}
                 </Link>
               </div>
             )}
@@ -198,47 +194,54 @@ export default async function SearchPage({
       ? params.q.trim()
       : "";
 
-  const productRecords = query
-    ? await prisma.product.findMany({
-        where: {
-          inStock: true,
-          OR: [
-            {
-              name: {
-                contains: query,
-                mode: "insensitive",
-              },
+  const [productRecords, brandRecords, categoryRecords, content] =
+    await Promise.all([
+      query
+        ? prisma.product.findMany({
+            where: {
+              OR: [
+                { name: { contains: query, mode: "insensitive" } },
+                { brand: { contains: query, mode: "insensitive" } },
+                { category: { contains: query, mode: "insensitive" } },
+                { slug: { contains: query, mode: "insensitive" } },
+              ],
             },
-            {
-              brand: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-            {
-              category: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-            {
-              slug: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      })
-    : [];
+            orderBy: { createdAt: "desc" },
+          })
+        : Promise.resolve([]),
+      prisma.product.findMany({
+        distinct: ["brand"],
+        select: { brand: true },
+        orderBy: { brand: "asc" },
+      }),
+      prisma.product.findMany({
+        distinct: ["category"],
+        select: { category: true },
+        orderBy: { category: "asc" },
+      }),
+      getStorefrontContent(),
+    ]);
+
+  if (!content) {
+    throw new Error("Storefront content is missing from the database.");
+  }
+  const popularSearches = Array.from(
+    new Set(
+      [
+        ...categoryRecords.map(({ category }) => category),
+        ...brandRecords.map(({ brand }) => brand),
+      ]
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )
+  ).slice(0, 5);
 
   return (
     <SearchPageContent
       query={query}
       results={productRecords.map(toProductView)}
+      popularSearches={popularSearches}
+      content={content.search}
     />
   );
 }

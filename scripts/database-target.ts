@@ -7,6 +7,9 @@ type DatabaseEnvironment = Record<string, string | undefined>;
 type TestDatabaseEnvironment = {
   DATABASE_URL_TEST?: string;
   DIRECT_DATABASE_URL_TEST?: string;
+  ADMIN_EMAIL?: string;
+  ADMIN_PASSWORD_HASH?: string;
+  ADMIN_SESSION_SECRET?: string;
 };
 
 function readTestDatabaseEnvironment(): TestDatabaseEnvironment {
@@ -201,6 +204,18 @@ export function configureDatabaseTarget(
   env.DATABASE_URL = env.DATABASE_URL_TEST;
   env.DIRECT_DATABASE_URL = env.DIRECT_DATABASE_URL_TEST;
   env.DIRECT_URL = env.DIRECT_DATABASE_URL_TEST;
+  for (const key of [
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD_HASH",
+    "ADMIN_SESSION_SECRET",
+  ] as const) {
+    const value = testEnv[key]?.trim();
+    if (value) {
+      env[key] = value;
+    } else {
+      delete env[key];
+    }
+  }
   return "test";
 }
 

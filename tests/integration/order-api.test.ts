@@ -29,12 +29,6 @@ import {
   resolveCustomerSession,
 } from "../../src/lib/customer-session-authorization";
 import {
-  CATEGORY_CONFIG,
-  getCategoryHref,
-  getHeaderCategories,
-  getSupportedCategories,
-} from "../../src/lib/categories";
-import {
   CUSTOMER_SESSION_COOKIE,
   createCustomerSessionToken,
 } from "../../src/lib/customer-session";
@@ -96,6 +90,13 @@ let baseUrl = "";
 let testDistDirCreated = false;
 const createdCustomers: { id: string; email: string }[] = [];
 let createdProduct: { id: string; slug: string } | undefined;
+let createdEmptyCategory: { id: string; slug: string } | undefined;
+let createdProductCategory: { id: string; slug: string } | undefined;
+let createdOutOfStockProduct: {
+  id: string;
+  slug: string;
+  name: string;
+} | undefined;
 let createdStockRestoreProduct: { id: string; slug: string } | undefined;
 let createdIdempotencyProduct: { id: string; slug: string } | undefined;
 let createdOrderId: string | undefined;
@@ -238,6 +239,24 @@ function adminHeaders(token: string): HeadersInit {
   return { cookie: cookie(adminCookieName, token) };
 }
 
+function categorySlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+async function expectedCatalogCategoryHrefs(): Promise<Set<string>> {
+  const categories = await prisma.category.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  });
+  return new Set(
+    categories.map((category) => `/categories/${categorySlug(category.slug)}`)
+  );
+}
+
 async function responseJson(response: Response): Promise<Record<string, unknown>> {
   return (await response.json()) as Record<string, unknown>;
 }
@@ -335,6 +354,15 @@ function registrationRequest(email: string): Request {
   });
 }
 
+if (createdProductCategory) {
+  await prisma.category.deleteMany({
+    where: {
+      id: createdProductCategory.id,
+      slug: createdProductCategory.slug,
+    },
+  });
+}
+
 describe("isolated order API integration", { concurrency: false }, () => {
   before(async () => {
     if (testDatabaseUrl === databaseUrlSentinel) {
@@ -405,6 +433,46 @@ describe("isolated order API integration", { concurrency: false }, () => {
       select: { id: true },
     });
     createdProduct = { id: product.id, slug: productSlug };
+
+    const emptyCategory = await prisma.category.create({
+      data: {
+        name: `TEST ONLY Empty Category ${runId}`,
+        slug: `test-only-empty-category-${runId}`,
+      },
+      select: { id: true, slug: true },
+    });
+    createdEmptyCategory = emptyCategory;
+
+    const productCategory = await prisma.category.create({
+      data: {
+        name: "PC Components",
+        slug: `test-only-pc-components-${runId}`,
+      },
+      select: { id: true, slug: true },
+    });
+    createdProductCategory = productCategory;
+
+    const outOfStockName = `TEST ONLY Out Of Stock Product ${runId}`;
+    const outOfStockSlug = `test-only-out-of-stock-${runId}`;
+    const outOfStockProduct = await prisma.product.create({
+      data: {
+        name: outOfStockName,
+        slug: outOfStockSlug,
+        brand: "TEST ONLY",
+        category: "TEST ONLY",
+        description: "Integration-test fixture; safe to remove.",
+        price: 1_000,
+        image: "/test-only/out-of-stock-fixture.png",
+        inStock: false,
+        stockQuantity: 0,
+      },
+      select: { id: true },
+    });
+    createdOutOfStockProduct = {
+      id: outOfStockProduct.id,
+      slug: outOfStockSlug,
+      name: outOfStockName,
+    };
 
     const stockRestoreProductSlug = `test-only-stock-restore-${runId}`;
     const stockRestoreProduct = await prisma.product.create({
@@ -577,6 +645,24 @@ describe("isolated order API integration", { concurrency: false }, () => {
           where: {
             id: createdIdempotencyProduct.id,
             slug: createdIdempotencyProduct.slug,
+          },
+        });
+      }
+
+      if (createdEmptyCategory) {
+        await prisma.category.deleteMany({
+          where: {
+            id: createdEmptyCategory.id,
+            slug: createdEmptyCategory.slug,
+          },
+        });
+      }
+
+      if (createdOutOfStockProduct) {
+        await prisma.product.deleteMany({
+          where: {
+            id: createdOutOfStockProduct.id,
+            slug: createdOutOfStockProduct.slug,
           },
         });
       }
@@ -1658,6 +1744,8 @@ describe("isolated order API integration", { concurrency: false }, () => {
 
   test("catalog and admin product search parameters reject oversized values", async () => {
     assert.ok(fixture);
+    assert.ok(createdOutOfStockProduct);
+    const outOfStockProduct = createdOutOfStockProduct;
     const defaultCatalog = await fetch(`${baseUrl}/api/products`);
     assert.equal(defaultCatalog.status, 200);
     const defaultCatalogPayload = await responseJson(defaultCatalog);
@@ -1671,6 +1759,18 @@ describe("isolated order API integration", { concurrency: false }, () => {
     assert.equal(defaultCatalogPagination.page, 1);
     assert.equal(defaultCatalogPagination.limit, 24);
     assert.ok(defaultCatalogProducts.length <= 24);
+
+    const outOfStockCatalog = await fetch(
+      `${baseUrl}/api/products?search=${encodeURIComponent(outOfStockProduct.name)}`
+    );
+    assert.equal(outOfStockCatalog.status, 200);
+    const outOfStockPayload = await responseJson(outOfStockCatalog);
+    assert.ok(
+      (outOfStockPayload.products as { id: string }[]).some(
+        ({ id }) => id === outOfStockProduct.id
+      ),
+      "The default catalog should include products marked out of stock."
+    );
 
     for (const limit of [1, 100]) {
       const response: Response = await fetch(
@@ -1909,55 +2009,45 @@ describe("isolated order API integration", { concurrency: false }, () => {
     assert.equal(adminOrderOverLimit.status, 400);
   });
 
-  test("all supported category URLs resolve, including valid categories with no products", async () => {
-    assert.ok(fixture);
-    for (const category of getSupportedCategories()) {
-      const response = await fetch(`${baseUrl}${getCategoryHref(category)}`);
+  test("database categories resolve and only database rows appear in the category listing", async () => {
+    assert.ok(createdProduct);
+    assert.ok(createdEmptyCategory);
+    assert.ok(createdProductCategory);
+    const categoryHrefs = await expectedCatalogCategoryHrefs();
+
+    for (const href of categoryHrefs) {
+      const response = await fetch(`${baseUrl}${href}`);
       const html = await response.text();
       assert.equal(
         response.status,
         200,
-        `${category.slug} should be a valid route: ${html.slice(0, 2_000)}`
+        `${href} should be a valid route: ${html.slice(0, 2_000)}`
       );
-      assert.ok(html.includes(category.displayName));
     }
 
-    const emptyCategory = getSupportedCategories().find(
-      (category) => category.productCategory !== "PC Components"
-    );
-    assert.ok(emptyCategory);
     const emptyResponse = await fetch(
-      `${baseUrl}${getCategoryHref(emptyCategory)}`
+      `${baseUrl}/categories/${createdEmptyCategory.slug}`
     );
     const emptyHtml = await emptyResponse.text();
     assert.equal(emptyResponse.status, 200, emptyHtml.slice(0, 2_000));
     assert.match(emptyHtml, /No products in this category yet/);
 
     const populatedResponse = await fetch(
-      `${baseUrl}${getCategoryHref(
-        getSupportedCategories().find(
-          (category) => category.productCategory === "PC Components"
-        )!
-      )}`
+      `${baseUrl}/categories/${createdProductCategory.slug}`
     );
     const populatedHtml = await populatedResponse.text();
     assert.equal(populatedResponse.status, 200, populatedHtml.slice(0, 2_000));
     assert.match(populatedHtml, new RegExp(`TEST ONLY Order API Product ${runId}`));
+    assert.ok(!categoryHrefs.has("/categories/test-only"));
   });
 
-  test("unsupported category URLs return deliberate 404 responses", async () => {
-    for (const slug of [
-      "accessories",
-      "peripherals",
-      "monitors",
-      "networking",
-    ]) {
-      const response = await fetch(`${baseUrl}/categories/${slug}`);
-      assert.equal(response.status, 404, `${slug} must not resolve accidentally`);
-    }
+  test("unknown category URLs return deliberate 404 responses", async () => {
+    const slug = `test-only-unknown-${runId}`;
+    const response = await fetch(`${baseUrl}/categories/${slug}`);
+    assert.equal(response.status, 404, `${slug} must not resolve accidentally`);
   });
 
-  test("homepage and header expose only supported category navigation links", async () => {
+  test("homepage and header expose every database-backed category", async () => {
     const response = await fetch(`${baseUrl}/`);
     const html = await response.text();
     assert.equal(response.status, 200, html.slice(0, 2_000));
@@ -1968,46 +2058,26 @@ describe("isolated order API integration", { concurrency: false }, () => {
       Array.from(markup.matchAll(/href="(\/categories\/[^"]+)"/g), (match) =>
         match[1]
       );
-    const supportedHrefs = new Set(
-      getSupportedCategories().map(getCategoryHref)
-    );
-    const homepageCategoryHrefs = getSupportedCategories()
-      .filter((category) => category.homepage)
-      .map(getCategoryHref);
     const headerLinks = categoryLinks(headerHtml);
     const homepageLinks = categoryLinks(html.replace(headerHtml, ""));
+    const expectedHrefs = await expectedCatalogCategoryHrefs();
 
     assert.deepEqual(
       new Set(headerLinks),
-      new Set(getHeaderCategories().map(getCategoryHref))
+      expectedHrefs
     );
     assert.deepEqual(
       new Set(homepageLinks),
-      new Set(homepageCategoryHrefs)
-    );
-    for (const href of [...headerLinks, ...homepageLinks]) {
-      assert.ok(supportedHrefs.has(href), `Unexpected category link: ${href}`);
-    }
-    for (const slug of [
-      "accessories",
-      "peripherals",
-      "monitors",
-      "networking",
-    ]) {
-      assert.ok(!headerLinks.includes(`/categories/${slug}`));
-      assert.ok(!homepageLinks.includes(`/categories/${slug}`));
-    }
-    assert.ok(
-      CATEGORY_CONFIG.filter((category) => category.productCategory === null)
-        .every((category) => category.homepage === undefined),
-      "Unsupported categories must not appear as linked homepage categories."
+      expectedHrefs
     );
   });
 
   test("shop and product detail pages remain available", async () => {
+    assert.ok(createdOutOfStockProduct);
     const shopResponse = await fetch(`${baseUrl}/shop`);
     const shopHtml = await shopResponse.text();
     assert.equal(shopResponse.status, 200, shopHtml.slice(0, 2_000));
+    assert.ok(shopHtml.includes(createdOutOfStockProduct.name));
     assert.ok(createdProduct);
     const productResponse = await fetch(
       `${baseUrl}/products/${createdProduct.slug}`
@@ -2020,13 +2090,12 @@ describe("isolated order API integration", { concurrency: false }, () => {
   test("security headers are present on representative pages and API responses", async () => {
     assert.ok(fixture);
     assert.ok(createdProduct);
-    const category = getSupportedCategories()[0];
-    assert.ok(category);
+    assert.ok(createdEmptyCategory);
 
     const responses = [
       ["homepage", `${baseUrl}/`],
       ["product", `${baseUrl}/products/${createdProduct.slug}`],
-      ["category", `${baseUrl}/categories/${category.slug}`],
+      ["category", `${baseUrl}/categories/${createdEmptyCategory.slug}`],
       ["login", `${baseUrl}/login`],
       ["checkout", `${baseUrl}/checkout`],
       ["API", `${baseUrl}/api/products?limit=1`],

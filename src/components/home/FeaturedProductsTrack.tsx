@@ -6,11 +6,14 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 
 import { ProductCard } from "@/components/shop/ProductCard";
 import type { Product } from "@/types/product";
+import type { StorefrontContent } from "@/lib/storefront-content";
 
 export default function FeaturedProductsTrack({
   products,
+  content,
 }: {
   products: Product[];
+  content: StorefrontContent["home"]["featured"];
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -20,17 +23,17 @@ export default function FeaturedProductsTrack({
         <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
           <div>
             <p className="font-display text-[9px] font-semibold uppercase tracking-[0.24em] text-white/45">
-              Featured Products
+              {content.eyebrow}
             </p>
             <h2 className="mt-2 font-display text-[28px] font-bold uppercase leading-none text-white/90 sm:text-[34px]">
-              Top Picks
+              {content.title}
             </h2>
           </div>
           <Link
-            href="/shop"
+            href={content.actionHref}
             className="group mb-1 inline-flex items-center gap-2 font-display text-[9px] font-semibold uppercase tracking-[0.12em] text-white/55 transition hover:text-amber-600"
           >
-            View all products
+            {content.actionLabel}
             <ArrowRight size={13} className="text-amber-600 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -44,7 +47,7 @@ export default function FeaturedProductsTrack({
             </div>
             <button
               type="button"
-              aria-label="Show more featured products"
+              aria-label={content.scrollLabel}
               onClick={() =>
                 trackRef.current?.scrollBy({
                   left: trackRef.current.clientWidth,
@@ -58,7 +61,7 @@ export default function FeaturedProductsTrack({
           </div>
         ) : (
           <p className="border border-dashed border-white/10 px-5 py-8 text-center text-xs text-white/45">
-            No featured products are currently available.
+            {content.emptyText}
           </p>
         )}
       </div>

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { connection } from "next/server";
 import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { getCatalogCategories } from "@/lib/categories";
+import { getStorefrontContent } from "@/lib/storefront-content";
 
 
 import "./globals.css";
@@ -25,24 +28,42 @@ const displayFont = localFont({
   variable: "--font-display",
 });
 
-export const metadata: Metadata = {
-  title: "Primezora Technologies",
-  description:
-    "Primezora Technologies — PC components, gaming accessories and technology products delivered islandwide in Sri Lanka.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getStorefrontContent();
 
-export default function RootLayout({
+  return {
+    title: content?.brand.name,
+    description: content?.brand.description,
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await connection();
+  const [categories, content] = await Promise.all([
+    getCatalogCategories(),
+    getStorefrontContent(),
+  ]);
+
   return (
     <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
 
       <body>
         <CartProvider>
           <WishlistProvider>
-            <Header />
+            <Header
+              brand={content?.brand ?? null}
+              navigation={content?.navigation ?? null}
+              searchPlaceholder={content?.search.inputPlaceholder ?? ""}
+              categories={categories.map(({ id, name, slug }) => ({
+                id,
+                name,
+                slug,
+              }))}
+            />
             {children}
             <Footer />
           </WishlistProvider>

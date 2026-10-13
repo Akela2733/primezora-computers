@@ -3,12 +3,14 @@ import { connection } from "next/server";
 import { Hero } from "@/components/home/Hero";
 import { ShopCategories } from "@/components/home/ShopCategories";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
-import { BuildPCBanner } from "@/components/home/BuildPCBanner";
+import BuildPCBanner from "@/components/home/BuildPCBanner";
 import { WhyPrimezora } from "@/components/home/WhyPrimezora";
 import { TrustedBrands } from "@/components/home/TrustedBrands";
+import { getStorefrontContent } from "@/lib/storefront-content";
 
 export default async function Home() {
   await connection();
+  const content = await getStorefrontContent();
 
   return (
     <main className="min-h-screen">
@@ -36,7 +38,12 @@ export default async function Home() {
 <Hero />
 <ShopCategories />
 <FeaturedProducts />
-<BuildPCBanner/>
+{content && (
+  <BuildPCBanner
+    left={content.home.promotions.left}
+    right={content.home.promotions.right}
+  />
+)}
 <WhyPrimezora />
 <TrustedBrands />
 

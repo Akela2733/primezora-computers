@@ -56,6 +56,12 @@ Do not set `PRIMEZORA_DATABASE_TARGET=production` for local development.
 Admin credentials, including password changes, are managed through deployment
 configuration. Password recovery through the application is disabled; contact
 an authorized deployment operator to rotate the configured credentials.
+Local development uses separate admin credentials stored in the ignored
+`.env.test.local` file. Run `npm run admin:setup:test` to set them up or rotate
+them; the command prompts for an email and a hidden password entry, stores only
+the password hash, and generates a separate session secret. Restart the
+development server after setup. Production credentials are never copied into
+the TEST runtime.
 
 Build artifacts are tagged with their database target. Use the matching
 `start` command for the build target; startup fails if the marker is missing

@@ -1,34 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import {
   SiFacebook,
   SiTiktok,
   SiWhatsapp,
 } from "@icons-pack/react-simple-icons";
+import { getStorefrontContent } from "@/lib/storefront-content";
 
-const quickLinks: [string, string][] = [
-  ["Home", "/"],
-  ["Shop", "/shop"],
-  ["Categories", "/shop"],
-  ["About Us", "/about"],
-  ["Contact", "/contact"],
-];
+export async function Footer() {
+  const content = await getStorefrontContent();
+  if (!content) return null;
 
-const helpLinks: [string, string][] = [
-  ["Shipping & Delivery", "/shipping"],
-  ["Returns & Refunds", "/returns"],
-  ["FAQ", "/faq"],
-  ["Terms & Conditions", "/terms"],
-  ["Privacy Policy", "/privacy"],
-];
+  const { brand, footer } = content;
 
-export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-amber-600/10 bg-[#030505]">
       <div className="primezora-grid pointer-events-none absolute inset-0 opacity-[0.08]" />
@@ -39,64 +24,62 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center">
               <Image
-                src="/primezora%20new%20logo.png"
-                alt="PrimeZora Computer Solutions"
+                src={brand.logo}
+                alt={brand.logoAlt}
                 width={180}
                 height={55}
+                unoptimized
                 className="h-10 w-auto object-contain"
               />
             </Link>
             <p className="mt-3 max-w-55 text-[10px] leading-[1.55] text-white/50">
-              Your trusted online store for computer and gaming gear. Quality
-              products, competitive prices, delivered islandwide.
+              {footer.description}
             </p>
             <div className="mt-3 flex items-center gap-1.5">
-              <SocialLink label="Facebook" href="https://www.facebook.com/">
-                <SiFacebook size={13} />
-              </SocialLink>
-              <SocialLink label="TikTok" href="https://www.tiktok.com/">
-                <SiTiktok size={13} />
-              </SocialLink>
-              <SocialLink label="WhatsApp" href="https://wa.me/94771234567">
-                <SiWhatsapp size={13} />
-              </SocialLink>
-              <SocialLink label="Email" href="mailto:support@primezora.lk">
-                <Mail size={13} />
-              </SocialLink>
+              {footer.socials.map((social) => (
+                <SocialLink
+                  key={social.label}
+                  label={social.label}
+                  href={social.href}
+                  icon={social.icon}
+                />
+              ))}
             </div>
           </div>
-      <FooterColumn title="Quick Links" links={quickLinks} />
-          <FooterColumn title="Help" links={helpLinks} />
+
+          <FooterColumn title={footer.quickLinksTitle} links={footer.quickLinks} />
+          <FooterColumn title={footer.helpLinksTitle} links={footer.helpLinks} />
 
           <div>
-            <FooterHeading>Contact Us</FooterHeading>
+            <FooterHeading>{footer.contactTitle}</FooterHeading>
             <ul className="mt-3 space-y-2.5">
-              <ContactItem icon={<Phone size={12} />} href="tel:+94771234567">
-                +94 77 123 4567
+              <ContactItem icon={<Phone size={12} />} href={footer.phoneHref}>
+                {footer.phone}
               </ContactItem>
-              <ContactItem icon={<Mail size={12} />} href="mailto:support@primezora.lk">
-                support@primezora.lk
+              <ContactItem icon={<Mail size={12} />} href={footer.emailHref}>
+                {footer.email}
               </ContactItem>
-              <ContactItem icon={<MapPin size={12} />} href="https://maps.google.com/?q=Colombo,+Sri+Lanka">
-                Colombo, Sri Lanka
+              <ContactItem icon={<MapPin size={12} />} href={footer.addressHref}>
+                {footer.address}
               </ContactItem>
             </ul>
           </div>
+
           <div>
-            <FooterHeading>Get Updates</FooterHeading>
+            <FooterHeading>{footer.updatesTitle}</FooterHeading>
             <p className="mt-3 max-w-47.5 text-[9px] leading-[1.55] text-white/45">
-              Exclusive deals, new arrivals and gaming news.
+              {footer.updatesDescription}
             </p>
             <div className="mt-3 flex h-8 max-w-57.5 items-center border border-white/15 bg-white/2.5 pl-2.5 pr-1">
               <input
                 type="email"
-                aria-label="Your email address"
-                placeholder="Your email address"
+                aria-label={footer.updatesEmailPlaceholder}
+                placeholder={footer.updatesEmailPlaceholder}
                 className="min-w-0 flex-1 bg-transparent text-[9px] text-white/90 outline-none placeholder:text-white/35"
               />
               <button
                 type="button"
-                aria-label="Subscribe to updates"
+                aria-label={footer.subscribeLabel}
                 className="flex h-6 w-7 shrink-0 items-center justify-center text-amber-600 transition hover:bg-amber-600/10 hover:text-amber-600"
               >
                 <ArrowRight size={13} />
@@ -106,12 +89,8 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-2 border-t border-amber-600/10 py-3 text-[8px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 Primezora Technologies. All rights reserved.</p>
-          <p>
-            Powered by <span className="text-white/60">Passion</span>
-            <span className="px-2 text-amber-600/70">/</span>
-            Built for Gamers
-          </p>
+          <p>{footer.copyright}</p>
+          <p>{footer.tagline}</p>
         </div>
       </div>
     </footer>
@@ -131,15 +110,18 @@ function FooterColumn({
   links,
 }: {
   title: string;
-  links: [string, string][];
+  links: { label: string; href: string }[];
 }) {
   return (
     <div>
       <FooterHeading>{title}</FooterHeading>
       <ul className="mt-3 space-y-1.5">
-        {links.map(([label, href]) => (
-          <li key={label}>
-            <Link href={href} className="text-[9px] text-white/45 transition hover:text-amber-600">
+        {links.map(({ label, href }) => (
+          <li key={`${label}-${href}`}>
+            <Link
+              href={href}
+              className="text-[9px] text-white/45 transition hover:text-amber-600"
+            >
               {label}
             </Link>
           </li>
@@ -160,7 +142,10 @@ function ContactItem({
 }) {
   return (
     <li>
-      <Link href={href} className="flex items-center gap-2 text-[9px] text-white/45 transition hover:text-amber-600">
+      <Link
+        href={href}
+        className="flex items-center gap-2 text-[9px] text-white/45 transition hover:text-amber-600"
+      >
         <span className="shrink-0 text-amber-600/80">{icon}</span>
         {children}
       </Link>
@@ -171,13 +156,23 @@ function ContactItem({
 function SocialLink({
   label,
   href,
-  children,
+  icon,
 }: {
   label: string;
   href: string;
-  children: React.ReactNode;
+  icon: string;
 }) {
   const isExternal = href.startsWith("https://");
+  const iconElement = {
+    Facebook: <SiFacebook size={13} />,
+    TikTok: <SiTiktok size={13} />,
+    WhatsApp: <SiWhatsapp size={13} />,
+    Email: <Mail size={13} />,
+  }[icon];
+
+  if (!iconElement) {
+    throw new Error(`Unknown storefront social icon: ${icon}`);
+  }
 
   return (
     <a
@@ -188,7 +183,7 @@ function SocialLink({
       rel={isExternal ? "noreferrer" : undefined}
       className="flex h-6 w-6 items-center justify-center rounded-sm text-white/60 transition hover:bg-amber-600/10 hover:text-amber-600"
     >
-      {children}
+      {iconElement}
     </a>
   );
 }

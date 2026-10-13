@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import type { Product } from "@/types/product";
+import type { StorefrontContent } from "@/lib/storefront-content";
 
 import { ProductCard } from "@/components/shop/ProductCard";
 
@@ -16,12 +17,14 @@ type ShopClientProps = {
   products: Product[];
   categories: Category[];
   brands: string[];
+  content: StorefrontContent["shop"];
 };
 
 export default function ShopClient({
   products,
   categories,
   brands,
+  content,
 }: ShopClientProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] =
@@ -142,24 +145,26 @@ export default function ShopClient({
         <div className="container-primezora py-14 sm:py-20">
 
           <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
-            Primezora Store
+            {content.eyebrow}
           </p>
 
           <div className="mt-4 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
 
             <div>
               <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.035em] sm:text-5xl lg:text-6xl">
-                Technology
-                <br />
-                <span className="text-white/35">
-                  built for you.
-                </span>
+                {content.titleLines.map((line, index) => (
+                  <span
+                    key={`${index}-${line}`}
+                    className={index > 0 ? "text-white/35" : undefined}
+                  >
+                    {line}
+                    {index < content.titleLines.length - 1 && <br />}
+                  </span>
+                ))}
               </h1>
 
               <p className="mt-5 max-w-xl text-xs leading-6 text-white/35 sm:text-sm">
-                Explore PC components, gaming
-                accessories and technology products
-                from trusted brands.
+                {content.description}
               </p>
             </div>
 
@@ -169,7 +174,7 @@ export default function ShopClient({
               </p>
 
               <p className="mt-1 text-[8px] uppercase tracking-[0.2em] text-white/30">
-                Products available
+                {content.countLabel}
               </p>
             </div>
 
@@ -200,7 +205,7 @@ export default function ShopClient({
                 onChange={(event) =>
                   setSearch(event.target.value)
                 }
-                placeholder="Search products..."
+                placeholder={content.searchPlaceholder}
                 className="h-11 w-full border border-white/[0.1] bg-white/[0.02] px-4 text-xs text-white/90 outline-none placeholder:text-white/25 focus:border-amber-600/50"
               />
 
@@ -219,7 +224,7 @@ export default function ShopClient({
                 className="h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50"
               >
                 <option value="ALL">
-                  All Categories
+                  {content.allCategoriesLabel}
                 </option>
 
                 {categories.map(
@@ -243,7 +248,7 @@ export default function ShopClient({
                 className="h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50"
               >
                 <option value="ALL">
-                  All Brands
+                  {content.allBrandsLabel}
                 </option>
 
                 {brands.map(
@@ -267,23 +272,23 @@ export default function ShopClient({
                 className="col-span-2 h-11 border border-white/[0.1] bg-[#030505] px-3 text-[9px] uppercase tracking-[0.1em] text-white/60 outline-none focus:border-amber-600/50 sm:col-span-1"
               >
                 <option value="featured">
-                  Featured
+                  {content.sortLabels.featured}
                 </option>
 
                 <option value="newest">
-                  Newest
+                  {content.sortLabels.newest}
                 </option>
 
                 <option value="price-low">
-                  Price: Low to High
+                  {content.sortLabels.priceLow}
                 </option>
 
                 <option value="price-high">
-                  Price: High to Low
+                  {content.sortLabels.priceHigh}
                 </option>
 
                 <option value="rating">
-                  Highest Rated
+                  {content.sortLabels.rating}
                 </option>
               </select>
 
@@ -305,11 +310,11 @@ export default function ShopClient({
         <div className="mb-6 flex items-center justify-between">
 
           <p className="text-[9px] uppercase tracking-[0.18em] text-white/30">
-            Showing{" "}
+            {content.showingLabel}{" "}
             <span className="text-white/70">
               {filteredProducts.length}
             </span>{" "}
-            products
+            {content.productsLabel}
           </p>
 
           {(search ||
@@ -324,7 +329,7 @@ export default function ShopClient({
               }}
               className="text-[8px] font-bold uppercase tracking-[0.15em] text-amber-600 hover:text-amber-600"
             >
-              Clear filters
+              {content.clearFiltersLabel}
             </button>
           )}
 
@@ -351,11 +356,11 @@ export default function ShopClient({
           <div className="flex min-h-[350px] flex-col items-center justify-center border border-white/[0.07] bg-white/[0.015]">
 
             <p className="text-xs font-medium text-white/50">
-              No products found.
+              {content.emptyTitle}
             </p>
 
             <p className="mt-2 text-[9px] text-white/25">
-              Try changing your search or filters.
+              {content.emptyDescription}
             </p>
 
             <button
@@ -367,7 +372,7 @@ export default function ShopClient({
               }}
               className="mt-5 border border-amber-600/30 px-5 py-2.5 text-[8px] font-bold uppercase tracking-[0.16em] text-amber-600 transition hover:bg-amber-600 hover:text-black"
             >
-              Reset Filters
+              {content.resetFiltersLabel}
             </button>
 
           </div>

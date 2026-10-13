@@ -28,6 +28,9 @@ describe("database target selection", () => {
     const target = configureDatabaseTarget(env, {
       DATABASE_URL_TEST: testDatabaseUrl,
       DIRECT_DATABASE_URL_TEST: directTestDatabaseUrl,
+      ADMIN_EMAIL: "test-admin@example.test",
+      ADMIN_PASSWORD_HASH: "test-password-hash",
+      ADMIN_SESSION_SECRET: "test-session-secret",
     });
 
     assert.equal(target, "test");
@@ -36,6 +39,27 @@ describe("database target selection", () => {
     assert.equal(env.DATABASE_URL, testDatabaseUrl);
     assert.equal(env.DIRECT_DATABASE_URL, directTestDatabaseUrl);
     assert.equal(env.DIRECT_URL, directTestDatabaseUrl);
+    assert.equal(env.ADMIN_EMAIL, "test-admin@example.test");
+    assert.equal(env.ADMIN_PASSWORD_HASH, "test-password-hash");
+    assert.equal(env.ADMIN_SESSION_SECRET, "test-session-secret");
+  });
+
+  test("never carries inherited admin credentials into TEST when no TEST credentials are configured", () => {
+    const env: Record<string, string | undefined> = {
+      NODE_ENV: "development",
+      ADMIN_EMAIL: "production-admin@example.test",
+      ADMIN_PASSWORD_HASH: "production-password-hash",
+      ADMIN_SESSION_SECRET: "production-session-secret",
+    };
+
+    configureDatabaseTarget(env, {
+      DATABASE_URL_TEST: testDatabaseUrl,
+      DIRECT_DATABASE_URL_TEST: directTestDatabaseUrl,
+    });
+
+    assert.equal(env.ADMIN_EMAIL, undefined);
+    assert.equal(env.ADMIN_PASSWORD_HASH, undefined);
+    assert.equal(env.ADMIN_SESSION_SECRET, undefined);
   });
 
   test("does not fall back to production URLs when TEST configuration is missing", () => {

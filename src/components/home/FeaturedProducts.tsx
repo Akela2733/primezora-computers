@@ -1,15 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { getStorefrontContent } from "@/lib/storefront-content";
 import FeaturedProductsTrack from "./FeaturedProductsTrack";
 
 export async function FeaturedProducts() {
-  const productRecords = await prisma.product.findMany({
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-  });
+  const [productRecords, content] = await Promise.all([
+    prisma.product.findMany({
+      where: { featured: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    getStorefrontContent(),
+  ]);
+
+  if (!content) return null;
 
   return (
     <FeaturedProductsTrack
       products={productRecords.map(toProductView)}
+      content={content.home.featured}
     />
   );
 }

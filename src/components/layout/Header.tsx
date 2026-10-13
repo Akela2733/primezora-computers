@@ -13,9 +13,22 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
-import { getCategoryHref, getHeaderCategories } from "@/lib/categories";
+import type { CatalogCategory } from "@/lib/categories";
+import type { StorefrontContent } from "@/lib/storefront-content";
 
-export function Header() {
+type HeaderProps = {
+  categories: Pick<CatalogCategory, "id" | "name" | "slug">[];
+  brand: StorefrontContent["brand"] | null;
+  navigation: StorefrontContent["navigation"] | null;
+  searchPlaceholder: string;
+};
+
+export function Header({
+  categories,
+  brand,
+  navigation,
+  searchPlaceholder,
+}: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
 
@@ -32,16 +45,23 @@ export function Header() {
 
           {/* LOGO */}
 
-          <Link href="/" className="flex shrink-0 items-center">
-            <Image
-              src="/primezora%20new%20logo.png"
-              alt="PrimeZora Computer Solutions"
-              width={210}
-              height={100}
-              priority
-              className="h-40 w-auto object-contain"
-            />
-          </Link>
+          {brand && (
+            <Link
+              href="/"
+              aria-label={brand.name}
+              className="flex shrink-0 items-center"
+            >
+              <Image
+                src={brand.logo}
+                alt={brand.logoAlt}
+                width={210}
+                height={100}
+                priority
+                unoptimized
+                className="h-40 w-auto object-contain"
+              />
+            </Link>
+          )}
 
 
           {/* SEARCH */}
@@ -63,7 +83,7 @@ export function Header() {
 
               <input
                 type="search"
-                placeholder="Search products..."
+                placeholder={searchPlaceholder}
                 className="
                   h-10
                   w-full
@@ -297,25 +317,25 @@ export function Header() {
 
         <div className="container-primezora">
 
-          <div className="flex h-11 items-center gap-8">
+          <div className="flex min-h-11 flex-wrap items-center gap-x-8 gap-y-2 py-2">
 
-            <NavLink href="/" label="HOME" />
+            {navigation && (
+              <>
+                <NavLink href="/" label={navigation.homeLabel} />
+                <NavLink href="/shop" label={navigation.shopLabel} />
+              </>
+            )}
 
-            <NavLink
-              href="/shop"
-              label="SHOP"
-            />
-
-            {getHeaderCategories().map((category) => (
+            {categories.map((category) => (
               <NavLink
                 key={category.slug}
-                href={getCategoryHref(category)}
-                label={category.headerLabel}
+                href={`/categories/${category.slug}`}
+                label={category.name}
               />
             ))}
 
-            <Link
-              href="/shop?sort=deals"
+            {navigation && <Link
+              href={navigation.dealsHref}
               className="
                 font-display
                 text-xs
@@ -328,8 +348,8 @@ export function Header() {
                 hover:text-amber-600
               "
             >
-              DEALS
-            </Link>
+              {navigation.dealsLabel}
+            </Link>}
 
           </div>
 
@@ -371,7 +391,7 @@ export function Header() {
               />
 
               <input
-                placeholder="Search products..."
+                placeholder={searchPlaceholder}
                 className="
                   h-10
                   w-full
@@ -394,27 +414,26 @@ export function Header() {
 
             <div className="grid gap-1">
 
-              <MobileLink
-                href="/"
-                label="Home"
-                closeMenu={() =>
-                  setMobileMenuOpen(false)
-                }
-              />
+              {navigation && (
+                <>
+                  <MobileLink
+                    href="/"
+                    label={navigation.homeLabel}
+                    closeMenu={() => setMobileMenuOpen(false)}
+                  />
+                  <MobileLink
+                    href="/shop"
+                    label={navigation.shopLabel}
+                    closeMenu={() => setMobileMenuOpen(false)}
+                  />
+                </>
+              )}
 
-              <MobileLink
-                href="/shop"
-                label="Shop"
-                closeMenu={() =>
-                  setMobileMenuOpen(false)
-                }
-              />
-
-              {getHeaderCategories().map((category) => (
+              {categories.map((category) => (
                 <MobileLink
                   key={category.slug}
-                  href={getCategoryHref(category)}
-                  label={category.displayName}
+                  href={`/categories/${category.slug}`}
+                  label={category.name}
                   closeMenu={() => setMobileMenuOpen(false)}
                 />
               ))}

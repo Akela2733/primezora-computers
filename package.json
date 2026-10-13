@@ -8,6 +8,7 @@
     "build:production": "tsx scripts/run-next.ts build production",
     "start": "tsx scripts/run-next.ts start",
     "start:production": "tsx scripts/run-next.ts start production",
+    "admin:setup:test": "tsx scripts/setup-test-admin.ts",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
     "test:security-headers": "tsx --test tests/security-headers.test.ts",

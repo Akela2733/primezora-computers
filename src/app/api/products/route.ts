@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     const where = {
-      ...(inStock === undefined ? { inStock: true } : { inStock: inStock === "true" }),
+      ...(inStock === undefined ? {} : { inStock: inStock === "true" }),
       ...(search
         ? {
             OR: [

@@ -1,4 +1,4 @@
-import type { Product } from "@/data/products";
+import type { Product } from "@/types/product";
 import type { PaymentMethod } from "@/lib/payment";
 
 export type DeliveryMethod = "delivery" | "pickup";

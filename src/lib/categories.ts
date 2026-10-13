@@ -1,78 +1,11 @@
-type CategoryDefinition = {
+import { prisma } from "@/lib/prisma";
+
+export type CatalogCategory = {
+  id: string;
+  name: string;
   slug: string;
-  displayName: string;
-  productCategory: string | null;
-  headerLabel?: string;
-  homepage?: {
-    label: string;
-    image?: string;
-  };
-};
-
-export const CATEGORY_CONFIG: readonly CategoryDefinition[] = [
-  {
-    slug: "accessories",
-    displayName: "Accessories",
-    productCategory: null,
-  },
-  {
-    slug: "gaming",
-    displayName: "Gaming",
-    productCategory: "Gaming",
-    headerLabel: "GAMING",
-    homepage: {
-      label: "Gaming Accessories",
-      image: "/categories/gaming%20accessories.png",
-    },
-  },
-  {
-    slug: "pc-components",
-    displayName: "PC Components",
-    productCategory: "PC Components",
-    headerLabel: "PC PARTS",
-    homepage: {
-      label: "PC Parts",
-      image: "/categories/pc%20parts.png",
-    },
-  },
-  {
-    slug: "monitors",
-    displayName: "Monitors",
-    productCategory: null,
-  },
-  {
-    slug: "networking",
-    displayName: "Network & Storage",
-    productCategory: null,
-  },
-  {
-    slug: "keyboards",
-    displayName: "Keyboards",
-    productCategory: "Keyboards",
-    headerLabel: "KEYBOARDS",
-    homepage: {
-      label: "Keyboards",
-    },
-  },
-  {
-    slug: "mice",
-    displayName: "Mice",
-    productCategory: "Mice",
-    headerLabel: "MICE",
-    homepage: {
-      label: "Mice",
-    },
-  },
-  {
-    slug: "peripherals",
-    displayName: "Peripherals",
-    productCategory: null,
-  },
-] as const;
-
-export type CategoryConfig = CategoryDefinition;
-export type SupportedCategory = CategoryDefinition & {
-  productCategory: string;
+  image: string | null;
+  productCategories: string[];
 };
 
 export function normalizeCategorySlug(value: string): string {
@@ -83,44 +16,51 @@ export function normalizeCategorySlug(value: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export function getCategoryBySlug(slug: string): CategoryConfig | undefined {
-  const normalizedSlug = normalizeCategorySlug(slug);
-  return CATEGORY_CONFIG.find((category) => category.slug === normalizedSlug);
-}
+export async function getCatalogCategories(): Promise<CatalogCategory[]> {
+  const [categoryRecords, productCategories] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        image: true,
+        isActive: true,
+      },
+    }),
+    prisma.product.findMany({
+      distinct: ["category"],
+      select: {
+        category: true,
+      },
+      orderBy: {
+        category: "asc",
+      },
+    }),
+  ]);
 
-export function isSupportedCategory(
-  category: CategoryConfig
-): category is SupportedCategory {
-  return category.productCategory !== null;
-}
+  const categories: CatalogCategory[] = categoryRecords
+    .filter((category) => category.isActive)
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      image: category.image,
+      productCategories: [],
+    }));
 
-export function getSupportedCategories(): SupportedCategory[] {
-  return CATEGORY_CONFIG.filter(isSupportedCategory);
-}
+  for (const catalogCategory of categories) {
+    const categoryKeys = new Set([
+      normalizeCategorySlug(catalogCategory.name),
+      normalizeCategorySlug(catalogCategory.slug),
+    ]);
 
-export function getHeaderCategories(): (SupportedCategory & {
-  headerLabel: string;
-})[] {
-  return getSupportedCategories().filter(
-    (category): category is SupportedCategory & { headerLabel: string } =>
-      typeof category.headerLabel === "string"
-  );
-}
-
-export function getSupportedCategoryBySlug(
-  slug: string
-): SupportedCategory {
-  const category = getCategoryBySlug(slug);
-  if (!category || !isSupportedCategory(category)) {
-    throw new Error(`Category "${slug}" is not configured as supported.`);
+    catalogCategory.productCategories = productCategories
+      .map(({ category }) => category)
+      .filter((category) => categoryKeys.has(normalizeCategorySlug(category)));
   }
-  return category;
-}
 
-export function getCategoryHref(category: SupportedCategory): string {
-  return `/categories/${category.slug}`;
-}
-
-export function getSupportedCategoryHref(slug: string): string {
-  return getCategoryHref(getSupportedCategoryBySlug(slug));
+  return categories.sort((a, b) => a.name.localeCompare(b.name));
 }

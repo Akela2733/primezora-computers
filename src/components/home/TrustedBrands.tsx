@@ -1,25 +1,22 @@
-const brands = [
-  { name: "ASUS", style: "font-black italic tracking-[0.06em]" },
-  { name: "msi", style: "font-black italic tracking-[0.04em]" },
-  { name: "intel", style: "font-semibold lowercase tracking-[0.02em]" },
-  { name: "AMD", style: "font-black tracking-[0.08em]" },
-  { name: "logitech G", style: "font-bold tracking-[-0.02em]" },
-  { name: "CORSAIR", style: "font-black tracking-[0.04em]" },
-  { name: "SAMSUNG", style: "font-bold tracking-[0.08em]" },
-  { name: "GIGABYTE", style: "font-bold tracking-[0.03em]" },
-  { name: "AND MORE...", style: "font-display text-[8px] font-medium tracking-[0.2em]" },
-];
+import { prisma } from "@/lib/prisma";
+import { getStorefrontContent } from "@/lib/storefront-content";
 
-function BrandGroup({ hidden = false }: { hidden?: boolean }) {
+function BrandGroup({
+  brands,
+  hidden = false,
+}: {
+  brands: string[];
+  hidden?: boolean;
+}) {
   return (
     <div className="brand-marquee-group flex shrink-0 items-center" aria-hidden={hidden}>
       {brands.map((brand) => (
         <div
-          key={brand.name}
+          key={brand}
           className="flex h-9 min-w-24 shrink-0 items-center justify-center border-r border-white/10 px-5 text-white/55 transition-colors hover:text-white/90 sm:min-w-32 sm:px-7"
         >
-          <span className={`whitespace-nowrap font-display text-[11px] sm:text-xs ${brand.style}`}>
-            {brand.name}
+          <span className="whitespace-nowrap font-display text-[11px] font-semibold sm:text-xs">
+            {brand}
           </span>
         </div>
       ))}
@@ -27,7 +24,25 @@ function BrandGroup({ hidden = false }: { hidden?: boolean }) {
   );
 }
 
-export function TrustedBrands() {
+export async function TrustedBrands() {
+  const [brandRecords, content] = await Promise.all([
+    prisma.product.findMany({
+      distinct: ["brand"],
+      select: {
+        brand: true,
+      },
+      orderBy: {
+        brand: "asc",
+      },
+    }),
+    getStorefrontContent(),
+  ]);
+  const brands = brandRecords.map(({ brand }) => brand);
+
+  if (brands.length === 0 || !content) {
+    return null;
+  }
+
   return (
     <section
       aria-labelledby="trusted-brands-heading"
@@ -38,16 +53,16 @@ export function TrustedBrands() {
           id="trusted-brands-heading"
           className="font-display text-[8px] font-semibold uppercase tracking-[0.2em] text-white/45"
         >
-          Trusted Brands
+          {content.home.brandsLabel}
         </h2>
 
         <div
           className="brand-marquee relative min-w-0 overflow-hidden"
-          aria-label="ASUS, MSI, Intel, AMD, Logitech G, Corsair, Samsung, Gigabyte, and more"
+          aria-label={brands.join(", ")}
         >
           <div className="brand-marquee-track flex w-max">
-            <BrandGroup />
-            <BrandGroup hidden />
+            <BrandGroup brands={brands} />
+            <BrandGroup brands={brands} hidden />
           </div>
         </div>
       </div>
