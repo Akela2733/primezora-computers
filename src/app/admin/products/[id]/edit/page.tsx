@@ -12,6 +12,7 @@ import {
 import { FormEvent, useEffect, useState } from "react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ProductGalleryEditor from "@/components/admin/ProductGalleryEditor";
+import ProductCategorySelect from "@/components/admin/ProductCategorySelect";
 
 type ProductForm = {
   name: string;
@@ -356,13 +357,10 @@ export default function EditProductPage() {
                   }
                 />
 
-                <Field
-                  label="Category"
+                <ProductCategorySelect
                   required
                   value={form.category}
-                  onChange={(value) =>
-                    updateField("category", value)
-                  }
+                  onChange={(value) => updateField("category", value)}
                 />
 
                 <div className="sm:col-span-2">
