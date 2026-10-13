@@ -14,9 +14,7 @@ export default function ProductGallery({
   productName,
 }: ProductGalleryProps) {
   const galleryImages =
-    images?.filter(Boolean).length > 0
-      ? images.filter(Boolean)
-      : ["/products/placeholder.jpg"];
+    images.filter((value) => value.trim().length > 0);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -28,14 +26,20 @@ export default function ProductGallery({
     <div className="space-y-4">
       {/* Main Image */}
       <div className="relative aspect-square overflow-hidden border border-white/[0.07] bg-[#030505]">
-        <Image
-          src={activeImage}
-          alt={productName}
-          fill
-          priority
-          className="object-contain p-8"
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
+        {activeImage ? (
+          <Image
+            src={activeImage}
+            alt={productName}
+            fill
+            priority
+            className="object-contain p-8"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        ) : (
+          <p className="absolute inset-0 flex items-center justify-center text-sm text-white/40">
+            No product image available
+          </p>
+        )}
       </div>
 
       {/* Thumbnails */}
