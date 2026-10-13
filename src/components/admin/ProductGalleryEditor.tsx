@@ -1,8 +1,7 @@
 "use client";
 
-import ImageUpload from "@/components/admin/ImageUpload";
 import { ChangeEvent, useRef, useState } from "react";
-import { AlertCircle, Loader2, UploadCloud } from "lucide-react";
+import { AlertCircle, Loader2, Trash2, UploadCloud } from "lucide-react";
 
 const MAX_PRODUCT_GALLERY_IMAGES = 20;
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -30,87 +29,61 @@ export default function ProductGalleryEditor({
   const [uploadError, setUploadError] = useState("");
   const [uploadNotice, setUploadNotice] = useState("");
 
-  const addImage = () => onChange((current) => [...current, ""]);
-  const updateImage = (index: number, image: string) => {
-    onChange((current) =>
-      current.map((currentImage, currentIndex) =>
-        currentIndex === index ? image : currentImage
-      )
-    );
-  };
   const removeImage = (index: number) =>
     onChange((current) =>
       current.filter((_, currentIndex) => currentIndex !== index)
     );
 
-  const uploadFiles = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.currentTarget.files ?? []);
+  const uploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
-    if (files.length === 0) return;
+    if (!file) return;
 
     setUploadError("");
     setUploadNotice("");
 
-    const availableSlots = MAX_PRODUCT_GALLERY_IMAGES - images.length;
-    if (files.length > availableSlots) {
+    if (images.length >= MAX_PRODUCT_GALLERY_IMAGES) {
       setUploadError(
-        `You can add ${availableSlots} more image${availableSlots === 1 ? "" : "s"}. The product gallery limit is ${MAX_PRODUCT_GALLERY_IMAGES}.`
+        `The product gallery limit is ${MAX_PRODUCT_GALLERY_IMAGES} images. Remove an image before uploading another.`
       );
       return;
     }
-
-    const invalidFile = files.find(
-      (file) =>
-        !ALLOWED_IMAGE_TYPES.has(file.type.toLowerCase()) ||
-        file.size === 0 ||
-        file.size > MAX_IMAGE_SIZE_BYTES
-    );
-    if (invalidFile) {
+    if (!ALLOWED_IMAGE_TYPES.has(file.type.toLowerCase())) {
       setUploadError(
-        !ALLOWED_IMAGE_TYPES.has(invalidFile.type.toLowerCase())
-          ? `${invalidFile.name} is not a supported image. Use JPEG, PNG, WebP, AVIF, or GIF.`
-          : invalidFile.size === 0
-            ? `${invalidFile.name} is empty. Select a different image.`
-            : `${invalidFile.name} exceeds the 5 MB limit.`
+        "Unsupported image. Use JPEG, PNG, WebP, AVIF, or GIF."
       );
+      return;
+    }
+    if (file.size === 0) {
+      setUploadError("The selected image is empty.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setUploadError(`${file.name} exceeds the 5 MB limit.`);
       return;
     }
 
     setIsUploading(true);
-    const uploadedUrls: string[] = [];
     try {
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("scope", "products");
-        const response = await fetch("/api/admin/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const result = await response.json();
-        if (!response.ok || typeof result.url !== "string") {
-          throw new Error(
-            `${file.name}: ${result.error || "Failed to upload image."}`
-          );
-        }
-        uploadedUrls.push(result.url);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("scope", "products");
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok || typeof result.url !== "string") {
+        throw new Error(result.error || "Failed to upload gallery image.");
       }
 
-      onChange((current) => [...current, ...uploadedUrls]);
-      setUploadNotice(
-        `${uploadedUrls.length} gallery image${uploadedUrls.length === 1 ? "" : "s"} uploaded successfully.`
-      );
+      onChange((current) => [...current, result.url]);
+      setUploadNotice("Gallery image uploaded successfully.");
     } catch (caught) {
-      if (uploadedUrls.length > 0) {
-        onChange((current) => [...current, ...uploadedUrls]);
-      }
-      const message =
-        caught instanceof Error ? caught.message : "Gallery upload failed.";
       console.error("Product gallery upload error:", caught);
       setUploadError(
-        uploadedUrls.length > 0
-          ? `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded; the rest failed. ${message}`
-          : message
+        caught instanceof Error ? caught.message : "Gallery upload failed."
       );
     } finally {
       setIsUploading(false);
@@ -119,58 +92,49 @@ export default function ProductGalleryEditor({
 
   return (
     <section className="mt-6 border-t border-white/[0.07] pt-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <h3 className="font-display text-xs font-bold uppercase text-white/80">
-            Product Gallery
-          </h3>
-          <p className="mt-1 text-[10px] leading-5 text-white/35">
-            Upload additional product photos shown in the product gallery.
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-wrap justify-end gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={Array.from(ALLOWED_IMAGE_TYPES).join(",")}
-            multiple
-            onChange={uploadFiles}
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || images.length >= MAX_PRODUCT_GALLERY_IMAGES}
-            className="inline-flex items-center gap-2 border border-amber-600/35 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-amber-500 transition hover:border-amber-600/70 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {isUploading ? (
-              <Loader2 size={13} className="animate-spin" />
-            ) : (
-              <UploadCloud size={13} />
-            )}
-            {isUploading ? "Uploading..." : "Upload Multiple"}
-          </button>
-          <button
-            type="button"
-            onClick={addImage}
-            disabled={
-              isUploading || images.length >= MAX_PRODUCT_GALLERY_IMAGES
-            }
-            className="border border-white/10 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-white/60 transition hover:border-white/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Add One
-          </button>
-        </div>
+      <div className="mb-4">
+        <h3 className="font-display text-xs font-bold uppercase text-white/80">
+          Product Gallery
+        </h3>
+        <p className="mt-1 text-[10px] leading-5 text-white/35">
+          Upload images one at a time. Each image appears below; use its delete
+          button to remove it.
+        </p>
       </div>
-      <p className="mb-4 text-[9px] text-white/30">
-        Select multiple images at once. JPEG, PNG, WebP, AVIF or GIF; maximum
-        5 MB each and {MAX_PRODUCT_GALLERY_IMAGES} gallery images per product.
-      </p>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={Array.from(ALLOWED_IMAGE_TYPES).join(",")}
+        onChange={uploadFile}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={
+          isUploading || images.length >= MAX_PRODUCT_GALLERY_IMAGES
+        }
+        className="flex min-h-32 w-full cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-white/10 bg-[#030505] p-5 text-center transition hover:border-amber-600/50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isUploading ? (
+          <Loader2 size={22} className="animate-spin text-amber-500" />
+        ) : (
+          <UploadCloud size={22} className="text-amber-500" />
+        )}
+        <span className="font-display text-[10px] font-semibold uppercase tracking-wider text-white/75">
+          {isUploading ? "Uploading image..." : "Click to upload gallery image"}
+        </span>
+        <span className="text-[9px] text-white/35">
+          JPEG, PNG, WebP, AVIF, or GIF · Max 5 MB · Up to{" "}
+          {MAX_PRODUCT_GALLERY_IMAGES} images
+        </span>
+      </button>
 
       {uploadError && (
         <p
           role="alert"
-          className="mb-4 flex items-center gap-2 border border-red-500/20 bg-red-500/[0.06] px-3 py-2 text-[10px] leading-5 text-red-300"
+          className="mt-3 flex items-center gap-2 border border-red-500/20 bg-red-500/[0.06] px-3 py-2 text-[10px] leading-5 text-red-300"
         >
           <AlertCircle size={14} className="shrink-0" />
           {uploadError}
@@ -179,44 +143,42 @@ export default function ProductGalleryEditor({
       {uploadNotice && (
         <p
           role="status"
-          className="mb-4 border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2 text-[10px] text-emerald-300"
+          className="mt-3 border border-emerald-500/20 bg-emerald-500/[0.06] px-3 py-2 text-[10px] text-emerald-300"
         >
           {uploadNotice}
         </p>
       )}
 
       {images.length > 0 ? (
-        <div className="space-y-5">
+        <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
           {images.map((image, index) => (
             <div
-              key={`gallery-${index}`}
-              className="border border-white/[0.06] p-4"
+              key={`${image}-${index}`}
+              className="group relative aspect-square overflow-hidden border border-white/10 bg-[#030505]"
             >
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-white/45">
-                  Gallery Image {index + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="text-[9px] font-bold uppercase tracking-wider text-red-300/70 transition hover:text-red-300"
-                >
-                  Remove
-                </button>
-              </div>
-              <ImageUpload
-                label={`Gallery Image ${index + 1}`}
-                value={image}
-                onChange={(value) => updateImage(index, value)}
-                allowUrlEntry={false}
-                previewDescription="Additional product gallery image."
+              <img
+                src={image}
+                alt={`Product gallery image ${index + 1}`}
+                className="h-full w-full object-contain p-1.5"
               />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                aria-label={`Delete gallery image ${index + 1}`}
+                title="Delete image"
+                className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center bg-red-600/90 text-white opacity-100 transition hover:bg-red-500 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+              >
+                <Trash2 size={14} />
+              </button>
+              <span className="absolute bottom-0 left-0 right-0 truncate bg-black/75 px-1.5 py-1 text-center text-[8px] text-white/70">
+                Image {index + 1}
+              </span>
             </div>
           ))}
         </div>
       ) : (
-        <p className="border border-dashed border-white/10 px-4 py-5 text-center text-[10px] text-white/30">
-          No additional gallery images.
+        <p className="mt-3 border border-dashed border-white/10 px-4 py-4 text-center text-[10px] text-white/30">
+          No additional gallery images yet.
         </p>
       )}
     </section>
