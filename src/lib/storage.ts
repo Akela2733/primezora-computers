@@ -198,6 +198,51 @@ export function getSupabaseStorageConfig() {
   };
 }
 
+function supabaseErrorMessage(responseBody: string): string {
+  try {
+    const parsed: unknown = JSON.parse(responseBody);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "message" in parsed &&
+      typeof parsed.message === "string"
+    ) {
+      return parsed.message;
+    }
+  } catch {
+    // Keep the response text when the Storage API doesn't return JSON.
+  }
+  return responseBody;
+}
+
+async function createSupabaseStorageBucket(
+  url: string,
+  serviceKey: string,
+  bucket: string
+): Promise<void> {
+  const response = await fetch(`${url}/storage/v1/bucket`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${serviceKey}`,
+      apikey: serviceKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: bucket,
+      name: bucket,
+      public: true,
+      file_size_limit: MAX_IMAGE_SIZE_BYTES,
+    }),
+  });
+
+  if (!response.ok && response.status !== 409) {
+    const details = supabaseErrorMessage(await response.text());
+    throw new Error(
+      `Supabase reported that the "${bucket}" image bucket is missing and could not create it (status ${response.status}). ${details}`
+    );
+  }
+}
+
 /**
  * Uploads an image to Supabase Storage via REST API.
  */
@@ -211,27 +256,38 @@ async function uploadToSupabaseStorage(
 
   const uploadEndpoint = `${url}/storage/v1/object/${bucket}/${scope}/${filename}`;
 
-  const response = await fetch(uploadEndpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${serviceKey}`,
-      apikey: serviceKey,
-      "Content-Type": mimeType,
-      "x-upsert": "true",
-    },
-    body: new Uint8Array(buffer),
-  });
+  const upload = () =>
+    fetch(uploadEndpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+        "Content-Type": mimeType,
+        "x-upsert": "true",
+      },
+      body: new Uint8Array(buffer),
+    });
+
+  let response = await upload();
+  if (!response.ok) {
+    const responseBody = await response.text();
+    const responseMessage = supabaseErrorMessage(responseBody);
+
+    if (/bucket[^.]*not found|not found[^.]*bucket/i.test(responseMessage)) {
+      await createSupabaseStorageBucket(url, serviceKey, bucket);
+      response = await upload();
+    } else {
+      throw new Error(
+        `Supabase Storage upload failed with status ${response.status}. (${responseMessage})`
+      );
+    }
+  }
 
   if (!response.ok) {
-    const errorText = await response.text();
-    let errorMessage = `Supabase Storage upload failed with status ${response.status}.`;
-    try {
-      const parsed = JSON.parse(errorText);
-      if (parsed.message) errorMessage += ` (${parsed.message})`;
-    } catch {
-      errorMessage += ` (${errorText})`;
-    }
-    throw new Error(errorMessage);
+    const responseMessage = supabaseErrorMessage(await response.text());
+    throw new Error(
+      `Supabase Storage upload failed with status ${response.status} after creating the missing bucket. (${responseMessage})`
+    );
   }
 
   const publicUrl = `${url}/storage/v1/object/public/${bucket}/${scope}/${filename}`;
