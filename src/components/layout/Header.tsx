@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import type { CatalogCategory } from "@/lib/categories";
 import type { StorefrontContent } from "@/lib/storefront-content";
 
@@ -216,6 +217,8 @@ export function Header({
 
 
             {/* Account */}
+
+            <NotificationBell />
 
             <Link
               href="/account"

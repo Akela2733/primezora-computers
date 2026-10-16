@@ -8,6 +8,7 @@ import {
   ArrowRight,
   FileText,
   Tags,
+  BellRing,
 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
@@ -278,6 +279,13 @@ export default async function AdminDashboard() {
               icon={<ShoppingBag size={20} />}
               title="Orders"
               description="View customer orders and update order status."
+            />
+
+            <AdminLink
+              href="/admin/notifications"
+              icon={<BellRing size={20} />}
+              title="Notifications"
+              description="Send store announcements and promotions to customer inboxes."
             />
 
           </div>

@@ -78,6 +78,7 @@ model Customer {
   orders                     Order[]
   checkoutIdempotencyRecords CheckoutIdempotency[]
   wishlistItems              WishlistItem[]
+  notificationRecipients     NotificationRecipient[]
 
   @@index([authUserId])
   @@index([emailVerified])
@@ -93,6 +94,31 @@ model WishlistItem {
 
   @@unique([customerId, productId])
   @@index([productId])
+}
+
+model SiteNotification {
+  id         String                  @id @default(cuid())
+  title      String
+  message    String
+  type       SiteNotificationType
+  href       String?
+  sourceKey  String?                 @unique
+  createdAt  DateTime                @default(now())
+  recipients NotificationRecipient[]
+
+  @@index([createdAt])
+}
+
+model NotificationRecipient {
+  id             String           @id @default(cuid())
+  notificationId String
+  customerId     String
+  readAt         DateTime?
+  notification   SiteNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  customer       Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, customerId])
+  @@index([customerId, readAt])
 }
 
 model CustomerEmailVerificationToken {
@@ -187,4 +213,11 @@ enum OrderStatus {
   READY_FOR_PICKUP
   COMPLETED
   CANCELLED
+}
+
+enum SiteNotificationType {
+  ANNOUNCEMENT
+  PROMOTION
+  RESTOCK
+  ORDER_UPDATE
 }

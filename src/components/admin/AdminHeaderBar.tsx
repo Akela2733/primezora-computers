@@ -10,6 +10,7 @@ import {
   Users,
   LayoutDashboard,
   ExternalLink,
+  BellRing,
 } from "lucide-react";
 import AdminLogoutButton from "./AdminLogoutButton";
 
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/admin/inventory", label: "Inventory", icon: Layers },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/notifications", label: "Notifications", icon: BellRing },
 ];
 
 export function AdminHeaderBar() {

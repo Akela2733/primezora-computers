@@ -11,6 +11,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import type { SiteNotificationType } from "@/generated/prisma/client";
 import { generateNotificationEmail } from "./templates";
 import { getEmailProvider } from "./providers";
 import {
@@ -22,6 +23,7 @@ import {
 // In-memory deduplication set with TTL to prevent duplicate notifications during retries/races
 const recentlySentCache = new Map<string, number>();
 const DEDUPLICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const RECIPIENT_BATCH_SIZE = 500;
 
 function cleanupOldCacheEntries() {
   const now = Date.now();
@@ -89,6 +91,21 @@ export async function sendOrderNotification(params: {
   const deduplicationKey = `${order.id}:${eventType}`;
   cleanupOldCacheEntries();
 
+  if (order.customerId) {
+    const inAppContent = getOrderNotificationContent(order, eventType);
+    try {
+      await createSiteNotification({
+        ...inAppContent,
+        type: "ORDER_UPDATE",
+        href: `/account/orders/${encodeURIComponent(order.id)}`,
+        customerIds: [order.customerId],
+        sourceKey: `order:${order.id}:${eventType}`,
+      });
+    } catch (error) {
+      console.error("ORDER IN-APP NOTIFICATION ERROR:", error);
+    }
+  }
+
   if (recentlySentCache.has(deduplicationKey)) {
     return {
       success: true,
@@ -148,7 +165,7 @@ export async function sendWishlistRestockNotifications(
   try {
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      select: { name: true, slug: true },
+      select: { name: true, slug: true, updatedAt: true },
     });
     if (!product) return;
 
@@ -157,9 +174,22 @@ export async function sendWishlistRestockNotifications(
         productId,
         customer: { restockAlertsEnabled: true },
       },
-      select: { customer: { select: { email: true } } },
+      select: { customer: { select: { id: true, email: true } } },
     });
     if (subscribers.length === 0) return;
+
+    try {
+      await createSiteNotification({
+        title: `${product.name} is back in stock`,
+        message: "A product saved to your wishlist is available again.",
+        type: "RESTOCK",
+        href: `/products/${encodeURIComponent(product.slug)}`,
+        customerIds: subscribers.map(({ customer }) => customer.id),
+        sourceKey: `restock:${productId}:${product.updatedAt.getTime()}`,
+      });
+    } catch (error) {
+      console.error("WISHLIST RESTOCK IN-APP NOTIFICATION ERROR:", error);
+    }
 
     const safeName = escapeHtml(product.name);
     const productUrl = new URL(
@@ -195,6 +225,70 @@ export async function sendWishlistRestockNotifications(
   } catch (error) {
     console.error("WISHLIST RESTOCK NOTIFICATION ERROR:", error);
   }
+}
+
+function getOrderNotificationContent(
+  order: NotificationOrderData,
+  eventType: NotificationEventType
+): { title: string; message: string } {
+  const status = eventType
+    .replaceAll("_", " ")
+    .replace(/^ORDER /, "")
+    .toLowerCase();
+  return {
+    title: `Order ${order.orderNumber} update`,
+    message: `Your order is now ${status}. View your order for the latest details.`,
+  };
+}
+
+export async function createSiteNotification(params: {
+  title: string;
+  message: string;
+  type: SiteNotificationType;
+  href?: string | null;
+  customerIds: string[];
+  sourceKey?: string;
+}): Promise<{ id: string; recipientCount: number }> {
+  const customerIds = [...new Set(params.customerIds)];
+  if (customerIds.length === 0) {
+    throw new Error("A site notification must have at least one recipient.");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const notification = params.sourceKey
+      ? await tx.siteNotification.upsert({
+          where: { sourceKey: params.sourceKey },
+          create: {
+            title: params.title,
+            message: params.message,
+            type: params.type,
+            href: params.href ?? null,
+            sourceKey: params.sourceKey,
+          },
+          update: {},
+        })
+      : await tx.siteNotification.create({
+          data: {
+            title: params.title,
+            message: params.message,
+            type: params.type,
+            href: params.href ?? null,
+          },
+        });
+
+    for (let index = 0; index < customerIds.length; index += RECIPIENT_BATCH_SIZE) {
+      const batch = customerIds.slice(index, index + RECIPIENT_BATCH_SIZE);
+      await tx.notificationRecipient.createMany({
+        data: batch.map((customerId) => ({
+          notificationId: notification.id,
+          customerId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return { id: notification.id, recipientCount: customerIds.length };
+  });
 }
 
 function escapeHtml(value: string): string {

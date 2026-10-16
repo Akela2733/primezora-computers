@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { MAX_STOCK_QUANTITY } from "@/lib/inventory";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/admin-auth";
+import { sendWishlistRestockNotifications } from "@/lib/notifications";
 
 type RouteContext = {
   params: Promise<{
@@ -74,6 +75,17 @@ export async function PATCH(
       );
     }
 
+    const previousProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { inStock: true, stockQuantity: true },
+    });
+    if (!previousProduct) {
+      return NextResponse.json(
+        { error: "Product not found." },
+        { status: 404 }
+      );
+    }
+
     const update = await prisma.product.updateMany({
       where: {
         id,
@@ -131,6 +143,14 @@ export async function PATCH(
         { error: "Product not found." },
         { status: 404 }
       );
+    }
+
+    if (
+      !(previousProduct.inStock && previousProduct.stockQuantity > 0) &&
+      product.inStock &&
+      product.stockQuantity > 0
+    ) {
+      void sendWishlistRestockNotifications(product.id);
     }
 
     return NextResponse.json({
