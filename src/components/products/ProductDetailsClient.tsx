@@ -3,6 +3,7 @@
 import ProductGallery from "@/components/shop/ProductGallery";
 import Link from "next/link";
 import {
+  AlertCircle,
   Check,
   ChevronRight,
   Heart,
@@ -31,6 +32,8 @@ export default function ProductDetailsClient({
   relatedProducts,
 }: ProductDetailsClientProps) {
   const [quantity, setQuantity] = useState(1);
+  const [cartError, setCartError] = useState("");
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 const {
   toggleWishlist,
   isInWishlist,
@@ -59,6 +62,18 @@ const isWishlisted = isInWishlist(
     setQuantity((current) =>
       Math.min(stockQuantity, current + 1)
     );
+  };
+
+  const handleAddToCart = async () => {
+    setCartError("");
+    setIsAddingToCart(true);
+    const result = await addToCart(product, quantity);
+    if (result === "unavailable") {
+      setCartError("This product is no longer available and was not added to your cart.");
+    } else if (result === "error") {
+      setCartError("We couldn't check current stock. Please try again.");
+    }
+    setIsAddingToCart(false);
   };
 
   const decreaseQuantity = () => {
@@ -327,10 +342,9 @@ const isWishlisted = isInWishlist(
 
                   <button
                     type="button"
-                    onClick={() => {
-                      addToCart(product, quantity);
-                    }}
+                    onClick={handleAddToCart}
                     disabled={
+                      isAddingToCart ||
                       !isPurchasable ||
                       quantity > stockQuantity
                     }
@@ -338,9 +352,19 @@ const isWishlisted = isInWishlist(
                   >
                     <ShoppingCart size={14} />
 
-                    Add to Cart
+                    {isAddingToCart ? "Checking stock..." : "Add to Cart"}
                   </button>
                 </div>
+
+                {cartError && (
+                  <p
+                    className="mt-3 flex items-start gap-2 text-xs leading-5 text-red-300"
+                    role="alert"
+                  >
+                    <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                    {cartError}
+                  </p>
+                )}
 
 
                 {/* Wishlist */}
