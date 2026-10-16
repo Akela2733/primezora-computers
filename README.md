@@ -135,29 +135,40 @@ new customer account. Admin authentication remains separate.
 Configure these server-side environment variables:
 
 - `PUBLIC_SITE_URL`: the canonical application origin used in verification
-  links. Use `http://localhost:3000` for local development and the exact HTTPS
-  production origin in deployment (no path, query string, or fragment).
+  and password-reset links. Use `http://localhost:3000` for local development
+  and the exact HTTPS production origin in deployment (no path, query string,
+  or fragment).
 - `RESEND_API_KEY`: a server-only Resend API key. Never expose it with a
+  `NEXT_PUBLIC_` prefix.
+- `SUPABASE_SERVICE_ROLE_KEY`: a server-only Supabase service-role key used to
+  generate customer password-recovery links. Never expose it with a
   `NEXT_PUBLIC_` prefix.
 - `EMAIL_FROM`: a sender such as `Primezora <noreply@primezora.com>`. The sender
   domain must be verified with Resend. Customer verification uses
   `Primezora <onboarding@resend.dev>` as its local/testing fallback when this
-  variable is unset; production requires `EMAIL_FROM` to be explicitly set.
+  variable is unset for local/testing emails; production requires `EMAIL_FROM`
+  to be explicitly set.
 
 For production, add the domain in Resend and publish the SPF/DKIM DNS records it
-provides. Wait for the domain to show as verified, then add all three variables
-to Vercel's **Production** environment and redeploy. `EMAIL_FROM` must use that
-verified domain, and `PUBLIC_SITE_URL` must be the site's HTTPS origin.
-Without a configured Resend provider, verification sends fail rather than
-showing a false “email sent” state. Local development may use a Resend test
-domain/key and an allowed recipient configured in Resend; no live delivery is
+provides. Wait for the domain to show as verified, then add the required
+variables above to Vercel's **Production** environment and redeploy.
+`EMAIL_FROM` must use that verified domain, and `PUBLIC_SITE_URL` must be the
+site's HTTPS origin.
+Password recovery fails closed when its required provider or Supabase
+configuration is missing. Recovery responses do not confirm whether an account
+exists, and the email is only sent when the provider accepts the request. Local
+development may use a Resend test domain/key and an allowed recipient configured
+in Resend; no live delivery is
 claimed until the provider accepts a send request. If a send fails, inspect the
-Vercel function logs for `CUSTOMER_EMAIL_VERIFICATION_CONFIGURATION_INVALID`,
-`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REJECTED`, or
-`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REQUEST_FAILED`. Rejection logs include
-only the provider name, allowlisted error category/code, and HTTP status; they
-never include API credentials, recipient addresses, tokens, or verification
-links.
+Vercel function logs for
+`CUSTOMER_EMAIL_VERIFICATION_CONFIGURATION_INVALID`,
+`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REJECTED`,
+`CUSTOMER_EMAIL_VERIFICATION_PROVIDER_REQUEST_FAILED`,
+`CUSTOMER_PASSWORD_RECOVERY_CONFIGURATION_INVALID`,
+`CUSTOMER_PASSWORD_RECOVERY_EMAIL_REJECTED`, or
+`CUSTOMER_PASSWORD_RECOVERY_EMAIL_REQUEST_FAILED`. Rejection logs include only
+the provider name, allowlisted error category/code, and HTTP status; they never
+include API credentials, recipient addresses, tokens, or recovery links.
 
 For local testing, put `RESEND_API_KEY`, `TEST_EMAIL_TO`, and
 `CONFIRM_EMAIL_SEND=1` in `.env.local`, then run `npm run test:email-delivery`.

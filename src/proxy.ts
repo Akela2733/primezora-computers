@@ -39,8 +39,7 @@ export async function proxy(request: NextRequest) {
   const isAuthPage =
     pathname === "/admin/login" ||
     pathname === "/admin/forgot" ||
-    pathname === "/admin/forgot-password" ||
-    pathname === "/forgot-password";
+    pathname === "/admin/forgot-password";
 
   // If navigating to auth pages
   if (isAuthPage) {

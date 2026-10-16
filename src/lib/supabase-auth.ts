@@ -190,6 +190,61 @@ function getSupabaseAdminClient(): SupabaseClient {
   return supabaseAdminClientInstance;
 }
 
+export async function generateCustomerPasswordRecoveryToken(
+  email: string
+): Promise<{ tokenHash: string | null }> {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: "recovery",
+    email: email.trim().toLowerCase(),
+  });
+
+  if (error) {
+    console.error("CUSTOMER_PASSWORD_RECOVERY_LINK_ERROR:", {
+      status: error.status ?? null,
+      code: error.code ?? null,
+    });
+    return { tokenHash: null };
+  }
+
+  return { tokenHash: data.properties.hashed_token || null };
+}
+
+export async function completeCustomerPasswordRecovery(
+  tokenHash: string,
+  password: string
+): Promise<{ success: boolean }> {
+  const config = getSupabaseAuthConfig();
+  if (!config.isConfigured) {
+    throw new Error("Supabase Auth is not configured.");
+  }
+
+  const supabase = createClient(config.url, config.anonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: "recovery",
+  });
+  if (error || !data.user) {
+    return { success: false };
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({ password });
+  if (updateError) {
+    console.error("CUSTOMER_PASSWORD_RECOVERY_UPDATE_ERROR:", {
+      status: updateError.status ?? null,
+      code: updateError.code ?? null,
+    });
+    return { success: false };
+  }
+
+  return { success: true };
+}
+
 export type SignUpResult = {
   success: boolean;
   user?: User;

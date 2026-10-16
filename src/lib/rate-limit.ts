@@ -40,6 +40,9 @@ const AUTH_RATE_LIMIT_POLICIES = new Set<RateLimitPolicyName>([
   "customerRegistrationAccount",
   "customerEmailConfirmationIp",
   "customerEmailConfirmationAccount",
+  "customerPasswordRecoveryIp",
+  "customerPasswordRecoveryAccount",
+  "customerPasswordResetIp",
   "adminLoginIp",
   "adminLoginAccount",
 ]);
