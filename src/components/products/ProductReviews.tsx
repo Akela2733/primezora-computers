@@ -44,7 +44,6 @@ export default function ProductReviews({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [summary, setSummary] = useState({
     rating: initialRating,
     reviewCount: initialReviewCount,
@@ -105,7 +104,6 @@ export default function ProductReviews({
   async function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSuccess("");
     setIsSaving(true);
 
     try {
@@ -150,7 +148,6 @@ export default function ProductReviews({
         reviewCount: result.reviewCount,
       });
       onSummaryChange(result.rating, result.reviewCount);
-      setSuccess("Your review has been published.");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -189,10 +186,28 @@ export default function ProductReviews({
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <form
-            onSubmit={submitReview}
-            className="border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6"
-          >
+          {isLoading ? (
+            <p className="border border-white/[0.08] bg-white/[0.02] p-5 text-xs text-white/40">
+              Loading your review status...
+            </p>
+          ) : hasOwnReview ? (
+            <div
+              role="status"
+              className="border border-emerald-500/20 bg-emerald-500/[0.04] p-5 sm:p-6"
+            >
+              <h3 className="text-sm font-semibold text-emerald-300">
+                Thanks for your review
+              </h3>
+              <p className="mt-2 text-xs leading-5 text-white/50">
+                Your rating and review are shown here and contribute to this
+                product&apos;s total rating.
+              </p>
+            </div>
+          ) : (
+            <form
+              onSubmit={submitReview}
+              className="border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6"
+            >
             <h3 className="text-sm font-semibold text-white/85">
               {hasOwnReview ? "Update your review" : "Write a review"}
             </h3>
@@ -273,12 +288,6 @@ export default function ProductReviews({
                 )}
               </p>
             )}
-            {success && (
-              <p role="status" className="mt-3 text-xs text-emerald-300">
-                {success}
-              </p>
-            )}
-
             <button
               type="submit"
               disabled={isSaving || isLoading || rating === 0 || !content.trim()}
@@ -286,11 +295,10 @@ export default function ProductReviews({
             >
               {isSaving
                 ? "Publishing..."
-                : hasOwnReview
-                  ? "Update review"
-                  : "Submit review"}
+                : "Submit review"}
             </button>
-          </form>
+            </form>
+          )}
 
           <div>
             <h3 className="text-sm font-semibold text-white/85">
