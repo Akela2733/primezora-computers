@@ -26,6 +26,7 @@ type CartContextType = {
   items: CartItem[];
   itemCount: number;
   subtotal: number;
+  validationStatus: "checking" | "current" | "error";
   lastAddedProductId: string | null;
 
   addToCart: (
@@ -51,6 +52,9 @@ export function CartProvider({
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [validationStatus, setValidationStatus] = useState<
+    "checking" | "current" | "error"
+  >("checking");
   const [lastAddedProductId, setLastAddedProductId] = useState<string | null>(null);
   const itemsRef = useRef(items);
 
@@ -97,15 +101,22 @@ export function CartProvider({
 
   const refreshCartAvailability = useCallback(async () => {
     const currentItems = itemsRef.current;
-    if (currentItems.length === 0) return;
+    if (currentItems.length === 0) {
+      setValidationStatus("current");
+      return;
+    }
 
+    setValidationStatus("checking");
     const checkedIds = new Set(
       currentItems.map((item) => item.product.id)
     );
     const availability = await fetchAvailability(
       currentItems.map((item) => item.product.id)
     );
-    if (!availability) return;
+    if (!availability) {
+      setValidationStatus("error");
+      return;
+    }
 
     setItems((current) => {
       const checkedItems = current.filter((item) =>
@@ -121,6 +132,7 @@ export function CartProvider({
         return updated ? [updated] : [];
       });
     });
+    setValidationStatus("current");
   }, [fetchAvailability]);
 
   useEffect(() => {
@@ -158,14 +170,18 @@ export function CartProvider({
                 .map((item) => item?.product?.id)
                 .filter((id): id is string => typeof id === "string")
             );
-            setItems(
-              availability
-                ? reconcileCartItems(parsedCart, availability)
-                : parsedCart
-            );
+            setItems(availability
+              ? reconcileCartItems(parsedCart, availability)
+              : parsedCart);
+            setValidationStatus(availability ? "current" : "error");
+          } else {
+            setValidationStatus("current");
           }
+        } else {
+          setValidationStatus("current");
         }
       } catch (error) {
+        setValidationStatus("error");
         console.error(
           "Failed to load Primezora cart:",
           error
@@ -231,19 +247,26 @@ export function CartProvider({
       return "unavailable";
     }
 
-    const availability = await fetchAvailability([product.id]);
-    if (!availability) return "error";
+    setValidationStatus("checking");
+    const idsToValidate = [
+      ...new Set([
+        ...itemsRef.current.map((item) => item.product.id),
+        product.id,
+      ]),
+    ];
+    const availability = await fetchAvailability(idsToValidate);
+    if (!availability) {
+      setValidationStatus("error");
+      return "error";
+    }
     const currentProduct = availability.find(
       (item) => item.id === product.id
     );
-    if (
-      !currentProduct ||
-      !currentProduct.inStock ||
-      currentProduct.stockQuantity <= 0
-    ) {
+    if (!currentProduct) {
       setItems((currentItems) =>
-        currentItems.filter((item) => item.product.id !== product.id)
+        reconcileCartItems(currentItems, availability)
       );
+      setValidationStatus("current");
       return "unavailable";
     }
 
@@ -252,24 +275,26 @@ export function CartProvider({
     setLastAddedProductId(product.id);
 
     setItems((currentItems) => {
-      const existingItem = currentItems.find(
+      const validatedItems = reconcileCartItems(currentItems, availability);
+      const existingItem = validatedItems.find(
         (item) =>
           item.product.id === product.id
       );
 
       if (existingItem) {
-        const newQuantity = Math.min(
-          existingItem.quantity + quantity,
-          currentStock
-        );
+        const requestedQuantity = existingItem.quantity + quantity;
+        const newQuantity =
+          currentStock > 0
+            ? Math.min(requestedQuantity, currentStock)
+            : requestedQuantity;
 
-        return currentItems.map((item) =>
+        return validatedItems.map((item) =>
           item.product.id === product.id
             ? {
                 ...item,
                 product: {
                   ...currentProductDetails,
-                  inStock: true,
+                  inStock: currentProduct.inStock,
                   stockQuantity: currentStock,
                   stock: currentStock,
                 },
@@ -280,21 +305,22 @@ export function CartProvider({
       }
 
       return [
-        ...currentItems,
+        ...validatedItems.filter((item) => item.product.id !== product.id),
         {
           product: {
             ...currentProductDetails,
-            inStock: true,
+            inStock: currentProduct.inStock,
             stockQuantity: currentStock,
             stock: currentStock,
           },
-          quantity: Math.min(
-            quantity,
-            currentStock
-          ),
+          quantity:
+            currentStock > 0
+              ? Math.min(quantity, currentStock)
+              : quantity,
         },
       ];
     });
+    setValidationStatus("current");
     return "added";
   };
 
@@ -341,13 +367,9 @@ export function CartProvider({
           item.product.stock ??
           0;
 
-        if (maximum <= 0) {
-          return [];
-        }
-
         return {
           ...item,
-          quantity: Math.min(quantity, maximum),
+          quantity: maximum > 0 ? Math.min(quantity, maximum) : quantity,
         };
       })
     );
@@ -363,6 +385,11 @@ export function CartProvider({
     setItems([]);
   };
 
+  const verifiedItems = useMemo(
+    () => (validationStatus === "current" ? items : []),
+    [items, validationStatus]
+  );
+
   /*
   |--------------------------------------------------------------------------
   | Check whether product is in cart
@@ -372,7 +399,7 @@ export function CartProvider({
   const isInCart = (
     productId: string
   ) => {
-    return items.some(
+    return verifiedItems.some(
       (item) =>
         item.product.id === productId
     );
@@ -385,12 +412,12 @@ export function CartProvider({
   */
 
   const itemCount = useMemo(() => {
-    return items.reduce(
+    return verifiedItems.reduce(
       (total, item) =>
         total + item.quantity,
       0
     );
-  }, [items]);
+  }, [verifiedItems]);
 
   /*
   |--------------------------------------------------------------------------
@@ -399,21 +426,22 @@ export function CartProvider({
   */
 
   const subtotal = useMemo(() => {
-    return items.reduce(
+    return verifiedItems.reduce(
       (total, item) =>
         total +
         item.product.price *
           item.quantity,
       0
     );
-  }, [items]);
+  }, [verifiedItems]);
 
   return (
     <CartContext.Provider
       value={{
-        items,
+        items: verifiedItems,
         itemCount,
         subtotal,
+        validationStatus,
         lastAddedProductId,
         addToCart,
         removeFromCart,

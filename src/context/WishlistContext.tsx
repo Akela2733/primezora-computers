@@ -13,6 +13,7 @@ import {
 
 import type { Product } from "@/types/product";
 import {
+  removeWishlistProducts,
   reconcileWishlistProducts,
   type AvailableWishlistProduct,
 } from "@/lib/wishlist-availability";
@@ -226,9 +227,7 @@ export function WishlistProvider({
     productId: string
   ) => {
     setItems((currentItems) =>
-      currentItems.filter(
-        (item) => item.id !== productId
-      )
+      removeWishlistProducts(currentItems, [productId])
     );
   };
 
@@ -258,10 +257,11 @@ export function WishlistProvider({
     setItems([]);
   };
 
-  const itemCount = useMemo(
-    () => items.length,
-    [items]
+  const visibleItems = useMemo(
+    () => (availabilityStatus === "current" ? items : []),
+    [availabilityStatus, items]
   );
+  const itemCount = useMemo(() => visibleItems.length, [visibleItems]);
 
   return (
     <WishlistContext.Provider

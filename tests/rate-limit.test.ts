@@ -132,6 +132,26 @@ describe("shared rate-limit responses", () => {
     }
   });
 
+  test("uses bounded in-memory limits for public catalog requests when Redis is unavailable", async () => {
+    const identifier = `ip:catalog-fallback-${randomUUID()}`;
+    const makeRequest = () =>
+      enforceRateLimits(
+        new Request("https://example.test/api/products"),
+        [{ policy: "publicCatalogIp", identifier }],
+        async () => {
+          throw new Error("Redis unavailable");
+        }
+      );
+
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      assert.equal(await makeRequest(), null);
+    }
+
+    const limited = await makeRequest();
+    assert.equal(limited?.status, 429);
+    assert.ok(Number(limited?.headers.get("Retry-After")) > 0);
+  });
+
   test("does not allow test-mode bypass outside the isolated integration harness", async () => {
     const originalTestMode = process.env.RATE_LIMIT_TEST_MODE;
     const originalDistDir = process.env.NEXT_DIST_DIR;

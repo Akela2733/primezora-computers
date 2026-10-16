@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { reconcileWishlistProducts } from "../src/lib/wishlist-availability";
+import {
+  reconcileWishlistProducts,
+  removeWishlistProducts,
+} from "../src/lib/wishlist-availability";
 import type { Product } from "../src/types/product";
 
 function product(id: string, overrides: Partial<Product> = {}): Product {
@@ -88,5 +91,14 @@ describe("wishlist product availability", () => {
     assert.equal(result[0].inStock, true);
     assert.equal(result[0].stockQuantity, 9);
     assert.equal(result[0].stock, 9);
+  });
+
+  test("removes products added to the cart while preserving other saved products", () => {
+    const saved = [product("added"), product("still-wanted")];
+
+    assert.deepEqual(
+      removeWishlistProducts(saved, ["added"]),
+      [product("still-wanted")]
+    );
   });
 });

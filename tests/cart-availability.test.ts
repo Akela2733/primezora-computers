@@ -22,7 +22,7 @@ function cartItem(id: string, quantity = 2) {
 }
 
 describe("cart product availability", () => {
-  test("removes deleted, disabled, and zero-stock products", () => {
+  test("removes only products deleted from the database", () => {
     const items = [
       cartItem("available"),
       cartItem("disabled"),
@@ -38,8 +38,10 @@ describe("cart product availability", () => {
 
     assert.deepEqual(
       result.map((item) => item.product.id),
-      ["available"]
+      ["available", "disabled", "empty"]
     );
+    assert.equal(result[1].product.inStock, false);
+    assert.equal(result[2].product.stockQuantity, 0);
   });
 
   test("updates stock and clamps saved cart quantities to current inventory", () => {
@@ -74,12 +76,13 @@ describe("cart product availability", () => {
     assert.equal(result[0].product.stockQuantity, 4);
   });
 
-  test("does not include invalid or unavailable products", () => {
+  test("omits invalid quantities and keeps zero-stock products that still exist", () => {
     const result = reconcileCartItems(
-      [cartItem("available", 0), cartItem("unavailable")],
+      [cartItem("invalid-quantity", 0), cartItem("unavailable")],
       [{ id: "unavailable", inStock: true, stockQuantity: 0 }]
     );
 
-    assert.deepEqual(result, []);
+    assert.deepEqual(result.map((item) => item.product.id), ["unavailable"]);
+    assert.equal(result[0].quantity, 2);
   });
 });

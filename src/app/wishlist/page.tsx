@@ -44,34 +44,27 @@ export default function WishlistPage() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
-  const availableProducts = useMemo(
+  const catalogProducts = useMemo(
     () =>
       availabilityStatus === "current"
-        ? items.filter(isPurchasable)
+        ? items
         : [],
     [availabilityStatus, items]
   );
-  const cartCandidates = useMemo(
-    () =>
-      availabilityStatus === "error"
-        ? items
-        : availableProducts,
-    [availabilityStatus, availableProducts, items]
-  );
-  const availableSubtotal = useMemo(
-    () => availableProducts.reduce((total, product) => total + product.price, 0),
-    [availableProducts]
+  const catalogSubtotal = useMemo(
+    () => catalogProducts.reduce((total, product) => total + product.price, 0),
+    [catalogProducts]
   );
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return items;
+    if (!query) return catalogProducts;
 
-    return items.filter((product) =>
+    return catalogProducts.filter((product) =>
       [product.name, product.brand, product.category].some((value) =>
         value.toLowerCase().includes(query)
       )
     );
-  }, [items, search]);
+  }, [catalogProducts, search]);
 
   const handleAddToCart = async (product: Product) => {
     setNotice("");
@@ -81,11 +74,15 @@ export default function WishlistPage() {
     try {
       const result = await addToCart(product, 1);
       if (result === "added") {
+        removeFromWishlist(product.id);
         setNotice(`${product.name} was added to your cart.`);
       } else if (result === "unavailable") {
+        removeFromWishlist(product.id);
         setError(`${product.name} is no longer available in the catalog.`);
       } else {
-        setError("We couldn't add this product right now. Please try again.");
+        setError(
+          `We couldn't confirm ${product.name} is still in the catalog. It remains in your wishlist.`
+        );
       }
     } finally {
       setBusyProductId(null);
@@ -93,7 +90,7 @@ export default function WishlistPage() {
   };
 
   const handleAddAvailableToCart = async () => {
-    if (addingAll || cartCandidates.length === 0) return;
+    if (addingAll || catalogProducts.length === 0) return;
 
     setNotice("");
     setError("");
@@ -101,13 +98,23 @@ export default function WishlistPage() {
     let addedCount = 0;
     let unavailableCount = 0;
     let failedCount = 0;
+    const addedProductIds: string[] = [];
 
     try {
-      for (const product of cartCandidates) {
+      for (const product of catalogProducts) {
         const result = await addToCart(product, 1);
-        if (result === "added") addedCount += 1;
-        else if (result === "unavailable") unavailableCount += 1;
+        if (result === "added") {
+          addedCount += 1;
+          addedProductIds.push(product.id);
+        } else if (result === "unavailable") {
+          unavailableCount += 1;
+          removeFromWishlist(product.id);
+        }
         else failedCount += 1;
+      }
+
+      for (const productId of addedProductIds) {
+        removeFromWishlist(productId);
       }
 
       if (addedCount > 0) {
@@ -122,7 +129,7 @@ export default function WishlistPage() {
               ? `${unavailableCount} item${unavailableCount === 1 ? "" : "s"} became unavailable.`
               : "",
             failedCount > 0
-              ? `Stock could not be checked for ${failedCount} item${failedCount === 1 ? "" : "s"}.`
+              ? `Couldn't confirm ${failedCount} item${failedCount === 1 ? "" : "s"} are still in the catalog; they remain in your wishlist.`
               : "",
           ]
             .filter(Boolean)
@@ -181,9 +188,35 @@ export default function WishlistPage() {
         </div>
       </section>
 
-      {itemCount === 0 ? (
+      {availabilityStatus !== "current" ? (
         <section className="container-primezora py-16 sm:py-24">
           <div className="mx-auto max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] px-6 py-14 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] text-amber-500">
+              <Heart size={25} />
+            </div>
+            <h2 className="mt-6 text-2xl font-semibold text-white">
+              {availabilityStatus === "checking"
+                ? "Loading your wishlist"
+                : "Wishlist temporarily unavailable"}
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/45">
+              {availabilityStatus === "checking"
+                ? "Checking your saved products against the current catalog."
+                : "We couldn't reach the product catalog. Your saved items are kept safe and will be checked again automatically."}
+            </p>
+          </div>
+        </section>
+      ) : itemCount === 0 ? (
+        <section className="container-primezora py-16 sm:py-24">
+          <div className="mx-auto max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] px-6 py-14 text-center">
+            {notice && (
+              <p
+                className="mb-6 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-sm text-emerald-300"
+                role="status"
+              >
+                {notice}
+              </p>
+            )}
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] text-amber-500">
               <Heart size={25} />
             </div>
@@ -213,20 +246,12 @@ export default function WishlistPage() {
                     Saved products
                   </h2>
                   <p className="mt-1 text-xs text-white/40">
-                    {availabilityStatus === "checking"
-                      ? "Loading saved products…"
-                      : availabilityStatus === "error"
-                        ? "Products are verified when you add them to your cart"
-                        : `${availableProducts.length} available${
-                            availableProducts.length !== itemCount
-                              ? ` · ${itemCount - availableProducts.length} currently unavailable`
-                              : ""
-                          }`}
+                    {catalogProducts.length} saved products are in the catalog
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {items.length > 1 && (
+                  {catalogProducts.length > 1 && (
                     <button
                       type="button"
                       onClick={clearWishlist}
@@ -279,9 +304,7 @@ export default function WishlistPage() {
               {filteredItems.length > 0 ? (
                 <ul className="space-y-3">
                   {filteredItems.map((product) => {
-                    const purchasable =
-                      availabilityStatus === "current" &&
-                      isPurchasable(product);
+                    const purchasable = isPurchasable(product);
                     const stockQuantity =
                       product.stockQuantity ?? product.stock ?? 0;
                     const busy = busyProductId === product.id || addingAll;
@@ -341,21 +364,13 @@ export default function WishlistPage() {
                                 <p className="text-base font-semibold text-amber-400">
                                   {formatPrice(product.price)}
                                 </p>
-                                {availabilityStatus === "checking" ? (
-                                  <p className="mt-1 text-[11px] text-white/45">
-                                    Loading saved product…
-                                  </p>
-                                ) : availabilityStatus === "error" ? (
-                                  <p className="mt-1 text-[11px] text-amber-200/80">
-                                    Verified when added to cart
-                                  </p>
-                                ) : purchasable ? (
+                                {purchasable ? (
                                   <p className="mt-1 text-[11px] text-emerald-300/80">
                                     {stockQuantity} in stock
                                   </p>
                                 ) : (
                                   <p className="mt-1 text-[11px] text-red-300/80">
-                                    Currently unavailable
+                                    In catalog · unavailable for purchase
                                   </p>
                                 )}
                               </div>
@@ -363,12 +378,7 @@ export default function WishlistPage() {
                               <button
                                 type="button"
                                 onClick={() => void handleAddToCart(product)}
-                                disabled={
-                                  availabilityStatus === "checking" ||
-                                  (availabilityStatus === "current" &&
-                                    !purchasable) ||
-                                  busy
-                                }
+                                disabled={busy}
                                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 text-xs font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border disabled:border-white/[0.08] disabled:bg-white/[0.03] disabled:text-white/35 sm:px-4"
                               >
                                 {busy ? (
@@ -377,16 +387,10 @@ export default function WishlistPage() {
                                   <ShoppingCart size={15} />
                                 )}
                                 <span className="hidden sm:inline">
-                                  {purchasable ||
-                                  availabilityStatus === "error"
-                                    ? "Add to cart"
-                                    : "Unavailable"}
+                                  Add to cart
                                 </span>
                                 <span className="sm:hidden">
-                                  {purchasable ||
-                                  availabilityStatus === "error"
-                                    ? "Add"
-                                    : "Unavailable"}
+                                  Add
                                 </span>
                               </button>
                             </div>
@@ -424,9 +428,7 @@ export default function WishlistPage() {
                       Ready when you are
                     </h2>
                     <p className="mt-1 text-xs text-white/40">
-                      {availabilityStatus === "error"
-                        ? `${items.length} saved items`
-                        : `${availableProducts.length} available to add`}
+                      {catalogProducts.length} in the catalog
                     </p>
                   </div>
                 </div>
@@ -435,24 +437,16 @@ export default function WishlistPage() {
 
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="text-white/50">
-                    {availabilityStatus === "error"
-                      ? "Saved items"
-                      : "Available items"}
+                    Catalog items
                   </span>
                   <span className="font-medium text-white">
-                    {cartCandidates.length}
+                    {catalogProducts.length}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                  <span className="text-white/50">
-                    {availabilityStatus === "error"
-                      ? "Product details"
-                      : "Estimated value"}
-                  </span>
+                  <span className="text-white/50">Estimated value</span>
                   <span className="font-semibold text-amber-400">
-                    {availabilityStatus === "error"
-                      ? "Confirmed on add"
-                      : formatPrice(availableSubtotal)}
+                    {formatPrice(catalogSubtotal)}
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] leading-5 text-white/35">
@@ -463,7 +457,7 @@ export default function WishlistPage() {
                 <button
                   type="button"
                   onClick={() => void handleAddAvailableToCart()}
-                  disabled={cartCandidates.length === 0 || addingAll}
+                  disabled={catalogProducts.length === 0 || addingAll}
                   className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-white/35"
                 >
                   {addingAll ? (
@@ -489,7 +483,7 @@ export default function WishlistPage() {
 
                 <div className="mt-5 flex items-start gap-2 border-t border-white/[0.07] pt-4 text-[11px] leading-5 text-white/40">
                   <ShieldCheck size={15} className="mt-0.5 shrink-0 text-emerald-400/80" />
-                  Products no longer available in the catalog cannot be added.
+                  Products are confirmed against the database when added.
                 </div>
               </div>
             </aside>

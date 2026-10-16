@@ -27,12 +27,12 @@ type RateLimitEvaluator = (
 
 const limiters = new Map<RateLimitPolicyName, Ratelimit>();
 let redis: Redis | undefined;
-const inMemoryAuthLimits = new Map<
+const inMemoryLimits = new Map<
   string,
   { timestamps: number[]; expiresAt: number }
 >();
-const MAX_IN_MEMORY_AUTH_KEYS = 10_000;
-let authRateLimitFallbackActive = false;
+const MAX_IN_MEMORY_LIMIT_KEYS = 10_000;
+let rateLimitFallbackActive = false;
 const AUTH_RATE_LIMIT_POLICIES = new Set<RateLimitPolicyName>([
   "customerLoginIp",
   "customerLoginAccount",
@@ -45,6 +45,10 @@ const AUTH_RATE_LIMIT_POLICIES = new Set<RateLimitPolicyName>([
   "customerPasswordResetIp",
   "adminLoginIp",
   "adminLoginAccount",
+]);
+const IN_MEMORY_FALLBACK_POLICIES = new Set<RateLimitPolicyName>([
+  ...AUTH_RATE_LIMIT_POLICIES,
+  "publicCatalogIp",
 ]);
 
 function parseWindowMilliseconds(window: string): number {
@@ -66,22 +70,22 @@ function evaluateInMemory(check: RateLimitCheck): RateLimitEvaluation {
     .update(check.identifier)
     .digest("hex")}`;
 
-  let state = inMemoryAuthLimits.get(key);
+  let state = inMemoryLimits.get(key);
   if (!state || state.expiresAt <= now) {
-    if (inMemoryAuthLimits.size >= MAX_IN_MEMORY_AUTH_KEYS) {
-      for (const [existingKey, existingState] of inMemoryAuthLimits) {
+    if (inMemoryLimits.size >= MAX_IN_MEMORY_LIMIT_KEYS) {
+      for (const [existingKey, existingState] of inMemoryLimits) {
         if (existingState.expiresAt <= now) {
-          inMemoryAuthLimits.delete(existingKey);
+          inMemoryLimits.delete(existingKey);
         }
       }
 
-      if (inMemoryAuthLimits.size >= MAX_IN_MEMORY_AUTH_KEYS) {
-        throw new Error("In-memory authentication rate-limit capacity reached.");
+      if (inMemoryLimits.size >= MAX_IN_MEMORY_LIMIT_KEYS) {
+        throw new Error("In-memory rate-limit capacity reached.");
       }
     }
 
     state = { timestamps: [], expiresAt: now + windowMilliseconds };
-    inMemoryAuthLimits.set(key, state);
+    inMemoryLimits.set(key, state);
   }
 
   state.timestamps = state.timestamps.filter(
@@ -195,7 +199,7 @@ export async function getEmailRateLimitIdentifier(
 
 function unavailableResponse(): NextResponse {
   return NextResponse.json(
-    { error: "Authentication is temporarily unavailable. Please try again in a moment." },
+    { error: "Service is temporarily unavailable. Please try again in a moment." },
     { status: 503, headers: { "Cache-Control": "no-store" } }
   );
 }
@@ -230,7 +234,7 @@ export async function enforceRateLimits(
 
   try {
     const results = await Promise.all(checks.map((check) => evaluator(check)));
-    authRateLimitFallbackActive = false;
+    rateLimitFallbackActive = false;
     const rejected = results.filter((result) => !result.success);
     if (rejected.length === 0) return null;
 
@@ -260,14 +264,16 @@ export async function enforceRateLimits(
   } catch (error) {
     if (
       checks.length > 0 &&
-      checks.every((check) => AUTH_RATE_LIMIT_POLICIES.has(check.policy))
+      checks.every((check) =>
+        IN_MEMORY_FALLBACK_POLICIES.has(check.policy)
+      )
     ) {
-      if (!authRateLimitFallbackActive) {
+      if (!rateLimitFallbackActive) {
         logger.error(
-          "Shared rate limiter is unavailable; applying per-instance limits to authentication requests.",
+          "Shared rate limiter is unavailable; applying per-instance limits to supported requests.",
           error
         );
-        authRateLimitFallbackActive = true;
+        rateLimitFallbackActive = true;
       }
 
       try {
@@ -293,7 +299,7 @@ export async function enforceRateLimits(
         );
       } catch (fallbackError) {
         logger.error(
-          "In-memory authentication rate limiting is unavailable; rejecting the request.",
+          "In-memory rate limiting is unavailable; rejecting the request.",
           fallbackError
         );
         return unavailableResponse();

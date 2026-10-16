@@ -32,3 +32,11 @@ export function reconcileWishlistProducts(
       : [];
   });
 }
+
+export function removeWishlistProducts(
+  items: Product[],
+  productIds: readonly string[]
+): Product[] {
+  const removedIds = new Set(productIds);
+  return items.filter((item) => !removedIds.has(item.id));
+}

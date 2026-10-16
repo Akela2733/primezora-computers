@@ -22,21 +22,25 @@ export function reconcileCartItems<T extends AvailableCartItem>(
 
   return items.flatMap((item) => {
     const current = availabilityById.get(item.product.id);
-    if (!current || !current.inStock || current.stockQuantity <= 0) {
+    if (
+      !current ||
+      !Number.isInteger(item.quantity) ||
+      item.quantity <= 0
+    ) {
       return [];
     }
 
-    const quantity = Math.min(
-      Math.max(1, item.quantity),
-      current.stockQuantity
-    );
+    const quantity =
+      current.stockQuantity > 0
+        ? Math.min(item.quantity, current.stockQuantity)
+        : item.quantity;
 
     return [
       {
         ...item,
         product: {
           ...(current.product ?? item.product),
-          inStock: true,
+          inStock: current.inStock,
           stockQuantity: current.stockQuantity,
           stock: current.stockQuantity,
         },

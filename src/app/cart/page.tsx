@@ -20,10 +20,45 @@ export default function CartPage() {
     items,
     itemCount,
     subtotal,
+    validationStatus,
     updateQuantity,
     removeFromCart,
     clearCart,
   } = useCart();
+
+  if (validationStatus !== "current") {
+    return (
+      <main className="min-h-screen bg-[#030505] text-white/90">
+        <section className="container-primezora flex min-h-[70vh] items-center justify-center py-16">
+          <div className="w-full max-w-xl text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center border border-white/[0.08] bg-white/[0.02]">
+              <ShoppingBag size={28} className="text-amber-600" />
+            </div>
+            <p className="mt-8 text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
+              Your Shopping Cart
+            </p>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              {validationStatus === "checking"
+                ? "Checking your cart"
+                : "Cart temporarily unavailable"}
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-xs leading-6 text-white/35">
+              {validationStatus === "checking"
+                ? "Confirming saved products are still in the catalog."
+                : "We couldn't reach the product catalog. Your cart is saved and will be checked again automatically."}
+            </p>
+            <Link
+              href="/shop"
+              className="mx-auto mt-8 flex h-12 w-fit items-center gap-3 bg-amber-600 px-7 text-[9px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-amber-600"
+            >
+              Continue Shopping
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   /*
   |--------------------------------------------------------------------------
