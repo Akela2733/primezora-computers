@@ -20,11 +20,13 @@ import {
 type WishlistContextType = {
   items: Product[];
   itemCount: number;
+  availabilityStatus: "checking" | "current" | "error";
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: string) => void;
   toggleWishlist: (product: Product) => void;
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
+  refreshWishlist: () => Promise<void>;
 };
 
 const WishlistContext =
@@ -41,6 +43,9 @@ export function WishlistProvider({
 }) {
   const [items, setItems] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [availabilityStatus, setAvailabilityStatus] = useState<
+    "checking" | "current" | "error"
+  >("checking");
   const itemsRef = useRef(items);
 
   useEffect(() => {
@@ -88,11 +93,17 @@ export function WishlistProvider({
 
   const refreshWishlist = useCallback(async () => {
     const currentItems = itemsRef.current;
-    if (currentItems.length === 0) return;
+    if (currentItems.length === 0) {
+      setAvailabilityStatus("current");
+      return;
+    }
 
     const checkedIds = new Set(currentItems.map((item) => item.id));
     const availableProducts = await fetchCurrentProducts([...checkedIds]);
-    if (!availableProducts) return;
+    if (!availableProducts) {
+      setAvailabilityStatus("error");
+      return;
+    }
 
     setItems((current) => {
       const currentById = new Map(current.map((item) => [item.id, item]));
@@ -111,6 +122,7 @@ export function WishlistProvider({
         return updated ? [updated] : [];
       });
     });
+    setAvailabilityStatus("current");
   }, [fetchCurrentProducts]);
 
   // Load wishlist from localStorage
@@ -132,6 +144,9 @@ export function WishlistProvider({
               .filter((id): id is string => typeof id === "string");
             const availableProducts =
               await fetchCurrentProducts(productIds);
+            setAvailabilityStatus(
+              availableProducts ? "current" : "error"
+            );
             setItems(
               availableProducts
                 ? reconcileWishlistProducts(
@@ -140,9 +155,14 @@ export function WishlistProvider({
                   )
                 : parsedWishlist
             );
+          } else {
+            setAvailabilityStatus("current");
           }
+        } else {
+          setAvailabilityStatus("current");
         }
       } catch (error) {
+        setAvailabilityStatus("error");
         console.error(
           "Failed to load Primezora wishlist:",
           error
@@ -249,11 +269,13 @@ export function WishlistProvider({
       value={{
         items,
         itemCount,
+        availabilityStatus,
         addToWishlist,
         removeFromWishlist,
         toggleWishlist,
         isInWishlist,
         clearWishlist,
+        refreshWishlist,
       }}
     >
       {children}

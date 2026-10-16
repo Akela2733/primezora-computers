@@ -2,6 +2,8 @@ import type { Product } from "@/types/product";
 
 export type AvailableWishlistProduct = {
   id: string;
+  inStock: boolean;
+  stockQuantity: number;
   product: Product;
 };
 
@@ -10,11 +12,23 @@ export function reconcileWishlistProducts(
   availableProducts: readonly AvailableWishlistProduct[]
 ): Product[] {
   const productsById = new Map(
-    availableProducts.map(({ id, product }) => [id, product])
+    availableProducts.map((availableProduct) => [
+      availableProduct.id,
+      availableProduct,
+    ])
   );
 
   return items.flatMap((item) => {
-    const currentProduct = productsById.get(item.id);
-    return currentProduct ? [currentProduct] : [];
+    const current = productsById.get(item.id);
+    return current
+      ? [
+          {
+            ...current.product,
+            inStock: current.inStock,
+            stockQuantity: current.stockQuantity,
+            stock: current.stockQuantity,
+          },
+        ]
+      : [];
   });
 }

@@ -29,10 +29,17 @@ describe("wishlist product availability", () => {
     });
     const result = reconcileWishlistProducts(
       [product("deleted"), product("still-listed", { price: 100 })],
-      [{ id: refreshedProduct.id, product: refreshedProduct }]
+      [
+        {
+          id: refreshedProduct.id,
+          inStock: true,
+          stockQuantity: 9,
+          product: refreshedProduct,
+        },
+      ]
     );
 
-    assert.deepEqual(result, [refreshedProduct]);
+    assert.deepEqual(result, [{ ...refreshedProduct, stock: 9 }]);
   });
 
   test("keeps disabled products in the wishlist using their current availability", () => {
@@ -42,10 +49,44 @@ describe("wishlist product availability", () => {
     });
     const result = reconcileWishlistProducts(
       [product("disabled", { inStock: true, stockQuantity: 5 })],
-      [{ id: disabledProduct.id, product: disabledProduct }]
+      [
+        {
+          id: disabledProduct.id,
+          inStock: false,
+          stockQuantity: 0,
+          product: disabledProduct,
+        },
+      ]
     );
 
-    assert.deepEqual(result, [disabledProduct]);
+    assert.deepEqual(result, [{ ...disabledProduct, stock: 0 }]);
     assert.equal(result[0].inStock, false);
+  });
+
+  test("uses the availability fields returned by the database over stale saved product fields", () => {
+    const databaseProduct = product("geforce-rtx", {
+      inStock: false,
+      stockQuantity: 0,
+    });
+    const result = reconcileWishlistProducts(
+      [
+        product("geforce-rtx", {
+          inStock: false,
+          stockQuantity: 0,
+        }),
+      ],
+      [
+        {
+          id: databaseProduct.id,
+          inStock: true,
+          stockQuantity: 9,
+          product: databaseProduct,
+        },
+      ]
+    );
+
+    assert.equal(result[0].inStock, true);
+    assert.equal(result[0].stockQuantity, 9);
+    assert.equal(result[0].stock, 9);
   });
 });
