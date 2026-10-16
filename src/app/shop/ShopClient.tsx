@@ -51,6 +51,7 @@ export default function ShopClient({
           product.name,
           product.brand,
           product.category,
+          product.slug,
         ].some((value) =>
           value
             .toLowerCase()
@@ -201,6 +202,7 @@ export default function ShopClient({
 
               <input
                 type="search"
+                aria-label={content.searchPlaceholder}
                 value={search}
                 onChange={(event) =>
                   setSearch(event.target.value)

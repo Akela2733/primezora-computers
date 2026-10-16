@@ -68,7 +68,12 @@ export function Header({
 
           <div className="hidden flex-1 md:block">
 
-            <div className="relative mx-auto max-w-[570px]">
+            <form
+              action="/search"
+              method="GET"
+              role="search"
+              className="relative mx-auto max-w-[570px]"
+            >
 
               <Search
                 size={17}
@@ -83,7 +88,10 @@ export function Header({
 
               <input
                 type="search"
+                name="q"
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
+                autoComplete="off"
                 className="
                   h-10
                   w-full
@@ -92,7 +100,7 @@ export function Header({
                   border-white/[0.08]
                   bg-white/[0.04]
                   pl-11
-                  pr-4
+                  pr-12
                   text-sm
                   text-white/90
                   outline-none
@@ -104,7 +112,15 @@ export function Header({
                 "
               />
 
-            </div>
+              <button
+                type="submit"
+                aria-label="Search products"
+                className="absolute right-1 top-1/2 flex h-8 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition hover:bg-white/[0.06] hover:text-amber-600"
+              >
+                <Search size={16} />
+              </button>
+
+            </form>
 
           </div>
 
@@ -377,7 +393,12 @@ export function Header({
 
             {/* Mobile search */}
 
-            <div className="relative mb-4">
+            <form
+              action="/search"
+              method="GET"
+              role="search"
+              className="relative mb-4"
+            >
 
               <Search
                 size={17}
@@ -391,7 +412,11 @@ export function Header({
               />
 
               <input
+                type="search"
+                name="q"
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
+                autoComplete="off"
                 className="
                   h-10
                   w-full
@@ -400,14 +425,26 @@ export function Header({
                   border-white/[0.08]
                   bg-white/[0.04]
                   pl-10
+                  pr-12
                   text-sm
                   outline-none
+                  text-white/90
+                  focus:border-amber-600/50
+                  focus:bg-white/[0.06]
 
                   placeholder:text-white/25
                 "
               />
 
-            </div>
+              <button
+                type="submit"
+                aria-label="Search products"
+                className="absolute right-1 top-1/2 flex h-8 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition hover:bg-white/[0.06] hover:text-amber-600"
+              >
+                <Search size={16} />
+              </button>
+
+            </form>
 
 
             {/* Links */}
