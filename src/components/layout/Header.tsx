@@ -326,18 +326,11 @@ export function Header({
       ================================= */}
 
       <nav
-        className="
-          hidden
-          border-t
-          border-white/[0.05]
-          md:block
-        "
+        aria-label="Main navigation"
+        className="hidden border-t border-white/[0.05] md:block"
       >
-
         <div className="container-primezora">
-
           <div className="flex min-h-11 flex-wrap items-center gap-x-8 gap-y-2 py-2">
-
             {navigation && (
               <>
                 <NavLink href="/" label={navigation.homeLabel} />
@@ -348,36 +341,39 @@ export function Header({
             <NavLink href="/about" label="About" />
             <NavLink href="/contact" label="Contact" />
 
-            {categories.map((category) => (
-              <NavLink
-                key={category.slug}
-                href={`/categories/${category.slug}`}
-                label={category.name}
-              />
-            ))}
-
-            {navigation && <Link
-              href={navigation.dealsHref}
-              className="
-                font-display
-                text-xs
-                font-semibold
-                tracking-[0.04em]
-                text-amber-600
-
-                transition
-
-                hover:text-amber-600
-              "
-            >
-              {navigation.dealsLabel}
-            </Link>}
-
+            {navigation && (
+              <Link
+                href={navigation.dealsHref}
+                className="font-display text-xs font-semibold tracking-[0.04em] text-amber-600 transition hover:text-amber-500"
+              >
+                {navigation.dealsLabel}
+              </Link>
+            )}
           </div>
-
         </div>
-
       </nav>
+
+      {categories.length > 0 && (
+        <nav
+          aria-label="Shop by category"
+          className="hidden border-t border-white/[0.05] bg-white/[0.02] md:block"
+        >
+          <div className="container-primezora overflow-x-auto">
+            <div className="flex min-h-10 w-max min-w-full items-center gap-x-7 py-2">
+              <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-600/75">
+                Categories
+              </span>
+              {categories.map((category) => (
+                <NavLink
+                  key={category.slug}
+                  href={`/categories/${category.slug}`}
+                  label={category.name}
+                />
+              ))}
+            </div>
+          </div>
+        </nav>
+      )}
 
 
       {/* ================================
@@ -456,7 +452,6 @@ export function Header({
             {/* Links */}
 
             <div className="grid gap-1">
-
               {navigation && (
                 <>
                   <MobileLink
@@ -482,18 +477,25 @@ export function Header({
                 label="Contact"
                 closeMenu={() => setMobileMenuOpen(false)}
               />
-
-              {categories.map((category) => (
-                <MobileLink
-                  key={category.slug}
-                  href={`/categories/${category.slug}`}
-                  label={category.name}
-                  closeMenu={() => setMobileMenuOpen(false)}
-                />
-              ))}
-
             </div>
 
+            {categories.length > 0 && (
+              <div className="mt-3 border-t border-white/[0.07] pt-3">
+                <p className="px-3 pb-1 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-600/75">
+                  Categories
+                </p>
+                <div className="grid gap-1">
+                  {categories.map((category) => (
+                    <MobileLink
+                      key={category.slug}
+                      href={`/categories/${category.slug}`}
+                      label={category.name}
+                      closeMenu={() => setMobileMenuOpen(false)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
