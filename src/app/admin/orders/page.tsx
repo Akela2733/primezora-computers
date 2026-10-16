@@ -226,6 +226,7 @@ export default async function AdminOrdersPage({
               <option value="">All payment methods</option>
               <option value="cod">Cash on Delivery</option>
               <option value="bank">Bank Transfer</option>
+              <option value="card">Credit / Debit Card</option>
             </select>
             <select
               name="dateRange"
@@ -332,7 +333,11 @@ export default async function AdminOrdersPage({
                         LKR {order.total.toLocaleString("en-LK")}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-[9px] text-white/45">
-                        {order.paymentMethod === "cod" ? "Cash on Delivery" : "Bank Transfer"}
+                        {order.paymentMethod === "cod"
+                          ? "Cash on Delivery"
+                          : order.paymentMethod === "bank"
+                            ? "Bank Transfer"
+                            : "Credit / Debit Card"}
                       </td>
                       <td className="px-4 py-4"><StatusBadge status={order.status} /></td>
                       <td className="px-4 py-4">

@@ -91,10 +91,48 @@ describe("shared rate-limit responses", () => {
     }
   });
 
-  test("fails closed when the shared store errors after configuration", async () => {
+  test("uses bounded in-memory limits for checkout when Redis is unavailable", async () => {
+    const customerIdentifier = `customer:checkout-fallback-${randomUUID()}`;
+    const makeCustomerRequest = () =>
+      enforceRateLimits(
+        new Request("https://example.test/api/orders"),
+        [{ policy: "checkoutCustomer", identifier: customerIdentifier }],
+        async () => {
+          throw new Error("Redis unavailable");
+        }
+      );
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      assert.equal(await makeCustomerRequest(), null);
+    }
+
+    const customerLimited = await makeCustomerRequest();
+    assert.equal(customerLimited?.status, 429);
+    assert.ok(Number(customerLimited?.headers.get("Retry-After")) > 0);
+
+    const ipIdentifier = `ip:checkout-fallback-${randomUUID()}`;
+    const makeIpRequest = () =>
+      enforceRateLimits(
+        new Request("https://example.test/api/orders"),
+        [{ policy: "checkoutIp", identifier: ipIdentifier }],
+        async () => {
+          throw new Error("Redis unavailable");
+        }
+      );
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      assert.equal(await makeIpRequest(), null);
+    }
+
+    const ipLimited = await makeIpRequest();
+    assert.equal(ipLimited?.status, 429);
+    assert.ok(Number(ipLimited?.headers.get("Retry-After")) > 0);
+  });
+
+  test("fails closed when shared rate limiting is unavailable for unsupported policies", async () => {
     const response = await enforceRateLimits(
-      new Request("https://example.test/api/orders"),
-      [{ policy: "checkoutCustomer", identifier: "customer:123" }],
+      new Request("https://example.test/api/orders/track"),
+      [{ policy: "orderTrackingIp", identifier: `ip:${randomUUID()}` }],
       async () => {
         throw new Error("Redis unavailable");
       }

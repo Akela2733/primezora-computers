@@ -189,6 +189,35 @@ invalidates all outstanding links created by the old implementation. Review and
 apply that migration as part of the normal deployment process. No production
 database migration or live email test is run from local development.
 
+## Checkout payment configuration
+
+Checkout supports Cash on Delivery, manual bank transfer, and PayHere-hosted
+card payments. Never collect or store card numbers in this application.
+
+Configure the following server-side variables in `.env.local` for development
+and in the hosting provider for production:
+
+- `BANK_TRANSFER_BANK_NAME`, `BANK_TRANSFER_ACCOUNT_NAME`,
+  `BANK_TRANSFER_ACCOUNT_NUMBER`, and `BANK_TRANSFER_BRANCH`: the business
+  account details shown on the order confirmation page. Bank-transfer orders
+  remain pending until an administrator verifies the transfer.
+- `PAYHERE_MODE`: `sandbox` for testing or `live` for production.
+- `PAYHERE_MERCHANT_ID` and `PAYHERE_MERCHANT_SECRET`: server-only credentials
+  from the matching PayHere environment. Do not use a live secret in local
+  development and never expose it with a `NEXT_PUBLIC_` prefix.
+- `PUBLIC_SITE_URL`: the canonical application HTTPS origin in production.
+  PayHere uses it to call `/api/payments/payhere/notify`; this URL must be
+  publicly reachable over HTTPS.
+
+The card flow redirects customers to PayHere's hosted checkout. Orders are
+confirmed only by a valid signed provider notification with the matching order
+number, amount, and LKR currency. Failed or cancelled provider notifications
+cancel the pending order and release its reserved inventory. The browser return
+URL is not treated as proof of payment. Set up and test PayHere sandbox
+credentials before enabling live payments. The migration
+`20261016213000_add_payment_transaction_id` adds unique provider-transaction
+tracking and is applied by the normal production build/deployment process.
+
 ## Security response headers
 
 The Next.js Proxy adds a Content Security Policy, `nosniff`, frame protection,

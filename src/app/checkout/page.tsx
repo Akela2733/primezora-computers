@@ -29,6 +29,10 @@ type FormData = CustomerDetails;
 
 type CreateOrderResponse = {
   error?: string;
+  payment?: {
+    redirectUrl?: string | null;
+    checkoutFields?: Record<string, string> | null;
+  };
   order?: {
     id: string;
     orderNumber: string;
@@ -213,6 +217,44 @@ export default function CheckoutPage() {
 
       if (!data.order?.id || !data.order.orderNumber) {
         throw new Error("The order was created but its confirmation could not be loaded.");
+      }
+
+      if (paymentMethod === "card") {
+        const redirectUrl = data.payment?.redirectUrl;
+        const checkoutFields = data.payment?.checkoutFields;
+        if (!redirectUrl || !checkoutFields) {
+          throw new Error(
+            "The card payment session could not be prepared. Your order was not redirected to PayHere."
+          );
+        }
+
+        const gatewayUrl = new URL(redirectUrl);
+        if (
+          !["www.payhere.lk", "sandbox.payhere.lk"].includes(
+            gatewayUrl.hostname
+          ) ||
+          gatewayUrl.pathname !== "/pay/checkout" ||
+          gatewayUrl.protocol !== "https:"
+        ) {
+          throw new Error("The configured card payment destination is invalid.");
+        }
+
+        clearCart();
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = gatewayUrl.toString();
+        form.hidden = true;
+        for (const [name, value] of Object.entries(checkoutFields)) {
+          if (typeof value !== "string") continue;
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = value;
+          form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
+        return;
       }
 
       clearCart();
@@ -406,7 +448,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
+              <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-6">
                 <DeliveryOption
                   selected={
                     deliveryMethod ===
@@ -616,7 +658,15 @@ export default function CheckoutPage() {
                     <Landmark size={17} />
                   }
                   title="Bank Transfer"
-                  description="Payment instructions will be provided."
+                  description="Transfer to our bank account and use your order number as the reference."
+                />
+
+                <PaymentOption
+                  selected={paymentMethod === "card"}
+                  onClick={() => setPaymentMethod("card")}
+                  icon={<CreditCard size={17} />}
+                  title="Credit / Debit Card"
+                  description="Pay securely with Visa or Mastercard through PayHere."
                 />
               </div>
             </section>

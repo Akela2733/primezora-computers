@@ -208,7 +208,11 @@ export default function CustomerDetailClient({
                               {order.status.replaceAll("_", " ")}
                             </td>
                             <td className="px-4 py-4 text-[9px] text-white/45">
-                              {order.paymentMethod === "cod" ? "Cash on Delivery" : "Bank Transfer"}
+                              {order.paymentMethod === "cod"
+                                ? "Cash on Delivery"
+                                : order.paymentMethod === "bank"
+                                  ? "Bank Transfer"
+                                  : "Credit / Debit Card"}
                             </td>
                             <td className="px-4 py-4 text-xs font-bold text-white/70">
                               LKR {order.total.toLocaleString("en-LK")}

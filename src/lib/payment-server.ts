@@ -15,9 +15,8 @@ import {
   getPaymentProvider,
   isSupportedPaymentMethod,
   type PaymentIntentResult,
-  type PaymentMethod,
-  type PaymentStatus,
 } from "@/lib/payment";
+import { createPayHerePaymentIntent } from "@/lib/payment-configuration";
 
 export class PaymentProcessingError extends Error {
   constructor(
@@ -87,8 +86,7 @@ export async function createPaymentIntentForOrder(
     );
   }
 
-  const provider = getPaymentProvider(order.paymentMethod);
-  return provider.createPaymentIntent({
+  const paymentInput = {
     orderId: order.id,
     orderNumber: order.orderNumber,
     amount: order.total,
@@ -98,7 +96,14 @@ export async function createPaymentIntentForOrder(
       email: order.customerEmail,
       phone: order.customerPhone,
     },
-  });
+  };
+
+  if (order.paymentMethod === "card") {
+    return createPayHerePaymentIntent(paymentInput);
+  }
+
+  const provider = getPaymentProvider(order.paymentMethod);
+  return provider.createPaymentIntent(paymentInput);
 }
 
 /**
@@ -233,7 +238,9 @@ export async function verifyAndProcessOrderPayment(
         message:
           order.paymentMethod === "cod"
             ? "Order placed for Cash on Delivery. Payment will be collected upon delivery."
-            : "Order placed for Bank Transfer. Awaiting bank deposit slip verification.",
+            : order.paymentMethod === "bank"
+              ? "Order placed for Bank Transfer. Awaiting bank deposit verification."
+              : "Awaiting PayHere server notification to verify the card payment.",
       };
     },
     {

@@ -9,7 +9,7 @@ import {
   parsePagination,
 } from "@/lib/pagination-limits";
 
-const PAYMENT_METHODS = ["cod", "bank"] as const;
+const PAYMENT_METHODS = ["cod", "bank", "card"] as const;
 const DATE_FILTERS = ["today", "last7days", "last30days", "all"] as const;
 
 function getCreatedAtFilter(filter: string) {

@@ -278,7 +278,12 @@ export default function TrackOrderPage() {
                   </div>
                 </dl>
                 <p className="mt-4 text-[9px] capitalize text-white/40">
-                  {order.deliveryMethod} · {order.paymentMethod}
+                  {order.deliveryMethod} ·{" "}
+                  {order.paymentMethod === "cod"
+                    ? "Cash on Delivery"
+                    : order.paymentMethod === "bank"
+                      ? "Bank Transfer"
+                      : "Credit / Debit Card"}
                 </p>
               </div>
             </div>

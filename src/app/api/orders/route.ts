@@ -17,6 +17,12 @@ import {
 import { sendOrderNotification } from "@/lib/notifications";
 import { requireCustomerApiWithProfileCheck } from "@/lib/customer-auth";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
+import {
+  assertPaymentMethodConfigured,
+  createPayHerePaymentIntent,
+  getBankTransferDetails,
+  PaymentConfigurationError,
+} from "@/lib/payment-configuration";
 
 const MAX_DATABASE_INT = INPUT_LIMITS.checkout.databaseInteger;
 
@@ -122,8 +128,7 @@ async function createPaymentIntent(
   order: CheckoutOrderResponse,
   paymentMethod: PaymentMethod
 ): Promise<PaymentIntentResult> {
-  const provider = getPaymentProvider(paymentMethod);
-  return provider.createPaymentIntent({
+  const paymentInput = {
     orderId: order.id,
     orderNumber: order.orderNumber,
     amount: order.total,
@@ -132,8 +137,23 @@ async function createPaymentIntent(
       name: order.customerName,
       email: order.customerEmail,
       phone: order.customerPhone,
+      address: order.address,
+      city: order.city,
     },
-  });
+  };
+  if (paymentMethod === "card") {
+    return createPayHerePaymentIntent(paymentInput);
+  }
+
+  const provider = getPaymentProvider(paymentMethod);
+  const paymentIntent = await provider.createPaymentIntent(paymentInput);
+  if (paymentMethod === "bank") {
+    paymentIntent.metadata = {
+      ...paymentIntent.metadata,
+      bankTransferDetails: getBankTransferDetails(),
+    };
+  }
+  return paymentIntent;
 }
 
 function respondWithOrder(
@@ -154,9 +174,20 @@ function respondWithOrder(
       payment: {
         providerIntentId: paymentIntent.providerIntentId,
         status: paymentIntent.status,
+        redirectUrl: paymentIntent.redirectUrl ?? null,
         instructions:
           typeof paymentIntent.metadata?.instructions === "string"
             ? paymentIntent.metadata.instructions
+            : null,
+        checkoutFields:
+          paymentIntent.metadata?.checkoutFields &&
+          typeof paymentIntent.metadata.checkoutFields === "object"
+            ? paymentIntent.metadata.checkoutFields
+            : null,
+        bankTransferDetails:
+          paymentIntent.metadata?.bankTransferDetails &&
+          typeof paymentIntent.metadata.bankTransferDetails === "object"
+            ? paymentIntent.metadata.bankTransferDetails
             : null,
       },
     },
@@ -181,6 +212,12 @@ async function respondWithIdempotentOrder(
   if (existing.requestFingerprint !== requestFingerprint) {
     return NextResponse.json(
       { error: "This Idempotency-Key was already used for a different checkout request." },
+      { status: 409 }
+    );
+  }
+  if (paymentMethod === "card" && existing.order.status !== "PENDING") {
+    return NextResponse.json(
+      { error: "This order is no longer awaiting card payment." },
       { status: 409 }
     );
   }
@@ -222,6 +259,7 @@ export async function POST(request: Request) {
     }
 
     const requestFingerprint = fingerprintCheckoutInput(input);
+    assertPaymentMethodConfigured(input.paymentMethod);
     const existingResponse = await respondWithIdempotentOrder(
       authenticatedCustomer.id,
       idempotencyKey,
@@ -421,6 +459,13 @@ export async function POST(request: Request) {
           }
         );
       } catch (error) {
+        if (error instanceof PaymentConfigurationError) {
+          return NextResponse.json(
+            { error: error.message },
+            { status: 503, headers: { "Cache-Control": "no-store" } }
+          );
+        }
+
         if (
           isPrismaErrorCode(error, "P2002") ||
           isPrismaErrorCode(error, "P2034") ||

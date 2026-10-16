@@ -151,6 +151,7 @@ model Order {
   deliveryFee               Int
   total                     Int
   paymentMethod             String
+  paymentTransactionId      String?              @unique
   status                    OrderStatus          @default(PENDING)
   notes                     String?
   createdAt                 DateTime             @default(now())

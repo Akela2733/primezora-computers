@@ -130,7 +130,13 @@ export default async function AdminOrderDetailPage({
                 />
                 <Detail
                   label="Payment"
-                  value={order.paymentMethod === "cod" ? "Cash on Delivery" : "Bank Transfer"}
+                  value={
+                    order.paymentMethod === "cod"
+                      ? "Cash on Delivery"
+                      : order.paymentMethod === "bank"
+                        ? "Bank Transfer"
+                        : "Credit / Debit Card"
+                  }
                 />
               </dl>
             </section>

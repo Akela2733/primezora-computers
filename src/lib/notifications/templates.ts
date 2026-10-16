@@ -34,7 +34,9 @@ function getEventContent(
         actionNote:
           order.paymentMethod === "bank"
             ? "Payment Instructions: Please complete your bank transfer using your Order Number as the deposit reference and send proof of payment to support@primezora.com."
-            : "Cash on Delivery: Please ensure you have exact cash available when the courier arrives.",
+            : order.paymentMethod === "card"
+              ? "Card payment: Your order will be confirmed after PayHere verifies your payment."
+              : "Cash on Delivery: Please ensure you have exact cash available when the courier arrives.",
       };
 
     case "ORDER_CONFIRMED":
@@ -131,6 +133,8 @@ export function generateNotificationEmail(
       ? "Cash on Delivery"
       : order.paymentMethod === "bank"
       ? "Bank Transfer"
+      : order.paymentMethod === "card"
+      ? "Credit / Debit Card (PayHere)"
       : order.paymentMethod;
 
   const deliveryLabel =

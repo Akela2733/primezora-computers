@@ -202,7 +202,13 @@ export default function CustomerOrderDetailClient({
                   />
                   <Detail
                     label="Payment method"
-                    value={order.paymentMethod === "cod" ? "Cash on Delivery" : "Bank Transfer"}
+                    value={
+                      order.paymentMethod === "cod"
+                        ? "Cash on Delivery"
+                        : order.paymentMethod === "bank"
+                          ? "Bank Transfer"
+                          : "Credit / Debit Card"
+                    }
                   />
                 </dl>
               </section>

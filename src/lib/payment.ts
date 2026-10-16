@@ -23,7 +23,7 @@
 
 export const DELIVERY_FEE = 500; // Fixed delivery fee in LKR
 
-export const SUPPORTED_PAYMENT_METHODS = ["cod", "bank"] as const;
+export const SUPPORTED_PAYMENT_METHODS = ["cod", "bank", "card"] as const;
 export type PaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number];
 
 export interface PaymentMethodConfig {
@@ -52,6 +52,14 @@ export const PAYMENT_METHOD_CONFIGS: Record<PaymentMethod, PaymentMethodConfig> 
       "Transfer the order total to our bank account. Use your Order Number as the transfer reference and send proof of payment.",
     isOnline: false,
     requiresClientRedirect: false,
+  },
+  card: {
+    id: "card",
+    name: "Credit / Debit Card",
+    shortDescription: "Pay securely by card with PayHere.",
+    instructions: "You will be redirected to PayHere to complete payment.",
+    isOnline: true,
+    requiresClientRedirect: true,
   },
 };
 
@@ -110,6 +118,8 @@ export interface PaymentIntentInput {
     name: string;
     email?: string | null;
     phone?: string | null;
+    address?: string | null;
+    city?: string | null;
   };
   metadata?: Record<string, string>;
 }
@@ -229,6 +239,27 @@ class BankTransferPaymentProvider implements PaymentProvider {
   }
 }
 
+class PayHereCardPaymentProvider implements PaymentProvider {
+  readonly id: PaymentMethod = "card";
+  readonly name = PAYMENT_METHOD_CONFIGS.card.name;
+  readonly isOnline = true;
+
+  async createPaymentIntent(): Promise<PaymentIntentResult> {
+    throw new Error(
+      "PayHere checkout intents must be created by the server payment configuration."
+    );
+  }
+
+  async verifyPayment(): Promise<PaymentVerificationResult> {
+    return {
+      verified: false,
+      paymentStatus: "PENDING",
+      failureReason: "PayHere payments are verified through the provider notification endpoint.",
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
 // ============================================================================
 // 5. PROVIDER REGISTRY & FACTORY
 // ============================================================================
@@ -236,6 +267,7 @@ class BankTransferPaymentProvider implements PaymentProvider {
 const providerRegistry = new Map<PaymentMethod, PaymentProvider>([
   ["cod", new CodPaymentProvider()],
   ["bank", new BankTransferPaymentProvider()],
+  ["card", new PayHereCardPaymentProvider()],
 ]);
 
 /**

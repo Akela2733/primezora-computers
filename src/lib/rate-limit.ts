@@ -48,6 +48,8 @@ const AUTH_RATE_LIMIT_POLICIES = new Set<RateLimitPolicyName>([
 ]);
 const IN_MEMORY_FALLBACK_POLICIES = new Set<RateLimitPolicyName>([
   ...AUTH_RATE_LIMIT_POLICIES,
+  "checkoutCustomer",
+  "checkoutIp",
   "publicCatalogIp",
 ]);
 
