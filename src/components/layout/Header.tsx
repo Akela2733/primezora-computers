@@ -345,6 +345,9 @@ export function Header({
               </>
             )}
 
+            <NavLink href="/about" label="About" />
+            <NavLink href="/contact" label="Contact" />
+
             {categories.map((category) => (
               <NavLink
                 key={category.slug}
@@ -468,6 +471,17 @@ export function Header({
                   />
                 </>
               )}
+
+              <MobileLink
+                href="/about"
+                label="About"
+                closeMenu={() => setMobileMenuOpen(false)}
+              />
+              <MobileLink
+                href="/contact"
+                label="Contact"
+                closeMenu={() => setMobileMenuOpen(false)}
+              />
 
               {categories.map((category) => (
                 <MobileLink
