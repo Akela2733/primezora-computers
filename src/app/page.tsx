@@ -5,6 +5,7 @@ import { ShopCategories } from "@/components/home/ShopCategories";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import BuildPCBanner from "@/components/home/BuildPCBanner";
 import { WhyPrimezora } from "@/components/home/WhyPrimezora";
+import { AboutSection } from "@/components/home/AboutSection";
 import { TrustedBrands } from "@/components/home/TrustedBrands";
 import { getStorefrontContent } from "@/lib/storefront-content";
 
@@ -45,6 +46,7 @@ export default async function Home() {
   />
 )}
 <WhyPrimezora />
+<AboutSection />
 <TrustedBrands />
 
     </main>
