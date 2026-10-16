@@ -26,16 +26,16 @@ export async function Footer() {
               <Image
                 src={brand.logo}
                 alt={brand.logoAlt}
-                width={180}
-                height={55}
+                width={220}
+                height={68}
                 unoptimized
-                className="h-10 w-auto object-contain"
+                className="h-14 w-auto object-contain sm:h-16"
               />
             </Link>
-            <p className="mt-3 max-w-55 text-[10px] leading-[1.55] text-white/50">
+            <p className="mt-4 max-w-64 text-sm leading-6 text-white/55">
               {footer.description}
             </p>
-            <div className="mt-3 flex items-center gap-1.5">
+            <div className="mt-4 flex items-center gap-2">
               {footer.socials.map((social) => (
                 <SocialLink
                   key={social.label}
@@ -52,14 +52,14 @@ export async function Footer() {
 
           <div>
             <FooterHeading>{footer.contactTitle}</FooterHeading>
-            <ul className="mt-3 space-y-2.5">
-              <ContactItem icon={<Phone size={12} />} href={footer.phoneHref}>
+            <ul className="mt-4 space-y-3">
+              <ContactItem icon={<Phone size={14} />} href={footer.phoneHref}>
                 {footer.phone}
               </ContactItem>
-              <ContactItem icon={<Mail size={12} />} href={footer.emailHref}>
+              <ContactItem icon={<Mail size={14} />} href={footer.emailHref}>
                 {footer.email}
               </ContactItem>
-              <ContactItem icon={<MapPin size={12} />} href={footer.addressHref}>
+              <ContactItem icon={<MapPin size={14} />} href={footer.addressHref}>
                 {footer.address}
               </ContactItem>
             </ul>
@@ -67,28 +67,28 @@ export async function Footer() {
 
           <div>
             <FooterHeading>{footer.updatesTitle}</FooterHeading>
-            <p className="mt-3 max-w-47.5 text-[9px] leading-[1.55] text-white/45">
+            <p className="mt-4 max-w-64 text-sm leading-6 text-white/55">
               {footer.updatesDescription}
             </p>
-            <div className="mt-3 flex h-8 max-w-57.5 items-center border border-white/15 bg-white/2.5 pl-2.5 pr-1">
+            <div className="mt-4 flex h-10 max-w-64 items-center border border-white/15 bg-white/2.5 pl-3 pr-1">
               <input
                 type="email"
                 aria-label={footer.updatesEmailPlaceholder}
                 placeholder={footer.updatesEmailPlaceholder}
-                className="min-w-0 flex-1 bg-transparent text-[9px] text-white/90 outline-none placeholder:text-white/35"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white/90 outline-none placeholder:text-white/45"
               />
               <button
                 type="button"
                 aria-label={footer.subscribeLabel}
-                className="flex h-6 w-7 shrink-0 items-center justify-center text-amber-600 transition hover:bg-amber-600/10 hover:text-amber-600"
+                className="flex h-8 w-9 shrink-0 items-center justify-center text-amber-600 transition hover:bg-amber-600/10 hover:text-amber-600"
               >
-                <ArrowRight size={13} />
+                <ArrowRight size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-t border-amber-600/10 py-3 text-[8px] text-white/35 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-t border-amber-600/10 py-4 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
           <p>{footer.copyright}</p>
           <p>{footer.tagline}</p>
         </div>
@@ -99,7 +99,7 @@ export async function Footer() {
 
 function FooterHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-white/85">
+    <h2 className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-white/85">
       {children}
     </h2>
   );
@@ -115,12 +115,12 @@ function FooterColumn({
   return (
     <div>
       <FooterHeading>{title}</FooterHeading>
-      <ul className="mt-3 space-y-1.5">
+      <ul className="mt-4 space-y-2.5">
         {links.map(({ label, href }) => (
           <li key={`${label}-${href}`}>
             <Link
               href={href}
-              className="text-[9px] text-white/45 transition hover:text-amber-600"
+              className="text-sm leading-6 text-white/55 transition hover:text-amber-600"
             >
               {label}
             </Link>
@@ -144,9 +144,9 @@ function ContactItem({
     <li>
       <Link
         href={href}
-        className="flex items-center gap-2 text-[9px] text-white/45 transition hover:text-amber-600"
+        className="flex items-start gap-2 text-sm leading-6 text-white/55 transition hover:text-amber-600"
       >
-        <span className="shrink-0 text-amber-600/80">{icon}</span>
+        <span className="mt-1 shrink-0 text-amber-600/80">{icon}</span>
         {children}
       </Link>
     </li>
@@ -181,7 +181,7 @@ function SocialLink({
       title={label}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noreferrer" : undefined}
-      className="flex h-6 w-6 items-center justify-center rounded-sm text-white/60 transition hover:bg-amber-600/10 hover:text-amber-600"
+      className="flex h-9 w-9 items-center justify-center rounded-md text-white/65 transition hover:bg-amber-600/10 hover:text-amber-600"
     >
       {iconElement}
     </a>

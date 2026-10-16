@@ -210,7 +210,7 @@ export function NotificationManager() {
             </span>
           </label>
 
-          <label className="block">
+          {/* <label className="block">
             <span className="mb-2 block text-xs font-medium text-white/65">
               Optional in-site link
             </span>
@@ -222,7 +222,7 @@ export function NotificationManager() {
               placeholder="/shop or /deals"
               className="min-h-11 w-full rounded-lg border border-white/[0.12] bg-[#080a0a] px-3 text-sm text-white/85 outline-none placeholder:text-white/30 focus:border-amber-600/50"
             />
-          </label>
+          </label> */}
 
           {feedback && (
             <p
