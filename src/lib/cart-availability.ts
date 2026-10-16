@@ -4,6 +4,7 @@ export type CartAvailability = {
   id: string;
   inStock: boolean;
   stockQuantity: number;
+  product?: Product;
 };
 
 export type AvailableCartItem = {
@@ -34,7 +35,7 @@ export function reconcileCartItems<T extends AvailableCartItem>(
       {
         ...item,
         product: {
-          ...item.product,
+          ...(current.product ?? item.product),
           inStock: true,
           stockQuantity: current.stockQuantity,
           stock: current.stockQuantity,

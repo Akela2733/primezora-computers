@@ -54,6 +54,26 @@ describe("cart product availability", () => {
     assert.equal(result[0].product.inStock, true);
   });
 
+  test("refreshes saved product details from the current database product", () => {
+    const currentProduct: Product = {
+      ...cartItem("available").product,
+      name: "Current product name",
+      price: 175,
+    };
+    const result = reconcileCartItems([cartItem("available")], [
+      {
+        id: "available",
+        inStock: true,
+        stockQuantity: 4,
+        product: currentProduct,
+      },
+    ]);
+
+    assert.equal(result[0].product.name, "Current product name");
+    assert.equal(result[0].product.price, 175);
+    assert.equal(result[0].product.stockQuantity, 4);
+  });
+
   test("does not include invalid or unavailable products", () => {
     const result = reconcileCartItems(
       [cartItem("available", 0), cartItem("unavailable")],

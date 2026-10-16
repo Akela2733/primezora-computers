@@ -36,7 +36,6 @@ export default function WishlistPage() {
     availabilityStatus,
     removeFromWishlist,
     clearWishlist,
-    refreshWishlist,
   } = useWishlist();
   const { addToCart } = useCart();
   const [search, setSearch] = useState("");
@@ -51,6 +50,13 @@ export default function WishlistPage() {
         ? items.filter(isPurchasable)
         : [],
     [availabilityStatus, items]
+  );
+  const cartCandidates = useMemo(
+    () =>
+      availabilityStatus === "error"
+        ? items
+        : availableProducts,
+    [availabilityStatus, availableProducts, items]
   );
   const availableSubtotal = useMemo(
     () => availableProducts.reduce((total, product) => total + product.price, 0),
@@ -77,9 +83,9 @@ export default function WishlistPage() {
       if (result === "added") {
         setNotice(`${product.name} was added to your cart.`);
       } else if (result === "unavailable") {
-        setError(`${product.name} is no longer available. Refresh its stock status and try again.`);
+        setError(`${product.name} is no longer available in the catalog.`);
       } else {
-        setError("We couldn't check stock just now. Please try again.");
+        setError("We couldn't add this product right now. Please try again.");
       }
     } finally {
       setBusyProductId(null);
@@ -87,7 +93,7 @@ export default function WishlistPage() {
   };
 
   const handleAddAvailableToCart = async () => {
-    if (addingAll || availableProducts.length === 0) return;
+    if (addingAll || cartCandidates.length === 0) return;
 
     setNotice("");
     setError("");
@@ -97,7 +103,7 @@ export default function WishlistPage() {
     let failedCount = 0;
 
     try {
-      for (const product of availableProducts) {
+      for (const product of cartCandidates) {
         const result = await addToCart(product, 1);
         if (result === "added") addedCount += 1;
         else if (result === "unavailable") unavailableCount += 1;
@@ -208,9 +214,9 @@ export default function WishlistPage() {
                   </h2>
                   <p className="mt-1 text-xs text-white/40">
                     {availabilityStatus === "checking"
-                      ? "Checking current stock…"
+                      ? "Loading saved products…"
                       : availabilityStatus === "error"
-                        ? "Current stock could not be verified"
+                        ? "Products are verified when you add them to your cart"
                         : `${availableProducts.length} available${
                             availableProducts.length !== itemCount
                               ? ` · ${itemCount - availableProducts.length} currently unavailable`
@@ -220,17 +226,6 @@ export default function WishlistPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {availabilityStatus !== "current" && (
-                    <button
-                      type="button"
-                      onClick={() => void refreshWishlist()}
-                      className="inline-flex h-10 items-center justify-center rounded-lg border border-amber-500/25 px-3 text-xs font-medium text-amber-300 transition hover:bg-amber-500/[0.08]"
-                    >
-                      {availabilityStatus === "checking"
-                        ? "Checking…"
-                        : "Retry stock check"}
-                    </button>
-                  )}
                   {items.length > 1 && (
                     <button
                       type="button"
@@ -348,11 +343,11 @@ export default function WishlistPage() {
                                 </p>
                                 {availabilityStatus === "checking" ? (
                                   <p className="mt-1 text-[11px] text-white/45">
-                                    Checking current stock…
+                                    Loading saved product…
                                   </p>
                                 ) : availabilityStatus === "error" ? (
                                   <p className="mt-1 text-[11px] text-amber-200/80">
-                                    Stock status could not be verified
+                                    Verified when added to cart
                                   </p>
                                 ) : purchasable ? (
                                   <p className="mt-1 text-[11px] text-emerald-300/80">
@@ -369,8 +364,9 @@ export default function WishlistPage() {
                                 type="button"
                                 onClick={() => void handleAddToCart(product)}
                                 disabled={
-                                  availabilityStatus !== "current" ||
-                                  !purchasable ||
+                                  availabilityStatus === "checking" ||
+                                  (availabilityStatus === "current" &&
+                                    !purchasable) ||
                                   busy
                                 }
                                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 text-xs font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border disabled:border-white/[0.08] disabled:bg-white/[0.03] disabled:text-white/35 sm:px-4"
@@ -381,18 +377,16 @@ export default function WishlistPage() {
                                   <ShoppingCart size={15} />
                                 )}
                                 <span className="hidden sm:inline">
-                                  {availabilityStatus !== "current"
-                                    ? "Check stock"
-                                    : purchasable
-                                      ? "Add to cart"
-                                      : "Unavailable"}
+                                  {purchasable ||
+                                  availabilityStatus === "error"
+                                    ? "Add to cart"
+                                    : "Unavailable"}
                                 </span>
                                 <span className="sm:hidden">
-                                  {availabilityStatus !== "current"
-                                    ? "Check stock"
-                                    : purchasable
-                                      ? "Add"
-                                      : "Unavailable"}
+                                  {purchasable ||
+                                  availabilityStatus === "error"
+                                    ? "Add"
+                                    : "Unavailable"}
                                 </span>
                               </button>
                             </div>
@@ -430,7 +424,9 @@ export default function WishlistPage() {
                       Ready when you are
                     </h2>
                     <p className="mt-1 text-xs text-white/40">
-                      {availableProducts.length} available to add
+                      {availabilityStatus === "error"
+                        ? `${items.length} saved items`
+                        : `${availableProducts.length} available to add`}
                     </p>
                   </div>
                 </div>
@@ -438,26 +434,36 @@ export default function WishlistPage() {
                 <div className="my-5 border-t border-white/[0.07]" />
 
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-white/50">Available items</span>
+                  <span className="text-white/50">
+                    {availabilityStatus === "error"
+                      ? "Saved items"
+                      : "Available items"}
+                  </span>
                   <span className="font-medium text-white">
-                    {availableProducts.length}
+                    {cartCandidates.length}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                  <span className="text-white/50">Estimated value</span>
+                  <span className="text-white/50">
+                    {availabilityStatus === "error"
+                      ? "Product details"
+                      : "Estimated value"}
+                  </span>
                   <span className="font-semibold text-amber-400">
-                    {formatPrice(availableSubtotal)}
+                    {availabilityStatus === "error"
+                      ? "Confirmed on add"
+                      : formatPrice(availableSubtotal)}
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] leading-5 text-white/35">
-                  One of each available product. Final prices and stock are
-                  confirmed in your cart.
+                  One of each product. Current product details are confirmed
+                  when added to your cart.
                 </p>
 
                 <button
                   type="button"
                   onClick={() => void handleAddAvailableToCart()}
-                  disabled={availableProducts.length === 0 || addingAll}
+                  disabled={cartCandidates.length === 0 || addingAll}
                   className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-white/35"
                 >
                   {addingAll ? (
@@ -468,7 +474,7 @@ export default function WishlistPage() {
                   ) : (
                     <>
                       <ShoppingCart size={17} />
-                      Add available to cart
+                      Add to cart
                     </>
                   )}
                 </button>
@@ -483,7 +489,7 @@ export default function WishlistPage() {
 
                 <div className="mt-5 flex items-start gap-2 border-t border-white/[0.07] pt-4 text-[11px] leading-5 text-white/40">
                   <ShieldCheck size={15} className="mt-0.5 shrink-0 text-emerald-400/80" />
-                  Stock is checked again before products are added.
+                  Products no longer available in the catalog cannot be added.
                 </div>
               </div>
             </aside>

@@ -227,15 +227,7 @@ export function CartProvider({
     product: Product,
     quantity = 1
   ): Promise<"added" | "unavailable" | "error"> => {
-    const availableQuantity =
-      product.stockQuantity ?? product.stock ?? 0;
-
-    if (
-      !product.inStock ||
-      availableQuantity <= 0 ||
-      !Number.isInteger(quantity) ||
-      quantity <= 0
-    ) {
+    if (!Number.isInteger(quantity) || quantity <= 0) {
       return "unavailable";
     }
 
@@ -256,6 +248,7 @@ export function CartProvider({
     }
 
     const currentStock = currentProduct.stockQuantity;
+    const currentProductDetails = currentProduct.product ?? product;
     setLastAddedProductId(product.id);
 
     setItems((currentItems) => {
@@ -275,7 +268,7 @@ export function CartProvider({
             ? {
                 ...item,
                 product: {
-                  ...product,
+                  ...currentProductDetails,
                   inStock: true,
                   stockQuantity: currentStock,
                   stock: currentStock,
@@ -290,7 +283,7 @@ export function CartProvider({
         ...currentItems,
         {
           product: {
-            ...product,
+            ...currentProductDetails,
             inStock: true,
             stockQuantity: currentStock,
             stock: currentStock,

@@ -26,7 +26,6 @@ type WishlistContextType = {
   toggleWishlist: (product: Product) => void;
   isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
-  refreshWishlist: () => Promise<void>;
 };
 
 const WishlistContext =
@@ -275,7 +274,6 @@ export function WishlistProvider({
         toggleWishlist,
         isInWishlist,
         clearWishlist,
-        refreshWishlist,
       }}
     >
       {children}
