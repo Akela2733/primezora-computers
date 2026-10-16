@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
+import { toProductView } from "@/lib/product-view";
 import { INPUT_LIMITS } from "@/lib/input-limits";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
 
@@ -53,11 +54,6 @@ export async function POST(request: Request) {
   try {
     const products = await prisma.product.findMany({
       where: { id: { in: [...new Set(validProductIds)] } },
-      select: {
-        id: true,
-        inStock: true,
-        stockQuantity: true,
-      },
     });
 
     return NextResponse.json(
@@ -67,6 +63,7 @@ export async function POST(request: Request) {
           id: product.id,
           inStock: product.inStock && product.stockQuantity > 0,
           stockQuantity: product.stockQuantity,
+          product: toProductView(product),
         })),
       },
       { headers: { "Cache-Control": "no-store" } }

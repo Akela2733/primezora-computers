@@ -2,207 +2,456 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
   Heart,
+  Loader2,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
   ShoppingCart,
   Trash2,
+  X,
 } from "lucide-react";
 
-import { ProductCard } from "@/components/shop/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import type { Product } from "@/types/product";
+
+function isPurchasable(product: Product): boolean {
+  return product.inStock && (product.stockQuantity ?? product.stock ?? 0) > 0;
+}
+
+function formatPrice(price: number): string {
+  return `LKR ${price.toLocaleString("en-LK")}`;
+}
 
 export default function WishlistPage() {
-    const handleAddAllToCart = () => {
-  items.forEach((product) => {
-    addToCart(product, 1);
-  });
-};
   const {
     items,
     itemCount,
     removeFromWishlist,
     clearWishlist,
   } = useWishlist();
-
   const { addToCart } = useCart();
+  const [search, setSearch] = useState("");
+  const [busyProductId, setBusyProductId] = useState<string | null>(null);
+  const [addingAll, setAddingAll] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
 
-  const handleAddToCart = (
-    product: (typeof items)[number]
-  ) => {
-    addToCart(product, 1);
+  const availableProducts = useMemo(
+    () => items.filter(isPurchasable),
+    [items]
+  );
+  const availableSubtotal = useMemo(
+    () => availableProducts.reduce((total, product) => total + product.price, 0),
+    [availableProducts]
+  );
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return items;
+
+    return items.filter((product) =>
+      [product.name, product.brand, product.category].some((value) =>
+        value.toLowerCase().includes(query)
+      )
+    );
+  }, [items, search]);
+
+  const handleAddToCart = async (product: Product) => {
+    setNotice("");
+    setError("");
+    setBusyProductId(product.id);
+
+    try {
+      const result = await addToCart(product, 1);
+      if (result === "added") {
+        setNotice(`${product.name} was added to your cart.`);
+      } else if (result === "unavailable") {
+        setError(`${product.name} is no longer available. Refresh the page to update its stock status.`);
+      } else {
+        setError("We couldn't check stock just now. Please try again.");
+      }
+    } finally {
+      setBusyProductId(null);
+    }
+  };
+
+  const handleAddAvailableToCart = async () => {
+    if (addingAll || availableProducts.length === 0) return;
+
+    setNotice("");
+    setError("");
+    setAddingAll(true);
+    let addedCount = 0;
+    let unavailableCount = 0;
+    let failedCount = 0;
+
+    try {
+      for (const product of availableProducts) {
+        const result = await addToCart(product, 1);
+        if (result === "added") addedCount += 1;
+        else if (result === "unavailable") unavailableCount += 1;
+        else failedCount += 1;
+      }
+
+      if (addedCount > 0) {
+        setNotice(
+          `${addedCount} ${addedCount === 1 ? "item was" : "items were"} added to your cart.`
+        );
+      }
+      if (unavailableCount > 0 || failedCount > 0) {
+        setError(
+          [
+            unavailableCount > 0
+              ? `${unavailableCount} item${unavailableCount === 1 ? "" : "s"} became unavailable.`
+              : "",
+            failedCount > 0
+              ? `Stock could not be checked for ${failedCount} item${failedCount === 1 ? "" : "s"}.`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        );
+      }
+    } finally {
+      setAddingAll(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-[#030505] text-white/90">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-white/[0.07]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(217,119,6,0.10),transparent_45%)]" />
+      <section className="relative overflow-hidden border-b border-white/[0.07] bg-[radial-gradient(ellipse_at_50%_-35%,rgba(217,119,6,0.17),transparent_65%)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-600/60 to-transparent" />
+        <div className="container-primezora relative py-12 sm:py-16">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-2 text-xs text-white/45 transition hover:text-amber-500"
+          >
+            <ArrowRight size={14} className="rotate-180" />
+            Continue shopping
+          </Link>
 
-        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-amber-600/60 to-transparent" />
-
-        <div className="container-primezora relative py-14 sm:py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-amber-600/20 bg-amber-600/[0.05]">
-              <Heart
-                size={20}
-                className="text-amber-600"
-              />
+          <div className="mt-9 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+            <div className="max-w-2xl">
+              <p className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-500">
+                <Heart size={13} className="fill-amber-500/20" />
+                Your saved picks
+              </p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Wishlist
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-white/50">
+                Keep the products you&apos;re considering in one place. Stock and
+                prices are kept up to date as you browse.
+              </p>
             </div>
 
-            <p className="mt-5 text-[8px] font-bold uppercase tracking-[0.3em] text-amber-600">
-              Primezora Technologies
-            </p>
-
-            <h1 className="mt-3 text-3xl font-bold tracking-[-0.03em] sm:text-5xl">
-              My Wishlist
-            </h1>
-
-            <p className="mx-auto mt-4 max-w-lg text-xs leading-6 text-white/35 sm:text-sm">
-              Keep the products you love in one place
-              and come back whenever you&apos;re ready.
-            </p>
+            {itemCount > 0 && (
+              <div className="flex items-center gap-3 self-start rounded-xl border border-white/[0.08] bg-white/[0.025] px-4 py-3 sm:self-auto">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                  <Heart size={17} />
+                </span>
+                <span>
+                  <span className="block text-lg font-semibold leading-none text-white">
+                    {itemCount}
+                  </span>
+                  <span className="mt-1 block text-[10px] text-white/40">
+                    saved {itemCount === 1 ? "product" : "products"}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Empty State */}
-      {items.length === 0 && (
+      {itemCount === 0 ? (
         <section className="container-primezora py-16 sm:py-24">
-          <div className="mx-auto max-w-xl border border-white/[0.08] bg-[#030505] px-6 py-14 text-center sm:px-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-amber-600/20 bg-amber-600/[0.05]">
-              <Heart
-                size={24}
-                className="text-amber-600/70"
-              />
+          <div className="mx-auto max-w-xl rounded-2xl border border-white/[0.08] bg-white/[0.02] px-6 py-14 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] text-amber-500">
+              <Heart size={25} />
             </div>
-
-            <p className="mt-7 text-[8px] font-bold uppercase tracking-[0.25em] text-amber-600">
-              Your Wishlist
-            </p>
-
-            <h2 className="mt-3 text-2xl font-bold">
-              Nothing saved yet
+            <h2 className="mt-6 text-2xl font-semibold text-white">
+              Your wishlist is ready for a favorite
             </h2>
-
-            <p className="mx-auto mt-3 max-w-md text-xs leading-6 text-white/30">
-              When you find something you like,
-              tap the heart icon to save it here.
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/45">
+              Save products using the heart button while browsing, then come
+              back here when you&apos;re ready.
             </p>
-
             <Link
               href="/shop"
-              className="mt-7 inline-flex h-11 items-center gap-2 bg-amber-600 px-6 text-[8px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
+              className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-black transition hover:bg-amber-400"
             >
-              Explore Products
-              <ShoppingCart size={13} />
+              Explore products
+              <ArrowUpRight size={16} />
             </Link>
           </div>
         </section>
-      )}
+      ) : (
+        <section className="container-primezora py-8 sm:py-12">
+          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="min-w-0">
+              <div className="mb-5 flex flex-col gap-3 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Saved products
+                  </h2>
+                  <p className="mt-1 text-xs text-white/40">
+                    {availableProducts.length} available
+                    {availableProducts.length !== itemCount &&
+                      ` · ${itemCount - availableProducts.length} currently unavailable`}
+                  </p>
+                </div>
 
-      {/* Wishlist */}
-      {items.length > 0 && (
-        <section className="container-primezora py-10 sm:py-14">
-          {/* Top controls */}
-          <div className="mb-7 flex flex-col gap-4 border-b border-white/[0.07] pb-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[8px] uppercase tracking-[0.2em] text-white/25">
-                Saved Products
-              </p>
+                <div className="flex flex-wrap gap-2">
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={clearWishlist}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-white/[0.09] px-3 text-xs text-white/55 transition hover:border-red-400/30 hover:text-red-300"
+                    >
+                      <Trash2 size={14} />
+                      Clear wishlist
+                    </button>
+                  )}
+                </div>
+              </div>
 
-              <h2 className="mt-2 text-xl font-bold">
-                {itemCount}{" "}
-                {itemCount === 1
-                  ? "Product"
-                  : "Products"}
-              </h2>
+              {itemCount > 3 && (
+                <label className="mb-4 flex h-11 items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.025] px-3 text-white/35 focus-within:border-amber-500/40">
+                  <Search size={16} />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Find a saved product..."
+                    aria-label="Find a saved product"
+                    className="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      aria-label="Clear search"
+                      className="text-white/35 transition hover:text-white"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </label>
+              )}
+
+              {notice && (
+                <div className="mb-4 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-sm text-emerald-300" role="status">
+                  <Check size={16} className="mt-0.5 shrink-0" />
+                  {notice}
+                </div>
+              )}
+              {error && (
+                <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-400/20 bg-red-400/[0.05] px-4 py-3 text-sm text-red-200" role="alert">
+                  <X size={16} className="mt-0.5 shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              {filteredItems.length > 0 ? (
+                <ul className="space-y-3">
+                  {filteredItems.map((product) => {
+                    const purchasable = isPurchasable(product);
+                    const stockQuantity =
+                      product.stockQuantity ?? product.stock ?? 0;
+                    const busy = busyProductId === product.id || addingAll;
+
+                    return (
+                      <li
+                        key={product.id}
+                        className="group rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 transition hover:border-white/[0.14] sm:p-4"
+                      >
+                        <div className="flex gap-4">
+                          <Link
+                            href={`/products/${product.slug}`}
+                            aria-label={`View ${product.name}`}
+                            className="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border border-white/[0.07] bg-[#080b0b] sm:h-36 sm:w-36"
+                          >
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              sizes="(max-width: 639px) 112px, 144px"
+                              className="object-contain p-3 transition duration-300 group-hover:scale-105"
+                            />
+                          </Link>
+
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-500">
+                                  {product.brand}
+                                </p>
+                                <Link
+                                  href={`/products/${product.slug}`}
+                                  className="mt-1 block line-clamp-2 text-sm font-semibold leading-5 text-white transition hover:text-amber-400 sm:text-base"
+                                >
+                                  {product.name}
+                                </Link>
+                                <p className="mt-1 text-xs text-white/40">
+                                  {product.category}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setNotice("");
+                                  setError("");
+                                  removeFromWishlist(product.id);
+                                }}
+                                aria-label={`Remove ${product.name} from wishlist`}
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/35 transition hover:bg-red-400/[0.08] hover:text-red-300"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+
+                            <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-4">
+                              <div>
+                                <p className="text-base font-semibold text-amber-400">
+                                  {formatPrice(product.price)}
+                                </p>
+                                {purchasable ? (
+                                  <p className="mt-1 text-[11px] text-emerald-300/80">
+                                    {stockQuantity} in stock
+                                  </p>
+                                ) : (
+                                  <p className="mt-1 text-[11px] text-red-300/80">
+                                    Currently unavailable
+                                  </p>
+                                )}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => void handleAddToCart(product)}
+                                disabled={!purchasable || busy}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 text-xs font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border disabled:border-white/[0.08] disabled:bg-white/[0.03] disabled:text-white/35 sm:px-4"
+                              >
+                                {busy ? (
+                                  <Loader2 size={15} className="animate-spin" />
+                                ) : (
+                                  <ShoppingCart size={15} />
+                                )}
+                                <span className="hidden sm:inline">
+                                  {purchasable ? "Add to cart" : "Unavailable"}
+                                </span>
+                                <span className="sm:hidden">
+                                  {purchasable ? "Add" : "Unavailable"}
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="rounded-xl border border-dashed border-white/[0.1] px-5 py-12 text-center">
+                  <Search size={22} className="mx-auto text-white/30" />
+                  <p className="mt-3 text-sm font-medium text-white/75">
+                    No saved products match “{search}”
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="mt-3 text-xs font-medium text-amber-400 hover:text-amber-300"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={clearWishlist}
-              className="inline-flex h-9 items-center gap-2 self-start border border-red-500/15 px-4 text-[8px] font-bold uppercase tracking-[0.14em] text-red-400/70 transition hover:border-red-500/30 hover:bg-red-500/[0.05] hover:text-red-400 sm:self-auto"
-            >
-              <Trash2 size={12} />
-              Clear Wishlist
-            </button>
-          </div>
+            <aside className="lg:sticky lg:top-28">
+              <div className="rounded-xl border border-white/[0.09] bg-white/[0.025] p-5">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                    <ShoppingBag size={18} />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">
+                      Ready when you are
+                    </h2>
+                    <p className="mt-1 text-xs text-white/40">
+                      {availableProducts.length} available to add
+                    </p>
+                  </div>
+                </div>
 
-          {/* Products */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {items.map((product) => (
-              <div
-                key={product.id}
-                className="relative"
-              >
-                <ProductCard
-                  product={product}
-                />
-              </div>
-            ))}
-          </div>
+                <div className="my-5 border-t border-white/[0.07]" />
 
-          {/* Saved product actions */}
-          <div className="mt-10 border border-white/[0.08] bg-[#030505] p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-amber-600">
-                  Ready to Buy?
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-white/50">Available items</span>
+                  <span className="font-medium text-white">
+                    {availableProducts.length}
+                  </span>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                  <span className="text-white/50">Estimated value</span>
+                  <span className="font-semibold text-amber-400">
+                    {formatPrice(availableSubtotal)}
+                  </span>
+                </div>
+                <p className="mt-2 text-[11px] leading-5 text-white/35">
+                  One of each available product. Final prices and stock are
+                  confirmed in your cart.
                 </p>
-
-                <h3 className="mt-2 text-lg font-bold">
-                  Add your saved products to the cart
-                </h3>
-
-                <p className="mt-1 text-[9px] text-white/25">
-                  Your wishlist stays saved on this
-                  device.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {items.slice(0, 3).map(
-                  (product) => (
-                    <button
-                      key={product.id}
-                      type="button"
-                      onClick={() =>
-                        handleAddToCart(
-                          product
-                        )
-                      }
-                      className="inline-flex h-9 items-center gap-2 border border-white/[0.1] px-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/60 transition hover:border-amber-600/30 hover:text-amber-600"
-                    >
-                      <ShoppingCart
-                        size={11}
-                      />
-                      Add
-                    </button>
-                  )
-                )}
 
                 <button
                   type="button"
-                  onClick={handleAddAllToCart}
-                  className="inline-flex h-10 items-center justify-center gap-2 bg-amber-600 px-5 text-[8px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-amber-600"
+                  onClick={() => void handleAddAvailableToCart()}
+                  disabled={availableProducts.length === 0 || addingAll}
+                  className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-white/35"
                 >
-                  <ShoppingCart size={12} />
-                  Add All to Cart
+                  {addingAll ? (
+                    <>
+                      <Loader2 size={17} className="animate-spin" />
+                      Adding products...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={17} />
+                      Add available to cart
+                    </>
+                  )}
                 </button>
+
+                <Link
+                  href="/cart"
+                  className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/[0.1] text-sm font-medium text-white/75 transition hover:border-white/20 hover:text-white"
+                >
+                  View cart
+                  <ArrowRight size={15} />
+                </Link>
+
+                <div className="mt-5 flex items-start gap-2 border-t border-white/[0.07] pt-4 text-[11px] leading-5 text-white/40">
+                  <ShieldCheck size={15} className="mt-0.5 shrink-0 text-emerald-400/80" />
+                  Stock is checked again before products are added.
+                </div>
               </div>
-            </div>
+            </aside>
           </div>
 
-          {/* Back */}
-          <div className="mt-8">
+          <div className="mt-8 flex justify-center sm:justify-start">
             <Link
               href="/shop"
-              className="inline-flex items-center gap-2 text-[8px] font-bold uppercase tracking-[0.15em] text-white/30 transition hover:text-amber-600"
+              className="inline-flex items-center gap-2 text-sm text-white/45 transition hover:text-amber-400"
             >
-              <ArrowLeft size={12} />
-              Continue Shopping
+              <ArrowRight size={15} className="rotate-180" />
+              Keep browsing products
             </Link>
           </div>
         </section>
