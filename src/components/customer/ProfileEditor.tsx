@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useCallback } from "react";
-import { Save, Loader2, CheckCircle2, AlertCircle, User, MapPin, Phone } from "lucide-react";
+import { Save, Loader2, CheckCircle2, AlertCircle, User, MapPin } from "lucide-react";
 
 type CustomerProfile = {
   id: string;
@@ -32,9 +32,20 @@ const PERSONAL_FIELDS: FieldDef[] = [
 const ADDRESS_FIELDS: FieldDef[] = [
   { key: "address", label: "Street Address", placeholder: "e.g. 42 Galle Road" },
   { key: "city", label: "City", placeholder: "e.g. Colombo" },
-  { key: "province", label: "Province / District", placeholder: "e.g. Western Province" },
   { key: "postalCode", label: "Postal Code", placeholder: "e.g. 10250" },
 ];
+
+const SRI_LANKAN_PROVINCES = [
+  "Central Province",
+  "Eastern Province",
+  "North Central Province",
+  "Northern Province",
+  "North Western Province",
+  "Sabaragamuwa Province",
+  "Southern Province",
+  "Uva Province",
+  "Western Province",
+] as const;
 
 type FormState = {
   firstName: string;
@@ -47,13 +58,19 @@ type FormState = {
 };
 
 function toFormState(profile: CustomerProfile): FormState {
+  const savedProvince = profile.province?.trim().toLowerCase();
+  const province =
+    SRI_LANKAN_PROVINCES.find(
+      (option) => option.toLowerCase() === savedProvince
+    ) ?? "";
+
   return {
     firstName: profile.firstName ?? "",
     lastName: profile.lastName ?? "",
     phone: profile.phone ?? "",
     address: profile.address ?? "",
     city: profile.city ?? "",
-    province: profile.province ?? "",
+    province,
     postalCode: profile.postalCode ?? "",
   };
 }
@@ -226,7 +243,37 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
           <div className="sm:col-span-2">
             <FieldGroup fields={[ADDRESS_FIELDS[0]]} values={form} onChange={handleChange} disabled={saving} />
           </div>
-          <FieldGroup fields={ADDRESS_FIELDS.slice(1)} values={form} onChange={handleChange} disabled={saving} />
+          <FieldGroup fields={[ADDRESS_FIELDS[1]]} values={form} onChange={handleChange} disabled={saving} />
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="profile-province"
+              className="text-[11px] font-semibold uppercase tracking-wider text-white/40"
+            >
+              Province
+            </label>
+            <select
+              id="profile-province"
+              autoComplete="address-level1"
+              value={form.province}
+              onChange={(event) => handleChange("province", event.target.value)}
+              disabled={saving}
+              className="
+                w-full rounded-xl border border-white/10 bg-[#101313] px-4 py-2.5
+                text-sm text-white/90
+                transition
+                focus:border-amber-600/50 focus:outline-none focus:ring-1 focus:ring-amber-600/30
+                disabled:cursor-not-allowed disabled:opacity-50
+              "
+            >
+              <option value="">Select a province</option>
+              {SRI_LANKAN_PROVINCES.map((province) => (
+                <option key={province} value={province}>
+                  {province}
+                </option>
+              ))}
+            </select>
+          </div>
+          <FieldGroup fields={[ADDRESS_FIELDS[2]]} values={form} onChange={handleChange} disabled={saving} />
         </div>
       </section>
 
