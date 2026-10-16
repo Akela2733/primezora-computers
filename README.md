@@ -218,6 +218,16 @@ credentials before enabling live payments. The migration
 `20261016213000_add_payment_transaction_id` adds unique provider-transaction
 tracking and is applied by the normal production build/deployment process.
 
+## Product reviews
+
+Signed-in customers can publish a 1–5 star rating and written review on a
+product page. Each customer has one review per product and can update it later.
+The product page displays the 50 most recent reviews and uses submitted reviews
+to calculate the displayed average and count; products without submitted
+reviews retain their existing catalog rating. Apply the
+`20261016230000_add_product_reviews` Prisma migration through the normal
+production build/deployment process.
+
 ## Security response headers
 
 The Next.js Proxy adds a Content Security Policy, `nosniff`, frame protection,

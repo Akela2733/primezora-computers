@@ -15,23 +15,34 @@ import {
   Star,
   Truck,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useWishlist } from "@/context/WishlistContext";
 
 import type { Product } from "@/types/product";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useCart } from "@/context/CartContext";
+import ProductReviews, {
+  type ProductReviewView,
+} from "@/components/products/ProductReviews";
 
 type ProductDetailsClientProps = {
   product: Product;
   relatedProducts: Product[];
+  initialReviews: ProductReviewView[];
+  initialRating: number;
+  initialReviewCount: number;
 };
 
 export default function ProductDetailsClient({
   product,
   relatedProducts,
+  initialReviews,
+  initialRating,
+  initialReviewCount,
 }: ProductDetailsClientProps) {
   const [quantity, setQuantity] = useState(1);
+  const [displayRating, setDisplayRating] = useState(initialRating);
+  const [displayReviewCount, setDisplayReviewCount] = useState(initialReviewCount);
   const [cartError, setCartError] = useState("");
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 const {
@@ -43,6 +54,13 @@ const isWishlisted = isInWishlist(
   product.id
 );
   const { addToCart } = useCart();
+  const handleReviewSummaryChange = useCallback(
+    (rating: number, reviewCount: number) => {
+      setDisplayRating(rating);
+      setDisplayReviewCount(reviewCount);
+    },
+    []
+  );
 
   const discount =
     product.oldPrice && product.oldPrice > product.price
@@ -192,7 +210,7 @@ const isWishlisted = isInWishlist(
                     size={13}
                     className={
                       star <=
-                      Math.round(product.rating)
+                      Math.round(displayRating)
                         ? "fill-amber-600 text-amber-600"
                         : "text-white/15"
                     }
@@ -202,14 +220,15 @@ const isWishlisted = isInWishlist(
               </div>
 
               <span className="text-[10px] font-medium text-white/60">
-                {product.rating}
+                {displayRating.toFixed(1)}
               </span>
 
-              <span className="h-3 w-px bg-white/10" />
-
-              <span className="text-[10px] text-white/35">
-                {product.reviews} Reviews
-              </span>
+              <a
+                href="#customer-reviews"
+                className="text-[10px] text-white/35 transition hover:text-amber-500"
+              >
+                {displayReviewCount} Reviews
+              </a>
 
             </div>
 
@@ -500,12 +519,12 @@ const isWishlisted = isInWishlist(
 
               <Specification
                 label="Rating"
-                value={`${product.rating} / 5`}
+                value={`${displayRating.toFixed(1)} / 5`}
               />
 
               <Specification
                 label="Reviews"
-                value={`${product.reviews} customer reviews`}
+                value={`${displayReviewCount} customer reviews`}
               />
 
               <Specification
@@ -527,6 +546,14 @@ const isWishlisted = isInWishlist(
         </div>
 
       </section>
+
+      <ProductReviews
+        slug={product.slug}
+        initialReviews={initialReviews}
+        initialRating={initialRating}
+        initialReviewCount={initialReviewCount}
+        onSummaryChange={handleReviewSummaryChange}
+      />
 
 
       {/* =====================================================

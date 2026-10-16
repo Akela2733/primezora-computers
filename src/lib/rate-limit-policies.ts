@@ -12,6 +12,7 @@ export const RATE_LIMIT_POLICIES = {
   adminLoginIp: { limit: 10, window: "15 m" },
   adminLoginAccount: { limit: 5, window: "15 m" },
   checkoutCustomer: { limit: 10, window: "10 m" },
+  customerProductReview: { limit: 10, window: "10 m" },
   checkoutIp: { limit: 30, window: "10 m" },
   publicCatalogIp: { limit: 120, window: "1 m" },
   orderTrackingIp: { limit: 10, window: "15 m" },

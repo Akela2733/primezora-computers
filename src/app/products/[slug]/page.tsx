@@ -43,12 +43,54 @@ export default async function ProductPage({
     take: 4,
   });
 
-  const product = toProductView(dbProduct);
+  const [reviews, reviewAggregate] = await Promise.all([
+    prisma.productReview.findMany({
+      where: { productId: dbProduct.id },
+      select: {
+        id: true,
+        rating: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        customer: {
+          select: { firstName: true, lastName: true, name: true },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 50,
+    }),
+    prisma.productReview.aggregate({
+      where: { productId: dbProduct.id },
+      _avg: { rating: true },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const reviewCount = reviewAggregate._count._all || dbProduct.reviews;
+  const rating = reviewAggregate._avg.rating ?? dbProduct.rating;
+  const product = toProductView({ ...dbProduct, rating, reviews: reviewCount });
+  const initialReviews = reviews.map((review) => ({
+    id: review.id,
+    rating: review.rating,
+    content: review.content,
+    customerName:
+      [review.customer.firstName, review.customer.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() ||
+      review.customer.name ||
+      "Customer",
+    createdAt: review.createdAt.toISOString(),
+    updatedAt: review.updatedAt.toISOString(),
+  }));
 
   return (
     <ProductDetailsClient
       product={product}
       relatedProducts={relatedProducts.map(toProductView)}
+      initialReviews={initialReviews}
+      initialRating={rating}
+      initialReviewCount={reviewCount}
     />
   );
 }

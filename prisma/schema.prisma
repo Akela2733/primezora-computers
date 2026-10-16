@@ -30,6 +30,7 @@ model Product {
   images         String[]       @default([])
   orderItems     OrderItem[]
   wishlistItems  WishlistItem[]
+  customerReviews ProductReview[]
 
   @@index([category])
   @@index([brand])
@@ -78,6 +79,7 @@ model Customer {
   orders                     Order[]
   checkoutIdempotencyRecords CheckoutIdempotency[]
   wishlistItems              WishlistItem[]
+  productReviews             ProductReview[]
   notificationRecipients     NotificationRecipient[]
 
   @@index([authUserId])
@@ -94,6 +96,21 @@ model WishlistItem {
 
   @@unique([customerId, productId])
   @@index([productId])
+}
+
+model ProductReview {
+  id         String   @id @default(cuid())
+  productId  String
+  customerId String
+  rating     Int
+  content    String   @db.VarChar(3000)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, customerId])
+  @@index([productId, createdAt])
 }
 
 model SiteNotification {
