@@ -8,6 +8,7 @@ import {
 import { requireAdminOrdersApi } from "@/lib/admin-orders-auth";
 import {
   mapOrderStatusToNotificationEvent,
+  sendWishlistRestockNotifications,
   triggerOrderNotificationById,
 } from "@/lib/notifications";
 import { INPUT_LIMITS, exceedsTextLimit } from "@/lib/input-limits";
@@ -121,7 +122,7 @@ export async function PATCH(
       );
     }
 
-    const { order, previousStatus } = await prisma.$transaction(async (tx) => {
+    const { order, previousStatus, restockedProductIds } = await prisma.$transaction(async (tx) => {
       const currentOrder = await tx.order.findUnique({
         where: { id },
         select: {
@@ -159,19 +160,29 @@ export async function PATCH(
         );
       }
 
+      const restockedProductIds: string[] = [];
       if (requestedStatus === "CANCELLED") {
         for (const item of currentOrder.items) {
+          const previousProduct = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { inStock: true, stockQuantity: true },
+          });
           const restoredProduct = await tx.product.update({
             where: { id: item.productId },
             data: { stockQuantity: { increment: item.quantity } },
             select: { stockQuantity: true },
           });
 
-          if (item.quantity > 0 && restoredProduct.stockQuantity > 0) {
+          if (
+            item.quantity > 0 &&
+            restoredProduct.stockQuantity > 0 &&
+            previousProduct?.stockQuantity === 0
+          ) {
             await tx.product.update({
               where: { id: item.productId },
               data: { inStock: true },
             });
+            restockedProductIds.push(item.productId);
           }
         }
       }
@@ -187,6 +198,7 @@ export async function PATCH(
 
       return {
         previousStatus: currentOrder.status,
+        restockedProductIds,
         order: {
           id: currentOrder.id,
           orderNumber: currentOrder.orderNumber,
@@ -205,6 +217,9 @@ export async function PATCH(
       triggerOrderNotificationById(order.id, notificationEvent).catch((notifyErr) => {
         console.error("NOTIFICATION DISPATCH TRIGGER ERROR:", notifyErr);
       });
+    }
+    for (const productId of new Set(restockedProductIds)) {
+      void sendWishlistRestockNotifications(productId);
     }
 
     return NextResponse.json({

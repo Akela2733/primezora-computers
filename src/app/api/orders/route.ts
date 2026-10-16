@@ -455,6 +455,7 @@ export async function POST(request: Request) {
       await sendOrderNotification({
         order: {
           id: order.id,
+          customerId: authenticatedCustomer.id,
           orderNumber: order.orderNumber,
           customerName: order.customerName,
           customerEmail: order.customerEmail,

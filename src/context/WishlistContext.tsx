@@ -47,6 +47,7 @@ export function WishlistProvider({
     "checking" | "current" | "error"
   >("checking");
   const itemsRef = useRef(items);
+  const customerWishlistSynced = useRef(false);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -125,9 +126,10 @@ export function WishlistProvider({
     setAvailabilityStatus("current");
   }, [fetchCurrentProducts]);
 
-  // Load wishlist from localStorage
+  // Merge browser saves with the signed-in customer's saved wishlist.
   useEffect(() => {
     const timeoutId = window.setTimeout(async () => {
+      let parsedWishlist: Product[] = [];
       try {
         const storedWishlist =
           window.localStorage.getItem(
@@ -135,10 +137,10 @@ export function WishlistProvider({
           );
 
         if (storedWishlist) {
-          const parsedWishlist =
-            JSON.parse(storedWishlist) as Product[];
+          const parsed: unknown = JSON.parse(storedWishlist);
 
-          if (Array.isArray(parsedWishlist)) {
+          if (Array.isArray(parsed)) {
+            parsedWishlist = parsed as Product[];
             const productIds = parsedWishlist
               .map((product) => product?.id)
               .filter((id): id is string => typeof id === "string");
@@ -147,19 +149,84 @@ export function WishlistProvider({
             setAvailabilityStatus(
               availableProducts ? "current" : "error"
             );
-            setItems(
-              availableProducts
-                ? reconcileWishlistProducts(
-                    parsedWishlist,
-                    availableProducts
-                  )
-                : parsedWishlist
-            );
-          } else {
-            setAvailabilityStatus("current");
+            if (availableProducts) {
+              parsedWishlist = reconcileWishlistProducts(
+                parsedWishlist,
+                availableProducts
+              );
+            }
           }
+        }
+
+        const response = await fetch("/api/customer/wishlist", {
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const data = (await response.json()) as {
+            products?: AvailableWishlistProduct[];
+          };
+          if (!Array.isArray(data.products)) {
+            throw new Error("Customer wishlist returned an invalid response.");
+          }
+          customerWishlistSynced.current = true;
+          const savedIds = new Set(data.products.map((item) => item.id));
+          const localProducts = parsedWishlist.filter(
+            (product) => !savedIds.has(product.id)
+          );
+          const localAvailability = await fetchCurrentProducts(
+            localProducts.map((product) => product.id)
+          );
+          if (localAvailability) {
+            const mergedProducts = new Map<string, AvailableWishlistProduct>();
+            for (const item of localAvailability) {
+              mergedProducts.set(item.id, item);
+            }
+            for (const item of data.products) {
+              mergedProducts.set(item.id, item);
+            }
+            setItems(
+              reconcileWishlistProducts(
+                [...data.products.map((item) => item.product), ...localProducts],
+                [...mergedProducts.values()]
+              )
+            );
+            setAvailabilityStatus("current");
+          } else {
+            setItems([
+              ...data.products.map((item) => item.product),
+              ...localProducts,
+            ]);
+            setAvailabilityStatus("error");
+          }
+
+          if (localAvailability) {
+            await Promise.all(
+              localProducts
+                .filter((product) =>
+                  localAvailability.some((available) => available.id === product.id)
+                )
+                .map((product) =>
+                  fetch("/api/customer/wishlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productId: product.id }),
+                  }).then((saveResponse) => {
+                    if (!saveResponse.ok) {
+                      throw new Error(
+                        `Unable to sync saved product (${saveResponse.status}).`
+                      );
+                    }
+                  })
+                )
+            );
+          }
+        } else if (response.status === 401) {
+          setItems(parsedWishlist);
+          if (!parsedWishlist.length) setAvailabilityStatus("current");
         } else {
-          setAvailabilityStatus("current");
+          throw new Error(
+            `Customer wishlist failed with status ${response.status}.`
+          );
         }
       } catch (error) {
         setAvailabilityStatus("error");
@@ -167,6 +234,7 @@ export function WishlistProvider({
           "Failed to load Primezora wishlist:",
           error
         );
+        setItems(parsedWishlist);
       } finally {
         setIsLoaded(true);
       }
@@ -174,6 +242,37 @@ export function WishlistProvider({
 
     return () => window.clearTimeout(timeoutId);
   }, [fetchCurrentProducts]);
+
+  const persistCustomerWishlist = useCallback(
+    async (method: "POST" | "DELETE", productId?: string) => {
+      if (!customerWishlistSynced.current) return;
+
+      try {
+        const response = await fetch(
+          productId
+            ? `/api/customer/wishlist?productId=${encodeURIComponent(productId)}`
+            : "/api/customer/wishlist",
+          {
+            method,
+            ...(method === "POST"
+              ? {
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ productId }),
+                }
+              : {}),
+          }
+        );
+        if (!response.ok && response.status !== 401) {
+          throw new Error(
+            `Wishlist update failed with status ${response.status}.`
+          );
+        }
+      } catch (error) {
+        console.error("Failed to sync Primezora customer wishlist:", error);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     const refreshWhenVisible = () => {
@@ -210,6 +309,7 @@ export function WishlistProvider({
   }, [items, isLoaded]);
 
   const addToWishlist = (product: Product) => {
+    void persistCustomerWishlist("POST", product.id);
     setItems((currentItems) => {
       const alreadyExists = currentItems.some(
         (item) => item.id === product.id
@@ -226,12 +326,15 @@ export function WishlistProvider({
   const removeFromWishlist = (
     productId: string
   ) => {
+    void persistCustomerWishlist("DELETE", productId);
     setItems((currentItems) =>
       removeWishlistProducts(currentItems, [productId])
     );
   };
 
   const toggleWishlist = (product: Product) => {
+    const exists = itemsRef.current.some((item) => item.id === product.id);
+    void persistCustomerWishlist(exists ? "DELETE" : "POST", product.id);
     setItems((currentItems) => {
       const exists = currentItems.some(
         (item) => item.id === product.id
@@ -254,6 +357,7 @@ export function WishlistProvider({
   };
 
   const clearWishlist = () => {
+    void persistCustomerWishlist("DELETE");
     setItems([]);
   };
 

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { validateProductInput } from "@/lib/product-validation";
 import { requireAdminApi } from "@/lib/admin-auth";
 import { INPUT_LIMITS, exceedsTextLimit } from "@/lib/input-limits";
+import { sendWishlistRestockNotifications } from "@/lib/notifications";
 
 type Params = {
   params: Promise<{
@@ -124,6 +125,13 @@ export async function PUT(
       where: { id },
       data: validation.data,
     });
+    if (
+      !(existing.inStock && existing.stockQuantity > 0) &&
+      product.inStock &&
+      product.stockQuantity > 0
+    ) {
+      void sendWishlistRestockNotifications(product.id);
+    }
 
     return NextResponse.json({
       success: true,
@@ -228,6 +236,13 @@ export async function PATCH(
           inStock: requestedInStock,
         },
       });
+    if (
+      !(product.inStock && product.stockQuantity > 0) &&
+      updatedProduct.inStock &&
+      updatedProduct.stockQuantity > 0
+    ) {
+      void sendWishlistRestockNotifications(updatedProduct.id);
+    }
 
     return NextResponse.json({
       success: true,

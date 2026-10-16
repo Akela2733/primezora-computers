@@ -8,27 +8,28 @@ datasource db {
 }
 
 model Product {
-  id             String      @id @default(cuid())
+  id             String         @id @default(cuid())
   name           String
-  slug           String      @unique
+  slug           String         @unique
   brand          String
   category       String
   description    String?
   price          Int
   oldPrice       Int?
-  rating         Float       @default(0)
-  reviews        Int         @default(0)
+  rating         Float          @default(0)
+  reviews        Int            @default(0)
   image          String
   badge          String?
-  inStock        Boolean     @default(true)
-  stockQuantity  Int         @default(0)
-  featured       Boolean     @default(false)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  inStock        Boolean        @default(true)
+  stockQuantity  Int            @default(0)
+  featured       Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   specifications Json?
   features       Json?
-  images         String[]    @default([])
+  images         String[]       @default([])
   orderItems     OrderItem[]
+  wishlistItems  WishlistItem[]
 
   @@index([category])
   @@index([brand])
@@ -54,28 +55,44 @@ model StorefrontContent {
 }
 
 model Customer {
-  id                         String                @id @default(cuid())
+  id                         String                           @id @default(cuid())
   name                       String?
-  email                      String                @unique
+  email                      String                           @unique
   phone                      String?
   address                    String?
   city                       String?
   province                   String?
   postalCode                 String?
-  createdAt                  DateTime              @default(now())
-  updatedAt                  DateTime              @updatedAt
-  authUserId                 String?               @unique
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
+  authUserId                 String?                          @unique
   firstName                  String?
   lastName                   String?
-  emailVerified             Boolean               @default(false)
-  emailVerificationSentAt   DateTime?
-  emailVerifiedAt           DateTime?
-  emailVerificationTokens   CustomerEmailVerificationToken[]
-  orders                    Order[]
+  emailVerified              Boolean                          @default(false)
+  emailVerificationSentAt    DateTime?
+  emailVerifiedAt            DateTime?
+  restockAlertsEnabled       Boolean                          @default(false)
+  orderUpdateEmailsEnabled   Boolean                          @default(true)
+  promotionalEmailsEnabled   Boolean                          @default(false)
+  emailVerificationTokens    CustomerEmailVerificationToken[]
+  orders                     Order[]
   checkoutIdempotencyRecords CheckoutIdempotency[]
+  wishlistItems              WishlistItem[]
 
   @@index([authUserId])
   @@index([emailVerified])
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  customerId String
+  productId  String
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, productId])
+  @@index([productId])
 }
 
 model CustomerEmailVerificationToken {

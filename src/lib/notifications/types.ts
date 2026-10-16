@@ -21,6 +21,7 @@ export interface NotificationOrderItem {
 
 export interface NotificationOrderData {
   id: string;
+  customerId?: string | null;
   orderNumber: string;
   customerName: string;
   customerEmail: string;

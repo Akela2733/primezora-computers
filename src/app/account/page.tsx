@@ -5,14 +5,13 @@ import { requireCustomerPage } from "@/lib/customer-auth";
 import { CustomerLogoutButton } from "@/components/customer/CustomerLogoutButton";
 import {
   ArrowRight,
+  Bell,
   CalendarDays,
-  CheckCircle2,
   ChevronRight,
   Heart,
   Home,
   LayoutGrid,
   Mail,
-  MapPin,
   Package,
   Phone,
   Settings,
@@ -58,8 +57,6 @@ export default async function AccountPage() {
     month: "long",
     year: "numeric",
   });
-  const hasAddress = customer.address || customer.city;
-
   const accountLinks = [
     {
       title: "My Orders",
@@ -70,29 +67,11 @@ export default async function AccountPage() {
       iconClass: "border-amber-600/20 bg-amber-600/[0.08] text-amber-600",
     },
     {
-      title: "Wishlist",
-      description: "Your saved items and products you are interested in.",
-      action: "View Wishlist",
-      href: "/wishlist",
-      icon: Heart,
-      iconClass: "border-amber-600/20 bg-amber-600/[0.08] text-amber-600",
-    },
-    {
-      title: "Addresses",
-      description: hasAddress
-        ? `Default address${customer.city ? ` in ${customer.city}` : ""}.`
-        : "Add or update your shipping and billing address.",
-      action: "Manage Addresses",
-      href: "/account/profile",
-      icon: MapPin,
-      iconClass: "border-amber-600/20 bg-amber-600/[0.08] text-amber-600",
-    },
-    {
-      title: "Account Settings",
-      description: "Update your personal information and contact details.",
-      action: "Edit Settings",
-      href: "/account/profile",
-      icon: Settings,
+      title: "Website Preferences",
+      description: "Choose wishlist alerts and the email updates you receive.",
+      action: "Manage Preferences",
+      href: "/account/preferences",
+      icon: Bell,
       iconClass: "border-amber-600/20 bg-amber-600/[0.08] text-amber-600",
     },
   ];
@@ -289,26 +268,13 @@ export default async function AccountPage() {
                     {customer.phone || "Not provided"}
                   </dd>
                 </div>
-                <div className="border-t border-white/[0.07] pt-3">
-                  <dt className="flex items-center gap-1.5 text-white/40">
-                    <MapPin size={11} />
-                    Default Shipping Address
-                  </dt>
-                  <dd className={`mt-1 leading-5 ${hasAddress ? "text-white/70" : "text-white/35"}`}>
-                    {hasAddress
-                      ? [customer.address, customer.city, customer.province, customer.postalCode]
-                          .filter(Boolean)
-                          .join(", ")
-                      : "No address saved"}
-                  </dd>
-                </div>
-                <div className="border-t border-white/[0.07] pt-3">
+                {/* <div className="border-t border-white/[0.07] pt-3">
                   <dt className="text-white/40">Account security</dt>
                   <dd className="mt-1 inline-flex items-center gap-1.5 font-medium text-amber-600/85">
                     <CheckCircle2 size={12} />
                     Supabase Auth secured
                   </dd>
-                </div>
+                </div> */}
               </dl>
 
               <Link
