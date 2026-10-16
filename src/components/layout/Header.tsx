@@ -10,10 +10,12 @@ import {
   Menu,
   Heart,
   X,
+  Check,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { useCart } from "@/context/CartContext";
 import type { CatalogCategory } from "@/lib/categories";
 import type { StorefrontContent } from "@/lib/storefront-content";
 
@@ -32,8 +34,27 @@ export function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
+  const { itemCount, lastAddedProduct } = useCart();
+  const [dismissedCartEventId, setDismissedCartEventId] = useState<
+    number | null
+  >(null);
+
+  useEffect(() => {
+    if (!lastAddedProduct) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setDismissedCartEventId(lastAddedProduct.eventId);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [lastAddedProduct]);
+  const cartConfirmation =
+    lastAddedProduct?.eventId !== dismissedCartEventId
+      ? lastAddedProduct
+      : null;
 
   return (
+    <>
     <header className="sticky top-0 z-50 border-b border-amber-600/[0.14] bg-[#030505]/95 backdrop-blur-xl">
 
       {/* ================================
@@ -242,6 +263,7 @@ export function Header({
 
             <Link
               href="/cart"
+              aria-label={`Shopping cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
               className="
                 relative
                 rounded-lg
@@ -257,6 +279,7 @@ export function Header({
               <ShoppingCart size={19} />
 
               <span
+                aria-hidden="true"
                 className="
                   absolute
                   -right-0.5
@@ -279,7 +302,7 @@ export function Header({
                   text-white/90
                 "
               >
-                0
+                {itemCount > 99 ? "99+" : itemCount}
               </span>
 
             </Link>
@@ -503,6 +526,51 @@ export function Header({
       )}
 
     </header>
+
+      {cartConfirmation && (
+        <aside
+          role="status"
+          aria-live="polite"
+          className="fixed right-4 top-24 z-60 flex w-[min(24rem,calc(100vw-2rem))] items-start gap-3 rounded-xl border border-emerald-400/25 bg-[#080d0b] p-4 text-white shadow-[0_16px_50px_rgba(0,0,0,0.5)]"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300">
+            <Check size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-white/90">
+              {cartConfirmation.quantity > 0
+                ? "Added to your cart"
+                : "Already in your cart"}
+            </p>
+            <p className="mt-1 truncate text-xs text-white/55">
+              {cartConfirmation.name}
+              {cartConfirmation.quantity > 1
+                ? ` · ${cartConfirmation.quantity} items`
+                : ""}
+            </p>
+            <Link
+              href="/cart"
+              onClick={() =>
+                setDismissedCartEventId(cartConfirmation.eventId)
+              }
+              className="mt-2 inline-flex text-xs font-semibold text-amber-500 transition hover:text-amber-400"
+            >
+              View cart
+            </Link>
+          </div>
+          <button
+            type="button"
+            aria-label="Dismiss cart confirmation"
+            onClick={() =>
+              setDismissedCartEventId(cartConfirmation.eventId)
+            }
+            className="rounded p-1 text-white/40 transition hover:bg-white/[0.06] hover:text-white/80"
+          >
+            <X size={15} />
+          </button>
+        </aside>
+      )}
+    </>
   );
 }
 

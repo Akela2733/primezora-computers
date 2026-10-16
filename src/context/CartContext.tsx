@@ -27,7 +27,12 @@ type CartContextType = {
   itemCount: number;
   subtotal: number;
   validationStatus: "checking" | "current" | "error";
-  lastAddedProductId: string | null;
+  lastAddedProduct: {
+    id: string;
+    name: string;
+    quantity: number;
+    eventId: number;
+  } | null;
 
   addToCart: (
     product: Product,
@@ -55,7 +60,10 @@ export function CartProvider({
   const [validationStatus, setValidationStatus] = useState<
     "checking" | "current" | "error"
   >("checking");
-  const [lastAddedProductId, setLastAddedProductId] = useState<string | null>(null);
+  const [lastAddedProduct, setLastAddedProduct] = useState<
+    CartContextType["lastAddedProduct"]
+  >(null);
+  const addEventIdRef = useRef(0);
   const itemsRef = useRef(items);
 
   useEffect(() => {
@@ -134,16 +142,6 @@ export function CartProvider({
     });
     setValidationStatus("current");
   }, [fetchAvailability]);
-
-  useEffect(() => {
-    if (!lastAddedProductId) return;
-
-    const timeoutId = window.setTimeout(() => {
-      setLastAddedProductId(null);
-    }, 1600);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [lastAddedProductId]);
 
   /*
   |--------------------------------------------------------------------------
@@ -272,7 +270,13 @@ export function CartProvider({
 
     const currentStock = currentProduct.stockQuantity;
     const currentProductDetails = currentProduct.product ?? product;
-    setLastAddedProductId(product.id);
+    const existingQuantity =
+      itemsRef.current.find((item) => item.product.id === product.id)
+        ?.quantity ?? 0;
+    const addedQuantity =
+      currentStock > 0
+        ? Math.max(0, Math.min(existingQuantity + quantity, currentStock) - existingQuantity)
+        : quantity;
 
     setItems((currentItems) => {
       const validatedItems = reconcileCartItems(currentItems, availability);
@@ -319,6 +323,12 @@ export function CartProvider({
               : quantity,
         },
       ];
+    });
+    setLastAddedProduct({
+      id: product.id,
+      name: currentProductDetails.name,
+      quantity: addedQuantity,
+      eventId: ++addEventIdRef.current,
     });
     setValidationStatus("current");
     return "added";
@@ -442,7 +452,7 @@ export function CartProvider({
         itemCount,
         subtotal,
         validationStatus,
-        lastAddedProductId,
+        lastAddedProduct,
         addToCart,
         removeFromCart,
         updateQuantity,
