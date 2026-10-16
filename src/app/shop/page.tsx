@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCatalogCategories } from "@/lib/categories";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { getStorefrontContent } from "@/lib/storefront-content";
 
 import ShopClient from "./ShopClient";
@@ -33,7 +34,7 @@ export default async function ShopPage() {
 
   return (
     <ShopClient
-      products={productRecords.map(toProductView)}
+      products={(await addCustomerReviewSummaries(productRecords)).map(toProductView)}
       categories={categories.map((category) => ({
         id: category.id,
         name: category.name,

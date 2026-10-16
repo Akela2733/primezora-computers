@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { INPUT_LIMITS } from "@/lib/input-limits";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
 
@@ -55,11 +56,13 @@ export async function POST(request: Request) {
     const products = await prisma.product.findMany({
       where: { id: { in: [...new Set(validProductIds)] } },
     });
+    const productsWithReviewSummaries =
+      await addCustomerReviewSummaries(products);
 
     return NextResponse.json(
       {
         success: true,
-        products: products.map((product) => ({
+        products: productsWithReviewSummaries.map((product) => ({
           id: product.id,
           inStock: product.inStock && product.stockQuantity > 0,
           stockQuantity: product.stockQuantity,

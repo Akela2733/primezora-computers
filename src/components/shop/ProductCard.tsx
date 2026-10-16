@@ -140,6 +140,9 @@ export function ProductCard({
           </div>
 
           <span className="text-[9px] text-white/40">
+            {product.rating.toFixed(1)}
+          </span>
+          <span className="text-[9px] text-white/40">
             ({product.reviews})
           </span>
         </div>

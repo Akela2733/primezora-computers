@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
 import {
   findOverLimitQueryParameter,
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      products: products.map(toProductView),
+      products: (await addCustomerReviewSummaries(products)).map(toProductView),
       count: products.length,
       pagination: {
         page: pagination.page,

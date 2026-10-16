@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireCustomerApiWithProfileCheck, getCustomerSession } from "@/lib/customer-auth";
 import { INPUT_LIMITS } from "@/lib/input-limits";
 import { prisma } from "@/lib/prisma";
+import { combineProductReviewSummary } from "@/lib/product-review-summary";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
 import { parseProductReviewInput } from "@/lib/product-review-validation";
 
@@ -94,12 +95,13 @@ export async function GET(request: Request, context: RouteContext) {
           select: { rating: true, content: true },
         })
       : null;
+    const summary = combineProductReviewSummary(product, aggregate);
 
     return NextResponse.json({
       reviews: reviews.map(formatReview),
       ownReview,
-      rating: aggregate._avg.rating ?? product.rating,
-      reviewCount: aggregate._count._all || product.reviews,
+      rating: summary.rating,
+      reviewCount: summary.reviews,
       authenticated: Boolean(session),
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
@@ -174,11 +176,12 @@ export async function POST(request: Request, context: RouteContext) {
       _avg: { rating: true },
       _count: { _all: true },
     });
+    const summary = combineProductReviewSummary(product, aggregate);
 
     return NextResponse.json({
       review: formatReview(savedReview),
-      rating: aggregate._avg.rating ?? product.rating,
-      reviewCount: aggregate._count._all || product.reviews,
+      rating: summary.rating,
+      reviewCount: summary.reviews,
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("PRODUCT REVIEW POST ERROR:", error);

@@ -7,6 +7,7 @@ import {
 } from "@/lib/categories";
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { getStorefrontContent } from "@/lib/storefront-content";
 import { ProductCard } from "@/components/shop/ProductCard";
 
@@ -42,7 +43,9 @@ export default async function CategoryPage({
       createdAt: "desc",
     },
   });
-  const categoryProducts = productRecords.map(toProductView);
+  const categoryProducts = (
+    await addCustomerReviewSummaries(productRecords)
+  ).map(toProductView);
 
   return (
     <main className="min-h-screen bg-[#030505] px-4 py-12 text-white/90 sm:px-6 lg:px-8">

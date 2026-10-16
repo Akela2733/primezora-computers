@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { enforceRateLimits, getClientIp } from "@/lib/rate-limit";
 import { INPUT_LIMITS, exceedsTextLimit } from "@/lib/input-limits";
 
@@ -49,7 +50,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      product: toProductView(product),
+      product: toProductView((await addCustomerReviewSummaries([product]))[0]),
     });
   } catch (error) {
     console.error(

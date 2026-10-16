@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { getStorefrontContent } from "@/lib/storefront-content";
 import FeaturedProductsTrack from "./FeaturedProductsTrack";
 
@@ -16,7 +17,7 @@ export async function FeaturedProducts() {
 
   return (
     <FeaturedProductsTrack
-      products={productRecords.map(toProductView)}
+      products={(await addCustomerReviewSummaries(productRecords)).map(toProductView)}
       content={content.home.featured}
     />
   );

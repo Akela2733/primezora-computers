@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireCustomerApiWithProfileCheck } from "@/lib/customer-auth";
 import { INPUT_LIMITS } from "@/lib/input-limits";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -15,13 +16,19 @@ export async function GET() {
       include: { product: true },
       orderBy: { createdAt: "asc" },
     });
+    const productsWithReviewSummaries = await addCustomerReviewSummaries(
+      wishlistItems.map(({ product }) => product)
+    );
+    const productById = new Map(
+      productsWithReviewSummaries.map((product) => [product.id, product])
+    );
 
     return NextResponse.json({
       products: wishlistItems.map(({ product }) => ({
         id: product.id,
         inStock: product.inStock && product.stockQuantity > 0,
         stockQuantity: product.stockQuantity,
-        product: toProductView(product),
+        product: toProductView(productById.get(product.id) ?? product),
       })),
     });
   } catch (error) {

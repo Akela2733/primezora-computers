@@ -20,7 +20,7 @@
     "test:integration": "tsx --test tests/database-target.test.ts tests/admin-recovery.test.ts tests/integration/order-api.test.ts",
     "test:rate-limit": "tsx --test tests/rate-limit.test.ts",
     "test:payment": "tsx --test tests/payment-configuration.test.ts",
-    "test:product-reviews": "tsx --test tests/product-review-validation.test.ts"
+    "test:product-reviews": "tsx --test tests/product-review-validation.test.ts tests/product-review-summary.test.ts"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.15.1",

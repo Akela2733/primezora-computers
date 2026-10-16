@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import {
+  addCustomerReviewSummaries,
+  combineProductReviewSummary,
+} from "@/lib/product-review-summary";
 import ProductDetailsClient from "@/components/products/ProductDetailsClient";
 
 type ProductPageProps = {
@@ -66,9 +70,8 @@ export default async function ProductPage({
     }),
   ]);
 
-  const reviewCount = reviewAggregate._count._all || dbProduct.reviews;
-  const rating = reviewAggregate._avg.rating ?? dbProduct.rating;
-  const product = toProductView({ ...dbProduct, rating, reviews: reviewCount });
+  const reviewSummary = combineProductReviewSummary(dbProduct, reviewAggregate);
+  const product = toProductView({ ...dbProduct, ...reviewSummary });
   const initialReviews = reviews.map((review) => ({
     id: review.id,
     rating: review.rating,
@@ -87,10 +90,12 @@ export default async function ProductPage({
   return (
     <ProductDetailsClient
       product={product}
-      relatedProducts={relatedProducts.map(toProductView)}
+      relatedProducts={(
+        await addCustomerReviewSummaries(relatedProducts)
+      ).map(toProductView)}
       initialReviews={initialReviews}
-      initialRating={rating}
-      initialReviewCount={reviewCount}
+      initialRating={reviewSummary.rating}
+      initialReviewCount={reviewSummary.reviews}
     />
   );
 }

@@ -3,6 +3,7 @@ import { Search, X, ArrowLeft } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/product-view";
+import { addCustomerReviewSummaries } from "@/lib/product-review-summary";
 import { getStorefrontContent } from "@/lib/storefront-content";
 import { ProductCard } from "@/components/shop/ProductCard";
 import type { Product } from "@/types/product";
@@ -239,7 +240,7 @@ export default async function SearchPage({
   return (
     <SearchPageContent
       query={query}
-      results={productRecords.map(toProductView)}
+      results={(await addCustomerReviewSummaries(productRecords)).map(toProductView)}
       popularSearches={popularSearches}
       content={content.search}
     />
