@@ -38,6 +38,17 @@ export async function GET(_request: Request, { params }: RouteContext) {
         province: true,
         postalCode: true,
         paymentMethod: true,
+        paymentStatus: true,
+        paymentReference: true,
+        currency: true,
+        paymentReceipts: {
+          select: {
+            submittedAt: true,
+            rejectionReason: true,
+          },
+          orderBy: { submittedAt: "desc" },
+          take: 1,
+        },
         subtotal: true,
         deliveryFee: true,
         total: true,
@@ -70,6 +81,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return NextResponse.json({
       order: {
         ...order,
+        latestReceipt: order.paymentReceipts[0] ?? null,
         items: order.items.map((item) => ({
           id: item.id,
           productName: item.productName,

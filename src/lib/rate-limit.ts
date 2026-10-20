@@ -51,6 +51,7 @@ const IN_MEMORY_FALLBACK_POLICIES = new Set<RateLimitPolicyName>([
   "checkoutCustomer",
   "customerProductReview",
   "checkoutIp",
+  "paymentReceiptUpload",
   "publicCatalogIp",
 ]);
 

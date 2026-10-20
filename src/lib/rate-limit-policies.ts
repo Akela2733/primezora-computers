@@ -14,6 +14,8 @@ export const RATE_LIMIT_POLICIES = {
   checkoutCustomer: { limit: 10, window: "10 m" },
   customerProductReview: { limit: 10, window: "10 m" },
   checkoutIp: { limit: 30, window: "10 m" },
+  paymentReceiptUpload: { limit: 10, window: "10 m" },
+  adminPaymentReview: { limit: 30, window: "15 m" },
   publicCatalogIp: { limit: 120, window: "1 m" },
   orderTrackingIp: { limit: 10, window: "15 m" },
   paymentVerificationIp: { limit: 30, window: "15 m" },

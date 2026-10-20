@@ -30,6 +30,9 @@ type CheckoutOrderResponse = {
   id: string;
   orderNumber: string;
   total: number;
+  currency: string;
+  paymentReference: string | null;
+  paymentStatus: string | null;
   status: string;
   paymentMethod: string;
   customerName: string;
@@ -53,6 +56,9 @@ const ORDER_RESPONSE_SELECT = {
   id: true,
   orderNumber: true,
   total: true,
+  currency: true,
+  paymentReference: true,
+  paymentStatus: true,
   status: true,
   paymentMethod: true,
   customerName: true,
@@ -167,6 +173,9 @@ function respondWithOrder(
         id: order.id,
         orderNumber: order.orderNumber,
         total: order.total,
+        currency: order.currency,
+        paymentReference: order.paymentReference,
+        paymentStatus: order.paymentStatus,
         // Replays keep the creation-time status even after later admin updates.
         status: "PENDING",
         paymentMethod: order.paymentMethod,
@@ -433,6 +442,11 @@ export async function POST(request: Request) {
                 deliveryFee,
                 total,
                 paymentMethod: input.paymentMethod,
+                paymentStatus:
+                  input.paymentMethod === "bank" ? "PAYMENT_PENDING" : null,
+                paymentReference:
+                  input.paymentMethod === "bank" ? orderNumber : null,
+                currency: "LKR",
                 status: "PENDING",
                 items: {
                   create: orderItems,
@@ -522,6 +536,13 @@ export async function POST(request: Request) {
 
     return respondWithOrder(order, paymentIntent);
   } catch (error) {
+    if (error instanceof PaymentConfigurationError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 503, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
     if (error instanceof OrderRequestError) {
       return NextResponse.json(
         { error: error.message },

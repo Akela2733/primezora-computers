@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 
 import { getCustomerSession } from "@/lib/customer-auth";
 
@@ -18,29 +19,32 @@ export default async function CheckoutLayout({
   }
 
   return (
-    <main className="min-h-screen bg-[#030505] px-4 py-20 text-white/90">
+    <main className="min-h-screen bg-[#030505] px-4 py-12 text-white/90 sm:py-20">
       <section className="container-primezora mx-auto flex min-h-[55vh] max-w-xl items-center justify-center">
-        <div className="w-full border border-white/[0.08] bg-[#030505] p-8 text-center">
-          <p className="font-display text-[9px] uppercase tracking-[0.25em] text-amber-600">
+        <div className="w-full rounded-xl border border-orange-500/25 bg-white/[0.02] p-6 text-center sm:p-8">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/25 bg-orange-500/[0.07] text-orange-400">
+            <ShieldCheck size={24} />
+          </span>
+          <p className="mt-5 font-display text-[9px] font-bold uppercase tracking-[0.25em] text-orange-400">
             Secure Checkout
           </p>
-          <h1 className="mt-3 font-display text-2xl font-bold uppercase">
+          <h1 className="mt-2 font-display text-2xl font-bold uppercase text-white">
             Sign in to continue
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/55">
+          <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-white/55">
             Checkout is available to Primezora customers. Sign in or create an
             account to continue; your cart will be waiting for you.
           </p>
-          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/login?next=%2Fcheckout"
-              className="border border-amber-600 bg-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-black transition hover:bg-amber-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-orange-500 px-5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
             >
               Sign In
             </Link>
             <Link
               href="/register?next=%2Fcheckout"
-              className="border border-white/15 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-white/90 transition hover:border-white/35"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-orange-500/45 px-5 text-[10px] font-bold uppercase tracking-wide text-white/85 transition hover:bg-orange-500/[0.08] hover:text-orange-300"
             >
               Create Account
             </Link>

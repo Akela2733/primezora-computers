@@ -7,8 +7,10 @@ import {
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import BankTransferReceiptUpload from "@/components/customer/BankTransferReceiptUpload";
 import {
   getBankTransferDetailsForDisplay,
+  getWhatsAppBusinessNumberForDisplay,
   PaymentConfigurationError,
 } from "@/lib/payment-configuration";
 
@@ -41,6 +43,14 @@ export default async function OrderSuccessPage({
       total: true,
       status: true,
       paymentMethod: true,
+      paymentStatus: true,
+      paymentReference: true,
+      currency: true,
+      paymentReceipts: {
+        select: { rejectionReason: true },
+        orderBy: { submittedAt: "desc" },
+        take: 1,
+      },
       createdAt: true,
     },
   });
@@ -50,19 +60,20 @@ export default async function OrderSuccessPage({
   }
 
   let bankTransferDetails = null;
+  let whatsappBusinessNumber: string | null = null;
+  const awaitingCardPayment =
+    order.paymentMethod === "card" && order.status === "PENDING";
+  const failedCardPayment =
+    order.paymentMethod === "card" && order.status === "CANCELLED";
   if (order.paymentMethod === "bank") {
     try {
       bankTransferDetails = getBankTransferDetailsForDisplay();
+      whatsappBusinessNumber = getWhatsAppBusinessNumberForDisplay();
     } catch (error) {
       if (!(error instanceof PaymentConfigurationError)) throw error;
       console.error("BANK_TRANSFER_DETAILS_UNAVAILABLE", error);
     }
   }
-  const awaitingCardPayment =
-    order.paymentMethod === "card" && order.status === "PENDING";
-  const failedCardPayment =
-    order.paymentMethod === "card" && order.status === "CANCELLED";
-
   return (
     <main className="min-h-screen bg-[#030505] text-white/90">
       <section className="relative overflow-hidden border-b border-white/[0.06]">
@@ -78,31 +89,40 @@ export default async function OrderSuccessPage({
             </div>
 
             <p className="mt-8 font-display text-[9px] uppercase tracking-[0.35em] text-amber-600">
-              {awaitingCardPayment
-                ? "Payment Verification Pending"
-                : failedCardPayment
-                  ? "Card Payment Not Completed"
-                  : order.status === "PENDING"
-                    ? "Order Received"
-                    : "Order Confirmed"}
+              {order.paymentMethod === "bank" &&
+              order.paymentStatus !== "PAID"
+                ? "Awaiting Payment Verification"
+                : awaitingCardPayment
+                  ? "Payment Verification Pending"
+                  : failedCardPayment
+                    ? "Card Payment Not Completed"
+                    : order.status === "PENDING"
+                      ? "Order Received"
+                      : "Order Confirmed"}
             </p>
 
             <h1 className="mt-4 font-display text-3xl font-bold uppercase tracking-tight sm:text-5xl">
-              {awaitingCardPayment
-                ? "We’re confirming payment"
-                : failedCardPayment
-                  ? "Payment was not completed"
-                  : "Thank You"}
+              {order.paymentMethod === "bank" &&
+              order.paymentStatus !== "PAID"
+                ? "Transfer the exact amount"
+                : awaitingCardPayment
+                  ? "We’re confirming payment"
+                  : failedCardPayment
+                    ? "Payment was not completed"
+                    : "Thank You"}
             </h1>
 
             <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/45">
-              {awaitingCardPayment
-                ? "PayHere is processing your card payment. This page will reflect the order status after the provider notifies us. Please keep your order number for reference."
-                : failedCardPayment
-                  ? "PayHere did not complete this payment. If you believe you were charged, contact support with your order number before placing another order."
-                  : order.paymentMethod === "bank"
-                  ? "Your order has been received. It will be confirmed after your bank transfer is verified."
-                  : "Your order has been successfully placed and is now being processed."}
+              {order.paymentMethod === "bank" &&
+              order.paymentStatus !== "PAID"
+                ? "Your order is reserved. Transfer the exact amount using the unique payment reference, then upload your receipt. Payment is confirmed only after Primezora verifies the incoming bank credit."
+                : awaitingCardPayment
+                  ? "PayHere is processing your card payment. This page will reflect the order status after the provider notifies us. Please keep your order number for reference."
+                  : failedCardPayment
+                    ? "PayHere did not complete this payment. If you believe you were charged, contact support with your order number."
+                    : order.paymentMethod === "card"
+                      ? "Your card payment was verified. We will contact you with the next order update."
+                      : "Your order has been successfully placed and is now being processed."}
             </p>
 
             <div className="mx-auto mt-8 inline-flex items-center gap-3 border border-amber-600/20 bg-amber-600/[0.06] px-5 py-3">
@@ -117,10 +137,10 @@ export default async function OrderSuccessPage({
 
             <div className="mx-auto mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[9px] uppercase tracking-[0.12em] text-white/40">
               <span>
-                Total <strong className="ml-2 text-white/75">LKR {order.total.toLocaleString("en-LK")}</strong>
+                Total <strong className="ml-2 text-white/75">{order.currency} {order.total.toLocaleString("en-LK")}</strong>
               </span>
               <span>
-                Status <strong className="ml-2 text-amber-600">{order.status.replaceAll("_", " ")}</strong>
+                Status <strong className="ml-2 text-amber-600">{order.paymentMethod === "bank" ? (order.paymentStatus ?? "PAYMENT_PENDING").replaceAll("_", " ") : order.status.replaceAll("_", " ")}</strong>
               </span>
               <span>
                 Placed <strong className="ml-2 text-white/75">{order.createdAt.toLocaleDateString("en-LK")}</strong>
@@ -148,14 +168,20 @@ export default async function OrderSuccessPage({
           {order.paymentMethod === "bank" ? (
             <>
               <h2 className="mt-5 font-display text-lg font-bold uppercase tracking-[0.18em] text-white/80">
-                Complete your bank transfer
+                {order.paymentStatus === "PAID"
+                  ? "Bank transfer verified"
+                  : "Complete your bank transfer"}
               </h2>
-              {bankTransferDetails ? (
+              {order.paymentStatus === "PAID" ? (
+                <p className="mt-3 text-sm leading-7 text-emerald-300">
+                  The bank credit has been verified and your order is confirmed.
+                </p>
+              ) : bankTransferDetails ? (
                 <>
                   <dl className="mx-auto mt-6 grid max-w-md gap-3 text-left text-sm">
                     {[
                       ["Bank", bankTransferDetails.bankName],
-                      ["Account name", bankTransferDetails.accountName],
+                        ["Account holder", bankTransferDetails.accountName],
                       ["Account number", bankTransferDetails.accountNumber],
                       ["Branch", bankTransferDetails.branch],
                     ].map(([label, value]) => (
@@ -169,10 +195,9 @@ export default async function OrderSuccessPage({
                     ))}
                   </dl>
                   <p className="mt-5 text-sm leading-7 text-white/50">
-                    Transfer LKR {order.total.toLocaleString("en-LK")} and use{" "}
-                    <strong className="text-amber-500">{order.orderNumber}</strong>{" "}
-                    as the payment reference. Your order remains pending until
-                    the transfer is verified.
+                    Transfer exactly {order.currency} {order.total.toLocaleString("en-LK")} and enter{" "}
+                    <strong className="text-amber-500">{order.paymentReference ?? order.orderNumber}</strong>{" "}
+                    as the payment reference. Your order remains unpaid until the incoming credit is independently verified.
                   </p>
                 </>
               ) : (
@@ -181,6 +206,33 @@ export default async function OrderSuccessPage({
                   contact support and quote your order number.
                 </p>
               )}
+              {order.paymentStatus !== "PAID" && whatsappBusinessNumber && (
+                <div className="mt-6">
+                  <a
+                    href={`https://wa.me/${whatsappBusinessNumber}?text=${encodeURIComponent(
+                      `Hi Primezora! I would like to pay for order ${order.orderNumber} by bank transfer. Amount: LKR ${order.total.toLocaleString("en-LK")}. Please confirm the payment instructions.`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center rounded-md bg-emerald-600 px-5 text-[10px] font-bold uppercase tracking-wide text-white transition hover:bg-emerald-500"
+                  >
+                    Message Primezora on WhatsApp
+                  </a>
+                  <p className="mx-auto mt-3 max-w-md text-[10px] leading-5 text-white/40">
+                    WhatsApp opens a prefilled message; you must press Send.
+                    Order-specific replies are manually sent by Primezora using
+                    the WhatsApp Business app. Configure a saved Quick Reply
+                    with the bank details and payment instructions in that
+                    app; it does not read order data or create automatic
+                    order-specific replies.
+                  </p>
+                </div>
+              )}
+              <BankTransferReceiptUpload
+                orderId={order.id}
+                paymentStatus={order.paymentStatus ?? "PAYMENT_PENDING"}
+                rejectionReason={order.paymentReceipts[0]?.rejectionReason}
+              />
             </>
           ) : (
             <>

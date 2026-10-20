@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Banknote, MapPin, Package, UserRound } from "lucide-react";
 
 import OrderStatusControl from "./OrderStatusControl";
+import BankTransferPaymentReview from "./BankTransferPaymentReview";
 import { prisma } from "@/lib/prisma";
 import { getOrderStatusLabel, type OrderStatus } from "@/lib/order-status";
 import { requireAdminPage } from "@/lib/admin-auth";
@@ -34,6 +35,8 @@ export default async function AdminOrderDetailPage({
       deliveryFee: true,
       total: true,
       paymentMethod: true,
+      paymentStatus: true,
+      paymentReference: true,
       status: true,
       createdAt: true,
       items: {
@@ -57,6 +60,30 @@ export default async function AdminOrderDetailPage({
           createdAt: true,
         },
         orderBy: { createdAt: "asc" },
+      },
+      paymentReceipts: {
+        select: {
+          id: true,
+          contentType: true,
+          sizeBytes: true,
+          status: true,
+          rejectionReason: true,
+          submittedAt: true,
+          reviewedAt: true,
+        },
+        orderBy: { submittedAt: "desc" },
+      },
+      paymentAuditEvents: {
+        select: {
+          action: true,
+          changedBy: true,
+          reason: true,
+          transactionId: true,
+          transactionReference: true,
+          transactionDate: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -93,6 +120,8 @@ export default async function AdminOrderDetailPage({
                 orderNumber={order.orderNumber}
                 status={order.status}
                 deliveryMethod={order.deliveryMethod}
+                paymentMethod={order.paymentMethod}
+                paymentStatus={order.paymentStatus}
               />
             </div>
           </div>
@@ -140,6 +169,17 @@ export default async function AdminOrderDetailPage({
                 />
               </dl>
             </section>
+
+            {order.paymentMethod === "bank" && (
+              <BankTransferPaymentReview
+                orderId={order.id}
+                paymentStatus={order.paymentStatus}
+                paymentReference={order.paymentReference}
+                total={order.total}
+                receipts={order.paymentReceipts}
+                auditEvents={order.paymentAuditEvents}
+              />
+            )}
 
             <section className="border border-white/[0.07] bg-[#030505]">
               <SectionHeading icon={<Package size={15} />} title="Order Items" />

@@ -111,6 +111,7 @@ export default async function AdminOrdersPage({
     createdAt: Date;
     total: number;
     paymentMethod: string;
+    paymentStatus: string | null;
     status: OrderStatus;
     itemCount: number;
   }[] = [];
@@ -130,6 +131,7 @@ export default async function AdminOrdersPage({
           createdAt: true,
           total: true,
           paymentMethod: true,
+          paymentStatus: true,
           status: true,
           items: { select: { quantity: true } },
         },
@@ -336,7 +338,7 @@ export default async function AdminOrdersPage({
                         {order.paymentMethod === "cod"
                           ? "Cash on Delivery"
                           : order.paymentMethod === "bank"
-                            ? "Bank Transfer"
+                            ? `Bank Transfer · ${(order.paymentStatus ?? "PAYMENT_PENDING").replaceAll("_", " ")}`
                             : "Credit / Debit Card"}
                       </td>
                       <td className="px-4 py-4"><StatusBadge status={order.status} /></td>

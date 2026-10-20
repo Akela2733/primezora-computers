@@ -8,28 +8,28 @@ datasource db {
 }
 
 model Product {
-  id             String         @id @default(cuid())
-  name           String
-  slug           String         @unique
-  brand          String
-  category       String
-  description    String?
-  price          Int
-  oldPrice       Int?
-  rating         Float          @default(0)
-  reviews        Int            @default(0)
-  image          String
-  badge          String?
-  inStock        Boolean        @default(true)
-  stockQuantity  Int            @default(0)
-  featured       Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  specifications Json?
-  features       Json?
-  images         String[]       @default([])
-  orderItems     OrderItem[]
-  wishlistItems  WishlistItem[]
+  id              String          @id @default(cuid())
+  name            String
+  slug            String          @unique
+  brand           String
+  category        String
+  description     String?
+  price           Int
+  oldPrice        Int?
+  rating          Float           @default(0)
+  reviews         Int             @default(0)
+  image           String
+  badge           String?
+  inStock         Boolean         @default(true)
+  stockQuantity   Int             @default(0)
+  featured        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  specifications  Json?
+  features        Json?
+  images          String[]        @default([])
+  orderItems      OrderItem[]
+  wishlistItems   WishlistItem[]
   customerReviews ProductReview[]
 
   @@index([category])
@@ -168,7 +168,12 @@ model Order {
   deliveryFee               Int
   total                     Int
   paymentMethod             String
+  paymentStatus             PaymentStatus?
+  paymentReference          String?              @unique
   paymentTransactionId      String?              @unique
+  paymentVerifiedBy         String?
+  paymentVerifiedAt         DateTime?
+  currency                  String               @default("LKR")
   status                    OrderStatus          @default(PENDING)
   notes                     String?
   createdAt                 DateTime             @default(now())
@@ -176,6 +181,8 @@ model Order {
   customer                  Customer?            @relation(fields: [customerId], references: [id])
   items                     OrderItem[]
   statusHistory             OrderStatusHistory[]
+  paymentReceipts           PaymentReceipt[]
+  paymentAuditEvents        PaymentAuditEvent[]
   checkoutIdempotencyRecord CheckoutIdempotency?
 
   @@index([status])
@@ -195,6 +202,40 @@ model CheckoutIdempotency {
 
   @@unique([customerId, key])
   @@index([createdAt])
+}
+
+model PaymentReceipt {
+  id               String               @id @default(cuid())
+  orderId          String
+  storagePath      String               @unique
+  contentType      String
+  sizeBytes        Int
+  originalFilename String
+  status           PaymentReceiptStatus @default(PENDING)
+  rejectionReason  String?
+  submittedAt      DateTime             @default(now())
+  reviewedAt       DateTime?
+  order            Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  auditEvents      PaymentAuditEvent[]
+
+  @@index([orderId, submittedAt])
+}
+
+model PaymentAuditEvent {
+  id                   String          @id @default(cuid())
+  orderId              String
+  receiptId            String?
+  action               String
+  changedBy            String
+  reason               String?
+  transactionId        String?
+  transactionReference String?
+  transactionDate      DateTime?
+  createdAt            DateTime        @default(now())
+  order                Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  receipt              PaymentReceipt? @relation(fields: [receiptId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {
@@ -231,6 +272,20 @@ enum OrderStatus {
   READY_FOR_PICKUP
   COMPLETED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PAYMENT_PENDING
+  PAYMENT_VERIFICATION_PENDING
+  PAYMENT_REJECTED
+  PAID
+  CANCELLED
+}
+
+enum PaymentReceiptStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum SiteNotificationType {

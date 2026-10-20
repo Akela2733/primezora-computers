@@ -191,32 +191,37 @@ database migration or live email test is run from local development.
 
 ## Checkout payment configuration
 
-Checkout supports Cash on Delivery, manual bank transfer, and PayHere-hosted
-card payments. Never collect or store card numbers in this application.
+Checkout currently supports Cash on Delivery and manual bank transfer. Card
+payments are temporarily unavailable in checkout; historical PayHere handlers
+remain only for compatibility with existing records. Never collect or store
+card numbers in this application.
 
 Configure the following server-side variables in `.env.local` for development
 and in the hosting provider for production:
 
 - `BANK_TRANSFER_BANK_NAME`, `BANK_TRANSFER_ACCOUNT_NAME`,
   `BANK_TRANSFER_ACCOUNT_NUMBER`, and `BANK_TRANSFER_BRANCH`: the business
-  account details shown on the order confirmation page. Bank-transfer orders
-  remain pending until an administrator verifies the transfer.
-- `PAYHERE_MODE`: `sandbox` for testing or `live` for production.
-- `PAYHERE_MERCHANT_ID` and `PAYHERE_MERCHANT_SECRET`: server-only credentials
-  from the matching PayHere environment. Do not use a live secret in local
-  development and never expose it with a `NEXT_PUBLIC_` prefix.
-- `PUBLIC_SITE_URL`: the canonical application HTTPS origin in production.
-  PayHere uses it to call `/api/payments/payhere/notify`; this URL must be
-  publicly reachable over HTTPS.
+  account details shown to customers after checkout. Do not invent or commit
+  account values. Bank-transfer orders remain unpaid until an administrator
+  verifies the actual incoming credit.
+- `WHATSAPP_BUSINESS_NUMBER`: Primezora's WhatsApp Business number in
+  international format with country code. The checkout creates a click-to-chat
+  link; the customer must press Send, and order-specific replies are manually
+  sent from the free WhatsApp Business app.
+- `SUPABASE_PAYMENT_RECEIPTS_BUCKET`: private Supabase Storage bucket for
+  uploaded receipts (defaults to `payment-receipts`). The server creates it as
+  private if missing and refuses to upload to an existing public bucket.
+  Receipts also require the server-only Supabase service role key and are never
+  exposed with public URLs.
 
-The card flow redirects customers to PayHere's hosted checkout. Orders are
-confirmed only by a valid signed provider notification with the matching order
-number, amount, and LKR currency. Failed or cancelled provider notifications
-cancel the pending order and release its reserved inventory. The browser return
-URL is not treated as proof of payment. Set up and test PayHere sandbox
-credentials before enabling live payments. The migration
-`20261016213000_add_payment_transaction_id` adds unique provider-transaction
-tracking and is applied by the normal production build/deployment process.
+Receipt uploads only set `PAYMENT_VERIFICATION_PENDING`. An authorized admin
+must check the official bank app, statement, or other bank-approved source for
+the expected amount, reference, transaction date, and transaction ID before
+approval. Approval records the administrator and audit history; duplicate
+transaction IDs are rejected. Apply migration
+`20261021000000_add_bank_transfer_verification` through the normal database
+migration/deployment process before deploying this checkout change. No
+production migration or external service is run by this change.
 
 ## Product reviews
 

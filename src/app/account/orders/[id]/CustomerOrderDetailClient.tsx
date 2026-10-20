@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, MapPin, Package, ReceiptText, UserRound } from "lucide-react";
 
 import { getOrderStatusLabel, type OrderStatus } from "@/lib/order-status";
+import BankTransferReceiptUpload from "@/components/customer/BankTransferReceiptUpload";
 
 type CustomerOrderDetail = {
   orderNumber: string;
@@ -21,6 +22,13 @@ type CustomerOrderDetail = {
   province: string | null;
   postalCode: string | null;
   paymentMethod: string;
+  paymentStatus: string | null;
+  paymentReference: string | null;
+  currency: string;
+  latestReceipt: {
+    submittedAt: string;
+    rejectionReason: string | null;
+  } | null;
   subtotal: number;
   deliveryFee: number;
   total: number;
@@ -210,7 +218,33 @@ export default function CustomerOrderDetailClient({
                           : "Credit / Debit Card"
                     }
                   />
+                  {order.paymentMethod === "bank" && (
+                    <>
+                      <Detail
+                        label="Payment status"
+                        value={(order.paymentStatus ?? "PAYMENT_PENDING").replaceAll("_", " ")}
+                      />
+                      <Detail
+                        label="Payment reference"
+                        value={order.paymentReference ?? order.orderNumber}
+                      />
+                      {order.latestReceipt && (
+                        <Detail
+                          label="Receipt submitted"
+                          value={new Date(order.latestReceipt.submittedAt).toLocaleString("en-LK")}
+                        />
+                      )}
+                    </>
+                  )}
                 </dl>
+                {order.paymentMethod === "bank" && order.paymentStatus && (
+                  <BankTransferReceiptUpload
+                    orderId={orderId}
+                    paymentStatus={order.paymentStatus}
+                    rejectionReason={order.latestReceipt?.rejectionReason}
+                    onUploaded={() => setReloadKey((key) => key + 1)}
+                  />
+                )}
               </section>
 
               <section className="rounded-2xl border border-white/[0.08] bg-[#030505] p-5">

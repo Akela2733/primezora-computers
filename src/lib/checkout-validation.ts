@@ -1,4 +1,4 @@
-import { isSupportedPaymentMethod, type PaymentMethod } from "@/lib/payment";
+import { isCheckoutPaymentMethod, type CheckoutPaymentMethod } from "@/lib/payment";
 import { INPUT_LIMITS, exceedsTextLimit } from "@/lib/input-limits";
 
 const MAX_DATABASE_INT = INPUT_LIMITS.checkout.databaseInteger;
@@ -20,7 +20,7 @@ export type CheckoutInput = {
     quantity: number;
   }[];
   deliveryMethod: "delivery" | "pickup";
-  paymentMethod: PaymentMethod;
+  paymentMethod: CheckoutPaymentMethod;
 };
 
 export class OrderRequestError extends Error {
@@ -109,7 +109,7 @@ export function parseCheckoutInput(value: unknown): CheckoutInput {
   }
 
   const paymentMethod = value.paymentMethod;
-  if (!isSupportedPaymentMethod(paymentMethod)) {
+  if (!isCheckoutPaymentMethod(paymentMethod)) {
     throw new OrderRequestError("Invalid payment method.");
   }
 

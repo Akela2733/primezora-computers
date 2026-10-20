@@ -1,18 +1,20 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Banknote,
   Check,
-  CreditCard,
   Landmark,
   MapPin,
   Package,
   ShieldCheck,
   Store,
   Truck,
+  UserRound,
 } from "lucide-react";
 import { FormEvent, useRef, useState } from "react";
 
@@ -219,44 +221,6 @@ export default function CheckoutPage() {
         throw new Error("The order was created but its confirmation could not be loaded.");
       }
 
-      if (paymentMethod === "card") {
-        const redirectUrl = data.payment?.redirectUrl;
-        const checkoutFields = data.payment?.checkoutFields;
-        if (!redirectUrl || !checkoutFields) {
-          throw new Error(
-            "The card payment session could not be prepared. Your order was not redirected to PayHere."
-          );
-        }
-
-        const gatewayUrl = new URL(redirectUrl);
-        if (
-          !["www.payhere.lk", "sandbox.payhere.lk"].includes(
-            gatewayUrl.hostname
-          ) ||
-          gatewayUrl.pathname !== "/pay/checkout" ||
-          gatewayUrl.protocol !== "https:"
-        ) {
-          throw new Error("The configured card payment destination is invalid.");
-        }
-
-        clearCart();
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = gatewayUrl.toString();
-        form.hidden = true;
-        for (const [name, value] of Object.entries(checkoutFields)) {
-          if (typeof value !== "string") continue;
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        }
-        document.body.appendChild(form);
-        form.submit();
-        return;
-      }
-
       clearCart();
 
       router.push(
@@ -284,30 +248,29 @@ export default function CheckoutPage() {
     return (
       <main className="min-h-screen bg-[#030505] text-white/90">
         <section className="container-primezora flex min-h-[70vh] items-center justify-center py-20">
-          <div className="w-full max-w-lg border border-white/[0.08] bg-[#030505] p-8 text-center">
-            <Package
-              size={38}
-              className="mx-auto text-amber-600"
-            />
+          <div className="w-full max-w-lg rounded-xl border border-orange-500/25 bg-white/[0.02] p-8 text-center">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-orange-500/25 bg-orange-500/[0.07] text-orange-400">
+              <Package size={25} />
+            </span>
 
-            <p className="mt-6 font-display text-[10px] uppercase tracking-[0.3em] text-amber-600">
+            <p className="mt-5 font-display text-[9px] font-bold uppercase tracking-[0.25em] text-orange-500">
               Checkout
             </p>
 
-            <h1 className="mt-3 font-display text-2xl font-bold uppercase">
-              Your Cart Is Empty
+            <h1 className="mt-2 font-display text-2xl font-bold uppercase text-white">
+              Your cart is empty
             </h1>
 
-            <p className="mt-4 text-sm leading-7 text-white/45">
-              Add some products to your cart before
-              continuing to checkout.
+            <p className="mt-2 text-xs leading-5 text-white/50">
+              Add products to your cart before continuing to checkout.
             </p>
 
             <Link
               href="/shop"
-              className="mt-8 inline-flex h-12 items-center justify-center bg-amber-600 px-7 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-amber-600"
+              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-orange-500 px-5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
             >
-              Browse Products
+              <ArrowRight size={13} />
+              Browse products
             </Link>
           </div>
         </section>
@@ -317,51 +280,72 @@ export default function CheckoutPage() {
 
   return (
     <main className="min-h-screen bg-[#030505] text-white/90">
-      {/* Header */}
-      <section className="border-b border-white/[0.06] bg-[#030505]">
-        <div className="container-primezora py-10">
-          <Link
-            href="/cart"
-            className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-white/40 transition hover:text-amber-600"
-          >
-            <ArrowLeft size={13} />
-            Back to Cart
-          </Link>
-
-          <div className="mt-8">
-            <p className="font-display text-[9px] uppercase tracking-[0.32em] text-amber-600">
-              Primezora Checkout
+      <section className="relative isolate overflow-hidden border-b border-orange-500/35 bg-[#030505]">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 bg-cover bg-[58%_53%] md:bg-center"
+          style={{
+            backgroundImage:
+              'url("/banners/hero%20section%20background%20image.png")',
+          }}
+        />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(3,5,5,0.97)_0%,rgba(3,5,5,0.85)_36%,rgba(3,5,5,0.18)_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-linear-to-t from-[#030505]/55 via-transparent to-[#030505]/10" />
+        <div className="container-primezora flex min-h-[240px] items-center justify-between gap-6 py-9 sm:min-h-[270px] sm:py-12">
+          <div className="max-w-lg">
+            <p className="flex items-center gap-2 font-display text-[9px] font-bold uppercase tracking-[0.24em] text-orange-400">
+              <span className="h-px w-6 bg-orange-500" />
+              Secure checkout
             </p>
-
-            <h1 className="mt-3 font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">
-              Complete Your Order
+            <h1 className="mt-3 font-display text-3xl font-black uppercase leading-[0.98] tracking-tight text-white sm:text-5xl">
+              Complete your
+              <br />
+              <span className="text-orange-500">order.</span>
             </h1>
-
-            <p className="mt-3 max-w-xl text-sm leading-7 text-white/40">
-              Enter your details and choose how you
-              would like to receive your order.
+            <p className="mt-3 max-w-sm text-[11px] leading-5 text-white/70 sm:text-xs">
+              Enter your details and choose how you would like to receive your
+              order.
             </p>
+            <Link
+              href="/cart"
+              className="mt-4 inline-flex items-center gap-2 text-[10px] font-medium text-white/75 transition hover:text-orange-400"
+            >
+              <ArrowLeft size={13} className="text-orange-500" />
+              Back to cart
+            </Link>
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 text-[9px] font-semibold uppercase tracking-wide text-white/65 sm:flex">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500 text-black">
+              1
+            </span>
+            <span className="text-orange-300">Details</span>
+            <span className="mx-1 h-px w-5 bg-white/20" />
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 text-white/55">
+              2
+            </span>
+            <span>Payment</span>
           </div>
         </div>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
       </section>
 
       <form
         onSubmit={handleSubmit}
-        className="container-primezora py-10 lg:py-14"
+        className="container-primezora py-5 sm:py-7"
       >
-        <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:gap-5">
           {/* LEFT */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Customer Information */}
-            <section className="border border-white/[0.07] bg-[#030505]">
-              <div className="border-b border-white/[0.06] p-5 sm:p-6">
+            <section className="rounded-xl border border-white/[0.1] bg-white/[0.02]">
+              <div className="border-b border-white/[0.08] p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
-                    <CreditCard size={16} />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/[0.06] text-orange-500">
+                    <UserRound size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
                       Step 01
                     </p>
 
@@ -372,7 +356,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+              <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
                 <InputField
                   label="First Name"
                   required
@@ -429,15 +413,15 @@ export default function CheckoutPage() {
             </section>
 
             {/* Delivery Method */}
-            <section className="border border-white/[0.07] bg-[#030505]">
-              <div className="border-b border-white/[0.06] p-5 sm:p-6">
+            <section className="rounded-xl border border-white/[0.1] bg-white/[0.02]">
+              <div className="border-b border-white/[0.08] p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/[0.06] text-orange-500">
                     <Truck size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
                       Step 02
                     </p>
 
@@ -448,7 +432,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-6">
+              <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
                 <DeliveryOption
                   selected={
                     deliveryMethod ===
@@ -485,15 +469,15 @@ export default function CheckoutPage() {
 
             {/* Address */}
             {deliveryMethod === "delivery" && (
-              <section className="border border-white/[0.07] bg-[#030505]">
-                <div className="border-b border-white/[0.06] p-5 sm:p-6">
+              <section className="rounded-xl border border-white/[0.1] bg-white/[0.02]">
+                <div className="border-b border-white/[0.08] p-4 sm:p-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/[0.06] text-orange-500">
                       <MapPin size={16} />
                     </div>
 
                     <div>
-                      <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
+                      <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
                         Delivery
                       </p>
 
@@ -504,7 +488,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
                   <div className="sm:col-span-2">
                     <InputField
                       label="Address"
@@ -569,15 +553,15 @@ export default function CheckoutPage() {
 
             {/* Pickup */}
             {deliveryMethod === "pickup" && (
-              <section className="border border-amber-600/20 bg-amber-600/[0.04] p-5 sm:p-6">
+              <section className="rounded-xl border border-orange-500/25 bg-orange-500/[0.04] p-5 sm:p-6">
                 <div className="flex gap-4">
                   <Store
                     size={20}
-                    className="mt-1 shrink-0 text-amber-600"
+                    className="mt-1 shrink-0 text-orange-500"
                   />
 
                   <div>
-                    <p className="font-display text-[10px] font-bold uppercase tracking-[0.18em] text-amber-600">
+                    <p className="font-display text-[10px] font-bold uppercase tracking-[0.18em] text-orange-400">
                       Store Pickup
                     </p>
 
@@ -607,15 +591,15 @@ export default function CheckoutPage() {
             )}
 
             {/* Payment */}
-            <section className="border border-white/[0.07] bg-[#030505]">
-              <div className="border-b border-white/[0.06] p-5 sm:p-6">
+            <section className="rounded-xl border border-white/[0.1] bg-white/[0.02]">
+              <div className="border-b border-white/[0.08] p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center border border-amber-600/20 bg-amber-600/10 text-amber-600">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-orange-500/20 bg-orange-500/[0.06] text-orange-500">
                     <Banknote size={16} />
                   </div>
 
                   <div>
-                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-amber-600">
+                    <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
                       Step 03
                     </p>
 
@@ -626,7 +610,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
+              <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
                 <PaymentOption
                   selected={
                     paymentMethod ===
@@ -661,51 +645,44 @@ export default function CheckoutPage() {
                   description="Transfer to our bank account and use your order number as the reference."
                 />
 
-                <PaymentOption
-                  selected={paymentMethod === "card"}
-                  onClick={() => setPaymentMethod("card")}
-                  icon={<CreditCard size={17} />}
-                  title="Credit / Debit Card"
-                  description="Pay securely with Visa or Mastercard through PayHere."
-                />
               </div>
             </section>
 
             {/* Error */}
             {authenticationRequired ? (
-              <div className="border border-amber-600/20 bg-amber-600/[0.06] px-5 py-4 text-xs leading-6 text-amber-600">
+              <div className="rounded-lg border border-orange-500/25 bg-orange-500/[0.06] px-5 py-4 text-xs leading-6 text-orange-300">
                 <p>Your session expired. Sign in to place your order; your cart is still saved.</p>
                 <div className="mt-3 flex flex-wrap gap-4">
                   <Link
                     href="/login?next=%2Fcheckout"
-                    className="font-semibold text-amber-600 underline underline-offset-4 hover:text-amber-600"
+                    className="font-semibold text-orange-300 underline underline-offset-4 hover:text-orange-200"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/register?next=%2Fcheckout"
-                    className="font-semibold text-amber-600 underline underline-offset-4 hover:text-amber-600"
+                    className="font-semibold text-orange-300 underline underline-offset-4 hover:text-orange-200"
                   >
                     Create an account
                   </Link>
                 </div>
               </div>
             ) : error ? (
-              <div className="border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-xs leading-6 text-red-300">
+              <div className="rounded-lg border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-xs leading-6 text-red-300">
                 {error}
               </div>
             ) : null}
           </div>
 
           {/* RIGHT */}
-          <aside className="lg:sticky lg:top-24 lg:h-fit">
-            <section className="border border-white/[0.07] bg-[#030505]">
-              <div className="border-b border-white/[0.06] p-5">
-                <p className="font-display text-[9px] uppercase tracking-[0.25em] text-amber-600">
+          <aside className="space-y-4 lg:sticky lg:top-24 lg:h-fit">
+            <section className="overflow-hidden rounded-xl border border-orange-500/35 bg-[#030505]">
+              <div className="border-b border-white/[0.08] px-4 py-3.5">
+                <p className="font-display text-[9px] uppercase tracking-[0.2em] text-orange-400">
                   Order Summary
                 </p>
 
-                <h2 className="mt-2 font-display text-lg font-bold uppercase">
+                <h2 className="mt-1 font-display text-base font-bold uppercase text-white">
                   Your Order
                 </h2>
               </div>
@@ -714,15 +691,17 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div
                     key={item.product.id}
-                    className="flex gap-3 border-b border-white/[0.05] p-4"
+                    className="flex gap-3 border-b border-white/[0.08] p-3.5"
                   >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-white/[0.07] bg-[#030505]/20">
-                      <img
+                    <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/[0.08] bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.1),transparent_65%),#060808]">
+                      <Image
                         src={item.product.image}
                         alt={
                           item.product.name
                         }
-                        className="h-full w-full object-contain p-1"
+                        fill
+                        sizes="56px"
+                        className="object-contain p-1"
                       />
                     </div>
 
@@ -737,7 +716,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
 
-                    <p className="shrink-0 text-xs font-bold text-amber-600">
+                    <p className="shrink-0 text-xs font-bold text-orange-400">
                       LKR{" "}
                       {(
                         item.product.price *
@@ -750,7 +729,7 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <div className="space-y-3 p-5">
+              <div className="space-y-3 p-4">
                 <SummaryRow
                   label="Subtotal"
                   value={`LKR ${subtotal.toLocaleString(
@@ -769,14 +748,14 @@ export default function CheckoutPage() {
                   }
                 />
 
-                <div className="my-4 border-t border-white/[0.07]" />
+                <div className="my-4 border-t border-white/[0.1]" />
 
                 <div className="flex items-end justify-between gap-4">
                   <span className="text-[10px] uppercase tracking-[0.15em] text-white/40">
                     Total
                   </span>
 
-                  <span className="font-display text-xl font-bold text-amber-600">
+                  <span className="font-display text-xl font-bold text-orange-500">
                     LKR{" "}
                     {total.toLocaleString(
                       "en-LK"
@@ -787,7 +766,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-4 flex h-14 w-full items-center justify-center gap-2 bg-amber-600 text-[10px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-3 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     "Processing..."
@@ -800,8 +779,8 @@ export default function CheckoutPage() {
                 </button>
 
                 <div className="flex items-center justify-center gap-2 pt-3 text-[9px] uppercase tracking-[0.12em] text-white/25">
-                  <ShieldCheck size={13} />
-                  Secure Checkout
+                  <ShieldCheck size={13} className="text-orange-500" />
+                  Secure checkout
                 </div>
               </div>
             </section>
@@ -836,7 +815,7 @@ function InputField({
       <span className="mb-2 block text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">
         {label}
         {required && (
-          <span className="ml-1 text-amber-600">
+          <span className="ml-1 text-orange-500">
             *
           </span>
         )}
@@ -849,7 +828,7 @@ function InputField({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="h-12 w-full border border-white/[0.08] bg-[#030505]/20 px-4 text-sm text-white/90 outline-none transition placeholder:text-white/15 focus:border-amber-600/50"
+        className="h-11 w-full rounded-md border border-white/[0.1] bg-white/[0.03] px-3.5 text-xs text-white/90 outline-none transition placeholder:text-white/25 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10"
       />
     </label>
   );
@@ -877,23 +856,24 @@ function DeliveryOption({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={onClick}
-      className={`relative text-left border p-4 transition ${
+      className={`relative rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
         selected
-          ? "border-amber-600/60 bg-amber-600/[0.07]"
-          : "border-white/[0.07] bg-[#030505]/10 hover:border-white/15"
+          ? "border-orange-500/50 bg-orange-500/[0.07]"
+          : "border-white/[0.1] bg-white/[0.02] hover:border-orange-500/30"
       }`}
     >
       {selected && (
-        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-black">
+        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-black">
           <Check size={11} />
         </div>
       )}
 
       <div
-        className={`flex h-9 w-9 items-center justify-center border ${
+        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
           selected
-            ? "border-amber-600/30 bg-amber-600/10 text-amber-600"
+            ? "border-orange-500/30 bg-orange-500/10 text-orange-400"
             : "border-white/10 text-white/40"
         }`}
       >
@@ -911,7 +891,7 @@ function DeliveryOption({
       <p
         className={`mt-3 font-display text-[10px] font-bold ${
           selected
-            ? "text-amber-600"
+            ? "text-orange-400"
             : "text-white/40"
         }`}
       >
@@ -941,23 +921,24 @@ function PaymentOption({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={onClick}
-      className={`relative text-left border p-4 transition ${
+      className={`relative rounded-lg border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
         selected
-          ? "border-amber-600/60 bg-amber-600/[0.07]"
-          : "border-white/[0.07] bg-[#030505]/10 hover:border-white/15"
+          ? "border-orange-500/50 bg-orange-500/[0.07]"
+          : "border-white/[0.1] bg-white/[0.02] hover:border-orange-500/30"
       }`}
     >
       {selected && (
-        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-black">
+        <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-black">
           <Check size={11} />
         </div>
       )}
 
       <div
-        className={`flex h-9 w-9 items-center justify-center border ${
+        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
           selected
-            ? "border-amber-600/30 bg-amber-600/10 text-amber-600"
+            ? "border-orange-500/30 bg-orange-500/10 text-orange-400"
             : "border-white/10 text-white/40"
         }`}
       >

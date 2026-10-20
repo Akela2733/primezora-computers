@@ -25,6 +25,8 @@ export const DELIVERY_FEE = 500; // Fixed delivery fee in LKR
 
 export const SUPPORTED_PAYMENT_METHODS = ["cod", "bank", "card"] as const;
 export type PaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number];
+export const CHECKOUT_PAYMENT_METHODS = ["cod", "bank"] as const;
+export type CheckoutPaymentMethod = (typeof CHECKOUT_PAYMENT_METHODS)[number];
 
 export interface PaymentMethodConfig {
   id: PaymentMethod;
@@ -74,6 +76,15 @@ export function isSupportedPaymentMethod(value: unknown): value is PaymentMethod
   return (
     typeof value === "string" &&
     (SUPPORTED_PAYMENT_METHODS as readonly string[]).includes(value)
+  );
+}
+
+export function isCheckoutPaymentMethod(
+  value: unknown
+): value is CheckoutPaymentMethod {
+  return (
+    typeof value === "string" &&
+    (CHECKOUT_PAYMENT_METHODS as readonly string[]).includes(value)
   );
 }
 

@@ -19,7 +19,7 @@
     "test:email-delivery": "tsx scripts/test-email-delivery.ts",
     "test:integration": "tsx --test tests/database-target.test.ts tests/admin-recovery.test.ts tests/integration/order-api.test.ts",
     "test:rate-limit": "tsx --test tests/rate-limit.test.ts",
-    "test:payment": "tsx --test tests/payment-configuration.test.ts",
+    "test:payment": "tsx --test tests/payment-configuration.test.ts tests/bank-transfer-checkout.test.ts",
     "test:product-reviews": "tsx --test tests/product-review-validation.test.ts tests/product-review-summary.test.ts"
   },
   "dependencies": {

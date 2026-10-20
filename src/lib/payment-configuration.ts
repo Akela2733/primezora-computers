@@ -17,6 +17,29 @@ export type BankTransferDetails = {
   branch: string;
 };
 
+export function getWhatsAppBusinessNumber(): string {
+  const value = requiredEnvironmentValue("WHATSAPP_BUSINESS_NUMBER")
+    .replace(/[\s()+.-]/g, "");
+  if (!/^[1-9]\d{7,14}$/.test(value)) {
+    throw new PaymentConfigurationError(
+      "WHATSAPP_BUSINESS_NUMBER must be a valid international number with country code."
+    );
+  }
+  return value;
+}
+
+export function getWhatsAppBusinessNumberForDisplay(): string | null {
+  const configured = process.env.WHATSAPP_BUSINESS_NUMBER?.trim();
+  if (!configured) return null;
+  const value = configured.replace(/[\s()+.-]/g, "");
+  if (!/^[1-9]\d{7,14}$/.test(value)) {
+    throw new PaymentConfigurationError(
+      "WHATSAPP_BUSINESS_NUMBER must be a valid international number with country code."
+    );
+  }
+  return value;
+}
+
 export class PaymentConfigurationError extends Error {
   constructor(message: string) {
     super(message);
@@ -139,6 +162,13 @@ export function verifyPayHereNotificationSignature(input: {
 }
 
 export function assertPaymentMethodConfigured(method: PaymentMethod): void {
-  if (method === "bank") getBankTransferDetails();
-  if (method === "card") getPayHereConfiguration();
+  if (method === "bank") {
+    getBankTransferDetails();
+    getWhatsAppBusinessNumber();
+  }
+  if (method === "card") {
+    throw new PaymentConfigurationError(
+      "Card payments are temporarily unavailable. Choose Cash on Delivery or Bank Transfer."
+    );
+  }
 }

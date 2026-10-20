@@ -49,6 +49,11 @@ export async function GET(
         deliveryFee: true,
         total: true,
         paymentMethod: true,
+        paymentStatus: true,
+        paymentReference: true,
+        paymentVerifiedBy: true,
+        paymentVerifiedAt: true,
+        paymentTransactionId: true,
         status: true,
         createdAt: true,
         items: {
@@ -70,6 +75,30 @@ export async function GET(
             createdAt: true,
           },
           orderBy: { createdAt: "asc" },
+        },
+        paymentReceipts: {
+          select: {
+            id: true,
+            contentType: true,
+            sizeBytes: true,
+            status: true,
+            rejectionReason: true,
+            submittedAt: true,
+            reviewedAt: true,
+          },
+          orderBy: { submittedAt: "desc" },
+        },
+        paymentAuditEvents: {
+          select: {
+            action: true,
+            changedBy: true,
+            reason: true,
+            transactionId: true,
+            transactionReference: true,
+            transactionDate: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: "desc" },
         },
       },
     });
@@ -129,6 +158,8 @@ export async function PATCH(
           id: true,
           orderNumber: true,
           status: true,
+          paymentMethod: true,
+          paymentStatus: true,
           deliveryMethod: true,
           items: {
             select: { productId: true, quantity: true },
@@ -149,10 +180,34 @@ export async function PATCH(
           `Cannot change an order from ${currentOrder.status} to ${requestedStatus}.`
         );
       }
+      if (
+        currentOrder.paymentMethod === "bank" &&
+        currentOrder.paymentStatus !== "PAID" &&
+        requestedStatus !== "CANCELLED"
+      ) {
+        throw new InvalidOrderTransitionError(
+          "Bank-transfer orders cannot be confirmed or dispatched before payment is verified."
+        );
+      }
+      if (
+        currentOrder.paymentMethod === "bank" &&
+        currentOrder.paymentStatus === "PAID" &&
+        requestedStatus === "CANCELLED"
+      ) {
+        throw new InvalidOrderTransitionError(
+          "A verified bank payment cannot be cancelled here. Follow the refund process first."
+        );
+      }
 
       const update = await tx.order.updateMany({
         where: { id, status: currentOrder.status },
-        data: { status: requestedStatus },
+        data: {
+          status: requestedStatus,
+          ...(requestedStatus === "CANCELLED" &&
+          currentOrder.paymentMethod === "bank"
+            ? { paymentStatus: "CANCELLED" as const }
+            : {}),
+        },
       });
       if (update.count !== 1) {
         throw new InvalidOrderTransitionError(
@@ -195,6 +250,18 @@ export async function PATCH(
           changedBy: process.env.ADMIN_EMAIL?.trim().toLowerCase() || "admin",
         },
       });
+      if (
+        requestedStatus === "CANCELLED" &&
+        currentOrder.paymentMethod === "bank"
+      ) {
+        await tx.paymentAuditEvent.create({
+          data: {
+            orderId: id,
+            action: "BANK_ORDER_CANCELLED",
+            changedBy: process.env.ADMIN_EMAIL?.trim().toLowerCase() || "admin",
+          },
+        });
+      }
 
       return {
         previousStatus: currentOrder.status,

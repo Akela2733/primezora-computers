@@ -15,20 +15,31 @@ export default function OrderStatusControl({
   orderNumber,
   status,
   deliveryMethod,
+  paymentMethod,
+  paymentStatus,
 }: {
   orderId: string;
   orderNumber: string;
   status: OrderStatus;
   deliveryMethod: string;
+  paymentMethod: string;
+  paymentStatus: string | null;
 }) {
   const router = useRouter();
-  const allowedStatuses = getAllowedOrderTransitions(
-    status,
-    deliveryMethod
-  );
+  const allAllowedStatuses = getAllowedOrderTransitions(status, deliveryMethod);
+  const allowedStatuses =
+    paymentMethod === "bank" && paymentStatus !== "PAID"
+      ? allAllowedStatuses.filter((value) => value === "CANCELLED")
+      : paymentMethod === "bank" && paymentStatus === "PAID"
+        ? allAllowedStatuses.filter((value) => value !== "CANCELLED")
+        : allAllowedStatuses;
   const [nextStatus, setNextStatus] = useState<OrderStatus | "">(
     allowedStatuses[0] ?? ""
   );
+  const selectedNextStatus =
+    nextStatus && allowedStatuses.includes(nextStatus)
+      ? nextStatus
+      : allowedStatuses[0] ?? "";
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,13 +47,16 @@ export default function OrderStatusControl({
     event.preventDefault();
     setError("");
 
-    if (!nextStatus || !allowedStatuses.includes(nextStatus)) {
+    if (
+      !selectedNextStatus ||
+      !allowedStatuses.includes(selectedNextStatus)
+    ) {
       setError("Choose a valid next status.");
       return;
     }
 
     if (
-      nextStatus === "CANCELLED" &&
+      selectedNextStatus === "CANCELLED" &&
       !window.confirm(
         `Cancel order ${orderNumber}? This cannot be undone.`
       )
@@ -59,7 +73,7 @@ export default function OrderStatusControl({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status: nextStatus }),
+          body: JSON.stringify({ status: selectedNextStatus }),
         }
       );
       const data = (await response.json()) as {
@@ -88,12 +102,14 @@ export default function OrderStatusControl({
     <div className="w-full max-w-sm">
       {allowedStatuses.length === 0 ? (
         <p className="border border-white/[0.07] px-4 py-3 text-[9px] uppercase tracking-[0.12em] text-white/35">
-          {getOrderStatusLabel(status)} · No further status changes
+          {paymentMethod === "bank" && paymentStatus !== "PAID"
+            ? "Awaiting verified bank payment before fulfilment"
+            : getOrderStatusLabel(status) + " · No further status changes"}
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
           <select
-            value={nextStatus}
+            value={selectedNextStatus}
             onChange={(event) =>
               setNextStatus(event.target.value as OrderStatus)
             }

@@ -6,6 +6,10 @@ import {
 import { randomBytes, randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { rm } from "node:fs/promises";
+import {
+  createServer as createHttpServer,
+  type Server as HttpServer,
+} from "node:http";
 import { createServer } from "node:net";
 import { resolve } from "node:path";
 import type { Readable } from "node:stream";
@@ -88,6 +92,10 @@ let serverProcess:
 let serverOutput = "";
 let baseUrl = "";
 let testDistDirCreated = false;
+let receiptStorageServer: HttpServer | undefined;
+let receiptStorageUrl = "";
+let verificationOrderId: string | undefined;
+const receiptStorageObjects = new Map<string, Buffer>();
 const createdCustomers: { id: string; email: string }[] = [];
 let createdProduct: { id: string; slug: string } | undefined;
 let createdEmptyCategory: { id: string; slug: string } | undefined;
@@ -170,6 +178,14 @@ function buildServerEnvironment(): NodeJS.ProcessEnv {
     ADMIN_SESSION_SECRET: adminSessionSecret,
     CUSTOMER_SESSION_SECRET: customerSessionSecret,
     RESEND_API_KEY: " ",
+    BANK_TRANSFER_BANK_NAME: "TEST ONLY bank",
+    BANK_TRANSFER_ACCOUNT_NAME: "TEST ONLY account",
+    BANK_TRANSFER_ACCOUNT_NUMBER: "TEST ONLY number",
+    BANK_TRANSFER_BRANCH: "TEST ONLY branch",
+    WHATSAPP_BUSINESS_NUMBER: "12345678",
+    SUPABASE_URL: receiptStorageUrl,
+    SUPABASE_SERVICE_ROLE_KEY: "integration-test-only-service-role-key",
+    SUPABASE_PAYMENT_RECEIPTS_BUCKET: "payment-receipts",
   });
 
   return env;
@@ -308,8 +324,58 @@ async function submitCheckout(
       createdIdempotentOrderIds.push(payload.order.id);
     }
   }
-
   return response;
+}
+
+async function createBankOrderForTest(): Promise<{
+  id: string;
+  total: number;
+}> {
+  assert.ok(fixture);
+  const body = {
+    ...checkoutBody(
+      fixture.customerA.email,
+      fixture.idempotencyProductId,
+      1
+    ),
+    paymentMethod: "bank",
+  };
+  const response = await submitCheckout(
+    fixture.customerAToken,
+    randomUUID(),
+    body
+  );
+  const payload = await responseJson(response);
+  assert.equal(response.status, 201, JSON.stringify(payload));
+  const order = payload.order as { id?: string; total?: number } | undefined;
+  assert.ok(order?.id);
+  if (typeof order.total !== "number") {
+    throw new Error("TEST bank order response did not include a total.");
+  }
+  return { id: order.id, total: order.total };
+}
+
+async function uploadBankReceiptForTest(
+  orderId: string,
+  token = fixture!.customerAToken
+): Promise<Response> {
+  const form = new FormData();
+  form.set(
+    "file",
+    new Blob(
+      [Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+      { type: "image/png" }
+    ),
+    "TEST-ONLY-receipt.png"
+  );
+  return fetch(
+    `${baseUrl}/api/customer/orders/${encodeURIComponent(orderId)}/receipt`,
+    {
+      method: "POST",
+      headers: customerHeaders(token),
+      body: form,
+    }
+  );
 }
 
 function loginAsIdentity(email: string, authUserId: string): Promise<Response> {
@@ -532,6 +598,82 @@ describe("isolated order API integration", { concurrency: false }, () => {
       ),
       adminToken: await createAdminSessionToken(adminEmail),
     };
+
+    receiptStorageServer = createHttpServer((request, response) => {
+      const pathname = new URL(
+        request.url ?? "/",
+        "http://127.0.0.1"
+      ).pathname;
+      if (
+        request.method === "GET" &&
+        pathname === "/storage/v1/bucket/payment-receipts"
+      ) {
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(
+          JSON.stringify({
+            id: "payment-receipts",
+            name: "payment-receipts",
+            public: false,
+            file_size_limit: 10 * 1024 * 1024,
+          })
+        );
+        return;
+      }
+
+      const objectPath = pathname.split("/storage/v1/object/")[1];
+      if (!objectPath) {
+        response.writeHead(404);
+        response.end();
+        return;
+      }
+      const parts = objectPath.split("/");
+      const bucket = parts[0] === "authenticated" ? parts[1] : parts[0];
+      const pathParts =
+        parts[0] === "authenticated" ? parts.slice(2) : parts.slice(1);
+      const key = `${bucket}/${decodeURIComponent(pathParts.join("/"))}`;
+
+      if (request.method === "POST") {
+        const chunks: Buffer[] = [];
+        request.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
+        request.on("end", () => {
+          receiptStorageObjects.set(key, Buffer.concat(chunks));
+          response.writeHead(200, { "Content-Type": "application/json" });
+          response.end(JSON.stringify({ Key: key }));
+        });
+        return;
+      }
+      if (request.method === "GET") {
+        const stored = receiptStorageObjects.get(key);
+        if (!stored) {
+          response.writeHead(404);
+          response.end();
+          return;
+        }
+        response.writeHead(200, {
+          "Content-Type": key.endsWith(".pdf") ? "application/pdf" : "image/png",
+          "Content-Length": stored.byteLength,
+        });
+        response.end(stored);
+        return;
+      }
+      if (request.method === "DELETE") {
+        receiptStorageObjects.delete(key);
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify({}));
+        return;
+      }
+      response.writeHead(404);
+      response.end();
+    });
+    await new Promise<void>((resolveListen, reject) => {
+      receiptStorageServer!.once("error", reject);
+      receiptStorageServer!.listen(0, "127.0.0.1", resolveListen);
+    });
+    const storageAddress = receiptStorageServer.address();
+    if (!storageAddress || typeof storageAddress === "string") {
+      throw new Error("Could not start isolated receipt-storage test server.");
+    }
+    receiptStorageUrl = `http://127.0.0.1:${storageAddress.port}`;
 
     const port = await getAvailablePort();
     baseUrl = `http://127.0.0.1:${port}`;
@@ -756,6 +898,14 @@ describe("isolated order API integration", { concurrency: false }, () => {
       }
 
       try {
+        if (receiptStorageServer) {
+          await new Promise<void>((resolveClose, reject) => {
+            receiptStorageServer!.close((error) =>
+              error ? reject(error) : resolveClose()
+            );
+          });
+        }
+        receiptStorageObjects.clear();
         await prisma.$disconnect();
       } finally {
         if (testDistDirCreated) {
@@ -2223,6 +2373,297 @@ describe("isolated order API integration", { concurrency: false }, () => {
       select: { stockQuantity: true },
     });
     assert.equal(product.stockQuantity, before.stockQuantity - 2);
+  });
+
+  test("bank checkout prices from the database and idempotently creates a pending order", async () => {
+    assert.ok(fixture);
+    const key = randomUUID();
+    const body = {
+      ...checkoutBody(
+        fixture.customerA.email,
+        fixture.idempotencyProductId,
+        1
+      ),
+      paymentMethod: "bank",
+      total: 1,
+      discount: 999_999,
+    };
+    const before = await prisma.product.findUniqueOrThrow({
+      where: { id: fixture.idempotencyProductId },
+      select: { stockQuantity: true },
+    });
+
+    const firstResponse = await submitCheckout(
+      fixture.customerAToken,
+      key,
+      body
+    );
+    const firstPayload = await responseJson(firstResponse);
+    const retryResponse = await submitCheckout(
+      fixture.customerAToken,
+      key,
+      body
+    );
+    const retryPayload = await responseJson(retryResponse);
+    assert.equal(firstResponse.status, 201, JSON.stringify(firstPayload));
+    assert.equal(retryResponse.status, 201);
+    assert.deepEqual(retryPayload, firstPayload);
+
+    const order = firstPayload.order as {
+      id: string;
+      orderNumber: string;
+      total: number;
+      currency: string;
+      paymentReference: string;
+      paymentStatus: string;
+    };
+    verificationOrderId = order.id;
+    assert.match(order.orderNumber, /^PRZ-/);
+    assert.equal(order.total, 1_000);
+    assert.equal(order.currency, "LKR");
+    assert.equal(order.paymentStatus, "PAYMENT_PENDING");
+    assert.equal(order.paymentReference, order.orderNumber);
+
+    const savedOrder = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      select: { subtotal: true, deliveryFee: true, total: true, currency: true },
+    });
+    assert.deepEqual(savedOrder, {
+      subtotal: 1_000,
+      deliveryFee: 0,
+      total: 1_000,
+      currency: "LKR",
+    });
+    const product = await prisma.product.findUniqueOrThrow({
+      where: { id: fixture.idempotencyProductId },
+      select: { stockQuantity: true },
+    });
+    assert.equal(product.stockQuantity, before.stockQuantity - 1);
+  });
+
+  test("receipt uploads require the order owner and only enter verification pending", async () => {
+    assert.ok(fixture);
+    assert.ok(verificationOrderId);
+
+    const unauthenticated = await fetch(
+      `${baseUrl}/api/customer/orders/${verificationOrderId}/receipt`,
+      { method: "POST" }
+    );
+    assert.equal(unauthenticated.status, 401);
+
+    const otherCustomer = await uploadBankReceiptForTest(
+      verificationOrderId,
+      fixture.customerBToken
+    );
+    assert.equal(otherCustomer.status, 404);
+
+    const ownerUpload = await uploadBankReceiptForTest(verificationOrderId);
+    const uploaded = await responseJson(ownerUpload);
+    assert.equal(ownerUpload.status, 201, JSON.stringify(uploaded));
+    assert.equal(uploaded.paymentStatus, "PAYMENT_VERIFICATION_PENDING");
+
+    const savedOrder = await prisma.order.findUniqueOrThrow({
+      where: { id: verificationOrderId },
+      select: { status: true, paymentStatus: true, paymentTransactionId: true },
+    });
+    assert.deepEqual(savedOrder, {
+      status: "PENDING",
+      paymentStatus: "PAYMENT_VERIFICATION_PENDING",
+      paymentTransactionId: null,
+    });
+    assert.equal(
+      await prisma.paymentReceipt.count({
+        where: { orderId: verificationOrderId, status: "PENDING" },
+      }),
+      1
+    );
+
+    const duplicateUpload = await uploadBankReceiptForTest(verificationOrderId);
+    assert.equal(duplicateUpload.status, 409);
+    const unauthorizedReview = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "approve" }),
+      }
+    );
+    assert.equal(unauthorizedReview.status, 401);
+    const customerReview = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
+      {
+        method: "PATCH",
+        headers: {
+          ...customerHeaders(fixture.customerAToken),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ action: "approve" }),
+      }
+    );
+    assert.equal(customerReview.status, 403);
+    const unauthorizedReceipt = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}/receipt?receiptId=unknown`
+    );
+    assert.equal(unauthorizedReceipt.status, 401);
+
+    const unpaidFulfillment = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...adminHeaders(fixture.adminToken),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ status: "CONFIRMED" }),
+      }
+    );
+    assert.equal(unpaidFulfillment.status, 409);
+  });
+
+  test("rejected receipts stay unpaid and can be resubmitted", async () => {
+    assert.ok(fixture);
+    assert.ok(verificationOrderId);
+    const receipt = await prisma.paymentReceipt.findFirstOrThrow({
+      where: { orderId: verificationOrderId, status: "PENDING" },
+      select: { id: true },
+    });
+    const response = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
+      {
+        method: "PATCH",
+        headers: {
+          ...adminHeaders(fixture.adminToken),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "reject",
+          receiptId: receipt.id,
+          reason: "TEST ONLY: receipt does not show the transfer reference.",
+        }),
+      }
+    );
+    assert.equal(response.status, 200);
+    const rejected = await prisma.order.findUniqueOrThrow({
+      where: { id: verificationOrderId },
+      select: { status: true, paymentStatus: true, paymentTransactionId: true },
+    });
+    assert.deepEqual(rejected, {
+      status: "PENDING",
+      paymentStatus: "PAYMENT_REJECTED",
+      paymentTransactionId: null,
+    });
+    const audit = await prisma.paymentAuditEvent.findFirstOrThrow({
+      where: { orderId: verificationOrderId, action: "RECEIPT_REJECTED" },
+      select: { changedBy: true, reason: true },
+    });
+    assert.equal(audit.changedBy, adminEmail);
+    assert.match(audit.reason ?? "", /TEST ONLY/);
+
+    const resubmission = await uploadBankReceiptForTest(verificationOrderId);
+    assert.equal(resubmission.status, 201);
+    const refreshed = await prisma.order.findUniqueOrThrow({
+      where: { id: verificationOrderId },
+      select: { paymentStatus: true },
+    });
+    assert.equal(refreshed.paymentStatus, "PAYMENT_VERIFICATION_PENDING");
+  });
+
+  test("approval records verification and rejects duplicate bank transaction IDs", async () => {
+    assert.ok(fixture);
+    assert.ok(verificationOrderId);
+    const secondOrder = await createBankOrderForTest();
+    const secondReceiptResponse = await uploadBankReceiptForTest(secondOrder.id);
+    assert.equal(secondReceiptResponse.status, 201);
+
+    const firstReceipt = await prisma.paymentReceipt.findFirstOrThrow({
+      where: { orderId: verificationOrderId, status: "PENDING" },
+      select: { id: true },
+      orderBy: { submittedAt: "desc" },
+    });
+    const secondReceipt = await prisma.paymentReceipt.findFirstOrThrow({
+      where: { orderId: secondOrder.id, status: "PENDING" },
+      select: { id: true },
+    });
+    const transactionId = `TEST-ONLY-TRANSFER-${runId}`;
+    const transactionDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    const makeApproval = (receiptId: string) => ({
+      action: "approve",
+      receiptId,
+      transactionId,
+      transactionReference: `PRZ-TEST-${runId}`,
+      transactionDate,
+      confirmBankVerification: true,
+    });
+    const firstApproval = await fetch(
+      `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
+      {
+        method: "PATCH",
+        headers: {
+          ...adminHeaders(fixture.adminToken),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(makeApproval(firstReceipt.id)),
+      }
+    );
+    assert.equal(firstApproval.status, 200);
+    const firstOrder = await prisma.order.findUniqueOrThrow({
+      where: { id: verificationOrderId },
+      select: {
+        paymentStatus: true,
+        paymentTransactionId: true,
+        paymentVerifiedBy: true,
+        paymentVerifiedAt: true,
+        status: true,
+      },
+    });
+    assert.equal(firstOrder.paymentStatus, "PAID");
+    assert.equal(firstOrder.paymentTransactionId, transactionId);
+    assert.equal(firstOrder.paymentVerifiedBy, adminEmail);
+    assert.ok(firstOrder.paymentVerifiedAt);
+    assert.equal(firstOrder.status, "CONFIRMED");
+
+    const duplicateApproval = await fetch(
+      `${baseUrl}/api/admin/orders/${secondOrder.id}/payment`,
+      {
+        method: "PATCH",
+        headers: {
+          ...adminHeaders(fixture.adminToken),
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(makeApproval(secondReceipt.id)),
+      }
+    );
+    assert.equal(duplicateApproval.status, 409);
+    const secondSavedOrder = await prisma.order.findUniqueOrThrow({
+      where: { id: secondOrder.id },
+      select: { paymentStatus: true, paymentTransactionId: true, status: true },
+    });
+    assert.deepEqual(secondSavedOrder, {
+      paymentStatus: "PAYMENT_VERIFICATION_PENDING",
+      paymentTransactionId: null,
+      status: "PENDING",
+    });
+    const approvalAudit = await prisma.paymentAuditEvent.findFirstOrThrow({
+      where: {
+        orderId: verificationOrderId,
+        action: "BANK_PAYMENT_APPROVED",
+      },
+      select: {
+        changedBy: true,
+        transactionId: true,
+        transactionReference: true,
+        transactionDate: true,
+      },
+    });
+    assert.equal(approvalAudit.changedBy, adminEmail);
+    assert.equal(approvalAudit.transactionId, transactionId);
+    assert.equal(approvalAudit.transactionReference, `PRZ-TEST-${runId}`);
+    assert.equal(
+      approvalAudit.transactionDate?.toISOString().slice(0, 10),
+      transactionDate
+    );
   });
 
   test("reusing a checkout key with a different payload returns 409", async () => {
