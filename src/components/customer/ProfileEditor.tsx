@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { Save, Loader2, CheckCircle2, AlertCircle, User, MapPin } from "lucide-react";
 
-type CustomerProfile = {
+export type CustomerProfile = {
   id: string;
   email: string;
   firstName: string | null;
@@ -14,6 +14,8 @@ type CustomerProfile = {
   province: string | null;
   postalCode: string | null;
 };
+
+export type ProfileEditorSection = "personal" | "address";
 
 type FieldDef = {
   key: keyof Omit<CustomerProfile, "id" | "email">;
@@ -26,7 +28,7 @@ type FieldDef = {
 const PERSONAL_FIELDS: FieldDef[] = [
   { key: "firstName", label: "First Name", placeholder: "e.g. John", required: true },
   { key: "lastName", label: "Last Name", placeholder: "e.g. Doe", required: true },
-  { key: "phone", label: "Phone Number", placeholder: "e.g. +94 77 123 4567", type: "tel" },
+  { key: "phone", label: "Phone Number", placeholder: "Your phone number", type: "tel" },
 ];
 
 const ADDRESS_FIELDS: FieldDef[] = [
@@ -125,7 +127,13 @@ function FieldGroup({
 // ---------------------------------------------------------------------------
 // Main: ProfileEditor
 // ---------------------------------------------------------------------------
-export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProfile }) {
+export function ProfileEditor({
+  initialProfile,
+  sections = ["personal", "address"],
+}: {
+  initialProfile: CustomerProfile;
+  sections?: ProfileEditorSection[];
+}) {
   const [form, setForm] = useState<FormState>(() => toFormState(initialProfile));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -201,7 +209,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
   return (
     <form onSubmit={handleSubmit} className="space-y-8" noValidate>
       {/* ---- Personal Info ---- */}
-      <section>
+      {sections.includes("personal") && <section>
         <div className="mb-5 flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-600/20 bg-amber-600/10 text-amber-600">
             <User size={15} />
@@ -229,10 +237,10 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
             </p>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ---- Address ---- */}
-      <section>
+      {sections.includes("address") && <section>
         <div className="mb-5 flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-600/20 bg-amber-600/10 text-amber-600">
             <MapPin size={15} />
@@ -275,7 +283,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: CustomerProf
           </div>
           <FieldGroup fields={[ADDRESS_FIELDS[2]]} values={form} onChange={handleChange} disabled={saving} />
         </div>
-      </section>
+      </section>}
 
       {/* ---- Status banner ---- */}
       {status === "success" && (

@@ -24,6 +24,7 @@ type HeaderProps = {
   brand: StorefrontContent["brand"] | null;
   navigation: StorefrontContent["navigation"] | null;
   searchPlaceholder: string;
+  hasCustomerSession: boolean;
 };
 
 export function Header({
@@ -31,6 +32,7 @@ export function Header({
   brand,
   navigation,
   searchPlaceholder,
+  hasCustomerSession,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
@@ -63,7 +65,7 @@ export function Header({
 
       <div className="container-primezora">
 
-        <div className="flex h-[76px] items-center gap-5">
+        <div className="flex h-16 items-center gap-4 sm:h-20">
 
           {/* LOGO */}
 
@@ -73,83 +75,48 @@ export function Header({
               aria-label={brand.name}
               className="flex shrink-0 items-center"
             >
-              <Image
-                src={brand.logo}
-                alt={brand.logoAlt}
-                width={210}
-                height={100}
-                priority
-                unoptimized
-                className="h-40 w-auto object-contain"
-              />
+              <span className="relative block h-14 w-[190px] overflow-hidden sm:h-[68px] sm:w-[240px]">
+                <Image
+                  src={brand.logo}
+                  alt={brand.logoAlt}
+                  width={240}
+                  height={240}
+                  priority
+                  unoptimized
+                  className="absolute left-0 top-[-65px] h-[190px] w-[190px] max-w-none object-contain sm:top-[-84px] sm:h-[240px] sm:w-[240px]"
+                />
+              </span>
             </Link>
           )}
 
-
-          {/* SEARCH */}
-
-          <div className="hidden flex-1 md:block">
-
-            <form
-              action="/search"
-              method="GET"
-              role="search"
-              className="relative mx-auto max-w-[570px]"
-            >
-
-              <Search
-                size={17}
-                className="
-                  absolute
-                  left-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-white/30
-                "
-              />
-
-              <input
-                type="search"
-                name="q"
-                placeholder={searchPlaceholder}
-                aria-label={searchPlaceholder}
-                autoComplete="off"
-                className="
-                  h-10
-                  w-full
-                  rounded-lg
-                  border
-                  border-white/[0.08]
-                  bg-white/[0.04]
-                  pl-11
-                  pr-12
-                  text-sm
-                  text-white/90
-                  outline-none
-
-                  placeholder:text-white/25
-
-                  focus:border-amber-600/50
-                  focus:bg-white/[0.055]
-                "
-              />
-
-              <button
-                type="submit"
-                aria-label="Search products"
-                className="absolute right-1 top-1/2 flex h-8 w-9 -translate-y-1/2 items-center justify-center rounded-md text-white/45 transition hover:bg-white/[0.06] hover:text-amber-600"
-              >
-                <Search size={16} />
-              </button>
-
-            </form>
-
-          </div>
+          <nav
+            aria-label="Main navigation"
+            className="hidden flex-1 items-center justify-center gap-4 md:flex lg:gap-6"
+          >
+            {navigation && (
+              <>
+                <NavLink href="/" label={navigation.homeLabel} />
+                <NavLink href="/shop" label={navigation.shopLabel} />
+              </>
+            )}
+            <NavLink href="/shop" label="Build Your PC" />
+            <NavLink href="/shop" label="Gaming" />
+            <NavLink href="/about" label="About" />
+            <NavLink href="/contact" label="Contact" />
+          </nav>
 
 
           {/* RIGHT ACTIONS */}
 
           <div className="ml-auto flex items-center gap-1">
+
+            <Link
+              href="/search"
+              aria-label="Search products"
+              className="hidden rounded-lg p-2 text-white/55 transition hover:bg-white/[0.05] hover:text-white/90 md:inline-flex"
+            >
+              <Search size={18} />
+            </Link>
 
             {/* Delivery */}
 
@@ -239,7 +206,7 @@ export function Header({
 
             {/* Account */}
 
-            <NotificationBell />
+            <NotificationBell hasCustomerSession={hasCustomerSession} />
 
             <Link
               href="/account"
@@ -345,61 +312,6 @@ export function Header({
 
 
       {/* ================================
-          DESKTOP NAVIGATION
-      ================================= */}
-
-      <nav
-        aria-label="Main navigation"
-        className="hidden border-t border-white/[0.05] md:block"
-      >
-        <div className="container-primezora">
-          <div className="flex min-h-11 flex-wrap items-center gap-x-8 gap-y-2 py-2">
-            {navigation && (
-              <>
-                <NavLink href="/" label={navigation.homeLabel} />
-                <NavLink href="/shop" label={navigation.shopLabel} />
-              </>
-            )}
-
-            <NavLink href="/about" label="About" />
-            <NavLink href="/contact" label="Contact" />
-
-            {navigation && (
-              <Link
-                href={navigation.dealsHref}
-                className="font-display text-xs font-semibold tracking-[0.04em] text-amber-600 transition hover:text-amber-500"
-              >
-                {navigation.dealsLabel}
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {categories.length > 0 && (
-        <nav
-          aria-label="Shop by category"
-          className="hidden border-t border-white/[0.05] bg-white/[0.02] md:block"
-        >
-          <div className="container-primezora overflow-x-auto">
-            <div className="flex min-h-10 w-max min-w-full items-center gap-x-7 py-2">
-              <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-600/75">
-                Categories
-              </span>
-              {categories.map((category) => (
-                <NavLink
-                  key={category.slug}
-                  href={`/categories/${category.slug}`}
-                  label={category.name}
-                />
-              ))}
-            </div>
-          </div>
-        </nav>
-      )}
-
-
-      {/* ================================
           MOBILE NAVIGATION
       ================================= */}
 
@@ -489,6 +401,16 @@ export function Header({
                   />
                 </>
               )}
+              <MobileLink
+                href="/shop"
+                label="Build Your PC"
+                closeMenu={() => setMobileMenuOpen(false)}
+              />
+              <MobileLink
+                href="/shop"
+                label="Gaming"
+                closeMenu={() => setMobileMenuOpen(false)}
+              />
 
               <MobileLink
                 href="/about"
@@ -591,9 +513,10 @@ function NavLink({
       href={href}
       className="
         font-display
-        text-xs
+        text-[9px]
         font-semibold
-        tracking-[0.04em]
+        uppercase
+        tracking-[0.08em]
         text-white/55
 
         transition

@@ -89,6 +89,19 @@ button {
   }
 }
 
+@media (min-width: 641px) and (max-width: 1023px) {
+  .container-primezora {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home-category-card {
+    height: 136px;
+  }
+}
+
 /* Glass panels */
 
 .primezora-glass {
@@ -289,4 +302,508 @@ button {
 .primezora-float {
   animation:
     primezora-float 5s ease-in-out infinite;
+}
+
+/* Cinematic PC showcase */
+
+.buildpc-stage {
+  --buildpc-tilt-x: 0deg;
+  --buildpc-tilt-y: 0deg;
+  --buildpc-shift-x: 0px;
+  --buildpc-shift-y: 0px;
+  position: relative;
+  isolation: isolate;
+  height: clamp(260px, 32vw, 410px);
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #030505;
+  perspective: 1200px;
+}
+
+.buildpc-stage__artwork {
+  position: absolute;
+  top: 50%;
+  left: 31%;
+  width: auto;
+  height: calc(100% - 24px);
+  aspect-ratio: 3 / 2;
+  max-width: none;
+  margin: 0;
+  z-index: 0;
+  transform:
+    translate3d(var(--buildpc-shift-x), calc(-50% + var(--buildpc-shift-y)), 0)
+    perspective(1200px)
+    rotateX(var(--buildpc-tilt-x))
+    rotateY(var(--buildpc-tilt-y))
+    scale(1.035);
+  transform-style: preserve-3d;
+  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+
+.buildpc-stage__image {
+  object-fit: contain;
+  object-position: center;
+  filter: brightness(0.96) saturate(1.04) contrast(1.04);
+}
+
+.buildpc-stage__atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 62% 54%, rgba(249, 115, 22, 0.1), transparent 38%),
+    linear-gradient(90deg, #030505 0%, rgba(3, 5, 5, 0.86) 18%, rgba(3, 5, 5, 0.15) 52%, transparent 78%),
+    linear-gradient(0deg, rgba(3, 5, 5, 0.68), transparent 28%, rgba(3, 5, 5, 0.18));
+}
+
+.buildpc-stage__content {
+  position: absolute;
+  top: 50%;
+  left: clamp(20px, 5vw, 64px);
+  z-index: 1;
+  width: min(330px, 46%);
+  transform: translateY(-50%);
+}
+
+.buildpc-stage__content > p:first-child {
+  margin: 0 0 10px;
+  color: #fb923c;
+  font-family: var(--font-display), sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.buildpc-stage__content h2 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(27px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+
+.buildpc-stage__content h2 span {
+  color: #f97316;
+}
+
+.buildpc-stage__description {
+  max-width: 260px;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.buildpc-stage__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  border: 1px solid rgba(249, 115, 22, 0.72);
+  border-radius: 999px;
+  padding: 9px 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-display), sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.buildpc-stage__action:hover {
+  background: #f97316;
+  color: #030505;
+}
+
+.buildpc-stage__action svg {
+  color: #fb923c;
+}
+
+.buildpc-stage__action:hover svg {
+  color: #030505;
+}
+
+.buildpc-stage__frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: clamp(16px, 3vw, 32px);
+  color: rgba(255, 255, 255, 0.58);
+  font-family: var(--font-display), sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.buildpc-stage__frame span:first-child {
+  border-left: 1px solid rgba(249, 115, 22, 0.75);
+  padding-left: 10px;
+}
+
+.buildpc-stage__panel {
+  position: absolute;
+  top: 50%;
+  right: clamp(16px, 3vw, 34px);
+  z-index: 2;
+  width: min(230px, 24%);
+  transform: translateY(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(3, 5, 5, 0.86);
+  padding: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.buildpc-stage__panel-eyebrow {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-display), sans-serif;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.buildpc-stage__panel h3 {
+  margin: 8px 0 12px;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.buildpc-stage__panel ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  list-style: none;
+}
+
+.buildpc-stage__panel li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.buildpc-stage__panel li span {
+  color: #fb923c;
+  font-family: var(--font-display), sans-serif;
+  font-size: 8px;
+}
+
+.buildpc-stage__panel-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 11px;
+  color: #fb923c;
+  font-family: var(--font-display), sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.buildpc-stage__labels {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.buildpc-stage__callout {
+  --callout-x: 0px;
+  --callout-y: 0px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 1;
+  transform: translate(var(--callout-x), var(--callout-y)) scale(1);
+  transform-origin: center;
+}
+
+.buildpc-stage__callout--gpu {
+  top: 57%;
+  left: 20%;
+  --callout-x: -12px;
+  --callout-y: 8px;
+}
+
+.buildpc-stage__callout--cpu {
+  top: 34%;
+  left: 42%;
+  --callout-x: -10px;
+  --callout-y: 12px;
+}
+
+.buildpc-stage__callout--ram {
+  top: 12%;
+  left: 56%;
+  --callout-x: 0px;
+  --callout-y: -14px;
+}
+
+.buildpc-stage__callout--motherboard {
+  top: 65%;
+  left: 71%;
+  --callout-x: 14px;
+  --callout-y: 10px;
+}
+
+.buildpc-stage__marker {
+  position: relative;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  place-items: center;
+  border: 1px solid rgba(249, 115, 22, 0.85);
+  border-radius: 50%;
+  background: rgba(3, 5, 5, 0.85);
+  color: #fb923c;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.2);
+}
+
+.buildpc-stage__marker::after {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  border-radius: 50%;
+  content: "";
+  animation: buildpc-marker-pulse 2.8s ease-out infinite;
+}
+
+.buildpc-stage__label {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  min-width: 77px;
+  border-left: 1px solid rgba(249, 115, 22, 0.7);
+  background: rgba(3, 5, 5, 0.76);
+  padding: 4px 7px;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-display), sans-serif;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.buildpc-stage__label strong {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.buildpc-stage__label small {
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-body), sans-serif;
+  font-size: 7px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.buildpc-stage__callout--gpu .buildpc-stage__label {
+  position: absolute;
+  right: calc(100% + 10px);
+  text-align: right;
+}
+
+.buildpc-stage__callout--cpu .buildpc-stage__label {
+  position: absolute;
+  left: calc(100% + 10px);
+  width: max-content;
+}
+
+.buildpc-stage__callout--ram .buildpc-stage__label {
+  position: absolute;
+  left: calc(100% + 10px);
+  width: max-content;
+}
+
+.buildpc-stage__callout--motherboard .buildpc-stage__label {
+  position: absolute;
+  right: calc(100% + 10px);
+  border-right: 1px solid rgba(249, 115, 22, 0.7);
+  border-left: 0;
+  text-align: right;
+}
+
+.buildpc-stage[data-motion-ready="true"] .buildpc-stage__callout {
+  opacity: 0;
+  transition:
+    opacity 500ms ease,
+    transform 650ms cubic-bezier(0.16, 1.3, 0.3, 1);
+  transform: translate(var(--callout-x), var(--callout-y)) scale(0.55);
+}
+
+.buildpc-stage[data-motion-ready="true"][data-visible="true"] .buildpc-stage__callout {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+}
+
+.buildpc-stage[data-motion-ready="true"][data-visible="true"] .buildpc-stage__callout--gpu {
+  transition-delay: 180ms;
+}
+
+.buildpc-stage[data-motion-ready="true"][data-visible="true"] .buildpc-stage__callout--cpu {
+  transition-delay: 340ms;
+}
+
+.buildpc-stage[data-motion-ready="true"][data-visible="true"] .buildpc-stage__callout--ram {
+  transition-delay: 500ms;
+}
+
+.buildpc-stage[data-motion-ready="true"][data-visible="true"] .buildpc-stage__callout--motherboard {
+  transition-delay: 660ms;
+}
+
+@keyframes buildpc-marker-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.75);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+.buildpc-stage__labels svg {
+  color: #fb923c;
+}
+
+@media (max-width: 1023px) {
+  .buildpc-stage__panel {
+    display: none;
+  }
+
+  .buildpc-stage__content {
+    width: min(280px, 42%);
+  }
+
+  .buildpc-stage__callout--gpu .buildpc-stage__label {
+    position: static;
+    text-align: left;
+  }
+}
+
+@media (max-width: 767px) {
+  .buildpc-stage {
+    height: clamp(240px, 57vw, 360px);
+    margin-bottom: 12px;
+  }
+
+  .buildpc-stage__content {
+    width: min(280px, 64%);
+  }
+
+  .buildpc-stage__labels {
+    inset: 0;
+  }
+
+  .buildpc-stage__artwork {
+    left: 32%;
+    width: auto;
+    height: 72%;
+  }
+
+  .buildpc-stage__callout {
+    gap: 4px;
+  }
+
+  .buildpc-stage__content {
+    width: min(210px, 58%);
+  }
+
+  .buildpc-stage__marker {
+    width: 19px;
+    height: 19px;
+    flex-basis: 19px;
+  }
+
+  .buildpc-stage__marker svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .buildpc-stage__label {
+    min-width: 60px;
+    padding: 3px 5px;
+  }
+
+  .buildpc-stage__label strong {
+    font-size: 7px;
+  }
+
+  .buildpc-stage__label small {
+    font-size: 6px;
+  }
+
+  .buildpc-stage__content h2 {
+    font-size: clamp(24px, 7vw, 34px);
+  }
+
+  .buildpc-stage__description {
+    max-width: 210px;
+    font-size: 10px;
+  }
+
+  .buildpc-stage__image {
+    object-position: 59% center;
+  }
+
+  .buildpc-stage__atmosphere {
+    background:
+      radial-gradient(ellipse at 72% 52%, rgba(249, 115, 22, 0.12), transparent 40%),
+      linear-gradient(90deg, rgba(3, 5, 5, 0.56), transparent 74%),
+      linear-gradient(0deg, rgba(3, 5, 5, 0.72), transparent 35%);
+  }
+}
+
+@media (hover: none) {
+  .buildpc-stage__artwork {
+    transform: translateY(-50%) scale(1.035);
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buildpc-stage,
+  .buildpc-stage__callout,
+  .buildpc-stage__marker::after {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+    will-change: auto;
+  }
+
+  .buildpc-stage__artwork {
+    transform: translateY(-50%);
+    transition: none;
+    will-change: auto;
+  }
+
+  .buildpc-stage__atmosphere {
+    transition: none;
+  }
 }

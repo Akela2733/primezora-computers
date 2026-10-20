@@ -20,6 +20,7 @@ describe("security response headers", () => {
     assert.match(csp, /default-src 'self'/);
     assert.match(csp, /script-src 'self' 'unsafe-inline'/);
     assert.match(csp, /style-src 'self' 'unsafe-inline'/);
+    assert.match(csp, /frame-src https:\/\/www\.openstreetmap\.org/);
     assert.match(csp, /img-src 'self' data: blob: https:\/\/\*\.supabase\.co/);
     assert.match(csp, /object-src 'none'/);
     assert.match(csp, /frame-ancestors 'none'/);

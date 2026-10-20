@@ -146,7 +146,7 @@ export default function LoginForm({
           <div className="flex-1 leading-relaxed">
             Your account is ready. Sign in below or{" "}
             <a
-              href="mailto:support@primezora.com"
+              href="mailto:primezorasolution@gmail.com"
               className="font-medium underline underline-offset-2 hover:text-emerald-200"
             >
               contact support

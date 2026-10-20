@@ -182,6 +182,18 @@ export type StorefrontContent = {
 
 type RecordValue = Record<string, unknown>;
 
+const BUSINESS_CONTACT = {
+  phone: "+94 76 41 32 650",
+  phoneHref: "tel:+94764132650",
+  email: "primezorasolution@gmail.com",
+  emailHref: "mailto:primezorasolution@gmail.com",
+  address: "Ehaliyagoda, Sri Lanka",
+  addressHref: "https://maps.google.com/?q=Ehaliyagoda,+Sri+Lanka",
+  facebookHref:
+    "https://www.facebook.com/profile.php?id=61592915424823&mibextid=ZbWKwL",
+  whatsappHref: "https://wa.me/94764132650",
+} as const;
+
 function isRecord(value: unknown): value is RecordValue {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -464,15 +476,49 @@ function isSafeImageUrl(value: string): boolean {
 }
 
 export const getStorefrontContent = cache(async () => {
-  const record = await prisma.storefrontContent.findUnique({
-    where: { key: "storefront" },
-    select: { content: true },
-  });
+  try {
+    const record = await prisma.storefrontContent.findUnique({
+      where: { key: "storefront" },
+      select: { content: true },
+    });
 
-  if (!record) return null;
-  if (!isStorefrontContent(record.content)) {
-    throw new Error("Storefront content in the database has an invalid shape.");
+    if (!record) return null;
+    if (!isStorefrontContent(record.content)) {
+      throw new Error("Storefront content in the database has an invalid shape.");
+    }
+
+    return {
+      ...record.content,
+      contact: {
+        ...record.content.contact,
+        phone: BUSINESS_CONTACT.phone,
+        email: BUSINESS_CONTACT.email,
+        address: BUSINESS_CONTACT.address,
+      },
+      footer: {
+        ...record.content.footer,
+        phone: BUSINESS_CONTACT.phone,
+        phoneHref: BUSINESS_CONTACT.phoneHref,
+        email: BUSINESS_CONTACT.email,
+        emailHref: BUSINESS_CONTACT.emailHref,
+        address: BUSINESS_CONTACT.address,
+        addressHref: BUSINESS_CONTACT.addressHref,
+        socials: record.content.footer.socials.map((social) => {
+          if (social.icon === "Facebook") {
+            return { ...social, href: BUSINESS_CONTACT.facebookHref };
+          }
+          if (social.icon === "WhatsApp") {
+            return { ...social, href: BUSINESS_CONTACT.whatsappHref };
+          }
+          if (social.icon === "Email") {
+            return { ...social, href: BUSINESS_CONTACT.emailHref };
+          }
+          return social;
+        }),
+      },
+    };
+  } catch (error) {
+    console.error("Storefront content unavailable; using empty fallback.", error);
+    return null;
   }
-
-  return record.content;
 });

@@ -1,101 +1,164 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import type { PromoBanner } from "@/lib/storefront-content";
+import { useRef, type PointerEvent } from "react";
+import {
+  ArrowRight,
+  CircuitBoard,
+  Cpu,
+  MemoryStick,
+  Microchip,
+} from "lucide-react";
 
-function BannerCarousel({
-  banners,
-}: {
-  banners: PromoBanner[];
-}) {
-  const [activeSlide, setActiveSlide] = useState(0);
+function BuildPCShowcase() {
+  const sceneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (banners.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const scene = sceneRef.current;
+    if (
+      !scene ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !("IntersectionObserver" in window)
+    ) {
       return;
     }
 
-    const intervalId = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % banners.length);
-    }, 5000);
+    scene.dataset.motionReady = "true";
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          scene.dataset.visible = "true";
+          observer.unobserve(scene);
+        }
+      },
+      { threshold: 0.08, rootMargin: "0px 0px 60px 0px" }
+    );
 
-    return () => window.clearInterval(intervalId);
-  }, [banners.length]);
+    observer.observe(scene);
+    return () => observer.disconnect();
+  }, []);
 
-  if (banners.length === 0) return null;
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const scene = sceneRef.current;
+    if (
+      !scene ||
+      event.pointerType !== "mouse" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
 
-  const slide = banners[activeSlide];
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const pointerX = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const pointerY = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+    scene.style.setProperty("--buildpc-tilt-x", `${pointerY * -3}deg`);
+    scene.style.setProperty("--buildpc-tilt-y", `${pointerX * 5}deg`);
+    scene.style.setProperty("--buildpc-shift-x", `${pointerX * 10}px`);
+    scene.style.setProperty("--buildpc-shift-y", `${pointerY * 8}px`);
+  };
+
+  const resetPointer = () => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+
+    scene.style.setProperty("--buildpc-tilt-x", "0deg");
+    scene.style.setProperty("--buildpc-tilt-y", "0deg");
+    scene.style.setProperty("--buildpc-shift-x", "0px");
+    scene.style.setProperty("--buildpc-shift-y", "0px");
+  };
 
   return (
-    <article
-      aria-roledescription="carousel"
-      aria-label={slide.eyebrow}
-      className="group relative isolate min-h-55 overflow-hidden border border-white/10 bg-[#030505] sm:min-h-62.5"
+    <div
+      ref={sceneRef}
+      className="buildpc-stage"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetPointer}
     >
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-20 bg-cover bg-center transition-transform duration-700 group-hover:scale-[1.03]"
-        style={{ backgroundImage: `url(${JSON.stringify(slide.image)})` }}
-      />
-      <div className="absolute inset-0 -z-10 bg-linear-to-r from-black/5 via-black/25 to-black/90" />
-      <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/70 via-transparent to-black/10" />
-
-      <div
-        key={slide.eyebrow}
-        className="relative z-10 ml-[34%] flex min-h-55 max-w-[66%] flex-col justify-center py-5 pl-2 pr-4 sm:min-h-62.5 sm:pl-4 sm:pr-6"
-        role="group"
-        aria-roledescription="slide"
-        aria-label={`${activeSlide + 1} of ${banners.length}`}
-      >
-        <p className="mb-2 font-display text-[7px] font-semibold uppercase tracking-[0.18em] text-white/65 sm:text-[8px]">
-          {slide.eyebrow}
-        </p>
-        <h2 className="font-display text-[22px] font-bold uppercase leading-[1.05] text-white/90 sm:text-[28px]">
-          {slide.titleLines.map((line, index) => (
-            <span
-              key={`${index}-${line}`}
-              className={index === slide.accentLine ? "text-amber-600" : undefined}
-            >
-              {line}
-              {index < slide.titleLines.length - 1 && <br />}
+      <figure className="buildpc-stage__artwork">
+        <Image
+          src="/banners/build%20your%20pc.png"
+          alt="Exploded custom PC build with a graphics card, motherboard, processor, memory, and cooling system"
+          fill
+          sizes="(max-width: 767px) 65vw, 620px"
+          className="buildpc-stage__image"
+        />
+        <ul className="buildpc-stage__labels" aria-label="PC parts in the build">
+          <li className="buildpc-stage__callout buildpc-stage__callout--gpu">
+            <span className="buildpc-stage__marker"><Microchip size={13} /></span>
+            <span className="buildpc-stage__label">
+              <strong>GPU</strong>
+              <small>Graphics card</small>
             </span>
-          ))}
+          </li>
+          <li className="buildpc-stage__callout buildpc-stage__callout--cpu">
+            <span className="buildpc-stage__marker"><Cpu size={13} /></span>
+            <span className="buildpc-stage__label">
+              <strong>CPU</strong>
+              <small>Processor</small>
+            </span>
+          </li>
+          <li className="buildpc-stage__callout buildpc-stage__callout--ram">
+            <span className="buildpc-stage__marker"><MemoryStick size={13} /></span>
+            <span className="buildpc-stage__label">
+              <strong>RAM</strong>
+              <small>Memory</small>
+            </span>
+          </li>
+          <li className="buildpc-stage__callout buildpc-stage__callout--motherboard">
+            <span className="buildpc-stage__marker"><CircuitBoard size={13} /></span>
+            <span className="buildpc-stage__label">
+              <strong>Motherboard</strong>
+              <small>System board</small>
+            </span>
+          </li>
+        </ul>
+      </figure>
+      <div className="buildpc-stage__atmosphere" aria-hidden="true" />
+      <div className="buildpc-stage__content">
+        <p>Custom PC builder</p>
+        <h2>
+          Build your
+          <br />
+          <span>dream PC.</span>
         </h2>
-        <p className="mt-2 max-w-55 text-[9px] leading-[1.45] text-white/65 sm:text-[10px]">
-          {slide.description}
+        <p className="buildpc-stage__description">
+          Choose your components and create a setup that is truly yours.
         </p>
-        <div className="mt-3">
-          <Link
-            href={slide.href}
-            className="group/link inline-flex w-fit items-center gap-2 border-b border-amber-600/70 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.12em] text-amber-600 transition hover:text-amber-600 sm:text-[9px]"
-          >
-            {slide.actionLabel}
-            <ArrowRight size={12} className="transition-transform group-hover/link:translate-x-1" />
-          </Link>
-        </div>
+        <Link href="/shop" className="buildpc-stage__action">
+          Explore PC parts <ArrowRight size={14} />
+        </Link>
       </div>
-    </article>
+      <aside className="buildpc-stage__panel">
+        <p className="buildpc-stage__panel-eyebrow">Your next setup</p>
+        <h3>Built around you.</h3>
+        <ol>
+          <li><span>01</span> Choose your components</li>
+          <li><span>02</span> Find your perfect upgrade</li>
+          <li><span>03</span> Shop trusted PC parts</li>
+        </ol>
+        <Link href="/shop" className="buildpc-stage__panel-link">
+          Browse components <ArrowRight size={13} />
+        </Link>
+      </aside>
+      <div className="buildpc-stage__frame" aria-hidden="true">
+        <span>PRIMEZORA / PERFORMANCE SYSTEMS</span>
+        <span>BUILD / UPGRADE / PLAY</span>
+      </div>
+    </div>
   );
 }
 
-export default function BuildPCBanner({
-  left,
-  right,
-}: {
-  left: PromoBanner[];
-  right: PromoBanner[];
-}) {
-  if (left.length === 0 && right.length === 0) return null;
-
+export default function BuildPCBanner() {
   return (
-    <section className="relative overflow-hidden bg-[#030505] py-7 sm:py-9">
+    <section
+      aria-label="Build your dream PC"
+      className="relative overflow-hidden border-y border-white/10 bg-[#030505] py-6 sm:py-8"
+    >
       <div className="container-primezora">
-        <div className="grid gap-3 md:grid-cols-2">
-          <BannerCarousel banners={left} />
-          <BannerCarousel banners={right} />
-        </div>
+        <BuildPCShowcase />
       </div>
     </section>
   );

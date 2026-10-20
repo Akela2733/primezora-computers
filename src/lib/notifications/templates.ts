@@ -33,7 +33,7 @@ function getEventContent(
           "We have successfully received your order and are currently verifying product availability.",
         actionNote:
           order.paymentMethod === "bank"
-            ? "Payment Instructions: Please complete your bank transfer using your Order Number as the deposit reference and send proof of payment to support@primezora.com."
+            ? "Payment Instructions: Please complete your bank transfer using your Order Number as the deposit reference and send proof of payment to primezorasolution@gmail.com."
             : order.paymentMethod === "card"
               ? "Card payment: Your order will be confirmed after PayHere verifies your payment."
               : "Cash on Delivery: Please ensure you have exact cash available when the courier arrives.",
@@ -96,7 +96,7 @@ function getEventContent(
         description:
           "Thank you for shopping with Primezora Technologies! Your order has been marked as completed.",
         actionNote:
-          "Need technical support or warranty assistance? Contact us at support@primezora.com.",
+          "Need technical support or warranty assistance? Contact us at primezorasolution@gmail.com.",
       };
 
     case "ORDER_CANCELLED":
@@ -280,7 +280,7 @@ export function generateNotificationEmail(
                 Primezora Technologies — Premier Gaming & Custom PC Hardware in Sri Lanka
               </p>
               <p style="margin: 0; font-size: 11px; color: #475569;">
-                Need help? Email <a href="mailto:support@primezora.com" style="color: #ea580c; text-decoration: none;">support@primezora.com</a>
+                Need help? Email <a href="mailto:primezorasolution@gmail.com" style="color: #ea580c; text-decoration: none;">primezorasolution@gmail.com</a>
               </p>
             </td>
           </tr>
@@ -330,7 +330,7 @@ Delivery Fee:    ${formattedDelivery}
 TOTAL:           ${formattedTotal}
 ------------------------------------------------------------
 
-If you have any questions, contact us at support@primezora.com.
+If you have any questions, contact us at primezorasolution@gmail.com.
 
 Thank you for choosing Primezora Technologies!
 `.trim();

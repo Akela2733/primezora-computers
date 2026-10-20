@@ -16,6 +16,7 @@ export function buildContentSecurityPolicy(
     "object-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
+    "frame-src https://www.openstreetmap.org",
     `script-src ${scriptSources.join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.supabase.co",

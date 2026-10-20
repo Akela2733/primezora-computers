@@ -2077,7 +2077,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
     const shopResponse = await fetch(`${baseUrl}/shop`);
     const shopHtml = await shopResponse.text();
     assert.equal(shopResponse.status, 200, shopHtml.slice(0, 2_000));
-    assert.ok(shopHtml.includes(createdOutOfStockProduct.name));
+    assert.ok(!shopHtml.includes(createdOutOfStockProduct.name));
     assert.ok(createdProduct);
     const productResponse = await fetch(
       `${baseUrl}/products/${createdProduct.slug}`

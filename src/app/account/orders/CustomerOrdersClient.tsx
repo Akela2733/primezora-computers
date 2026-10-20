@@ -35,7 +35,11 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   CANCELLED: "border-rose-500/20 bg-rose-500/10 text-rose-300",
 };
 
-export default function CustomerOrdersClient() {
+export default function CustomerOrdersClient({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<OrderListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,17 +74,27 @@ export default function CustomerOrdersClient() {
     return () => controller.abort();
   }, [page, reloadKey]);
 
-  return (
-    <main className="container-primezora min-h-[calc(100vh-76px)] py-10 text-white/90">
-      <Link
-        href="/account"
-        className="inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white/70"
-      >
-        <ArrowLeft size={14} />
-        Back to Account
-      </Link>
+  const Container = embedded ? "section" : "main";
 
-      <header className="mb-8 mt-7">
+  return (
+    <Container
+      className={
+        embedded
+          ? "text-white/90"
+          : "container-primezora min-h-[calc(100vh-76px)] py-10 text-white/90"
+      }
+    >
+      {!embedded && (
+        <Link
+          href="/account"
+          className="inline-flex items-center gap-2 text-xs text-white/40 transition hover:text-white/70"
+        >
+          <ArrowLeft size={14} />
+          Back to Account
+        </Link>
+      )}
+
+      <header className={embedded ? "mb-5" : "mb-8 mt-7"}>
         <p className="font-display text-[9px] uppercase tracking-[0.3em] text-amber-600">
           Customer Account
         </p>
@@ -210,6 +224,6 @@ export default function CustomerOrdersClient() {
           </nav>
         )}
       </section>
-    </main>
+    </Container>
   );
 }

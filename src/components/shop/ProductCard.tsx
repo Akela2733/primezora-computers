@@ -3,26 +3,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Check,
   Heart,
   Star,
 } from "lucide-react";
+import { useState } from "react";
 
 import type { Product } from "@/types/product";
+import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
 type ProductCardProps = {
   product: Product;
+  showAddToCart?: boolean;
 };
 
 export function ProductCard({
   product,
+  showAddToCart = false,
 }: ProductCardProps) {
+  const { addToCart } = useCart();
   const {
     toggleWishlist,
     isInWishlist,
   } = useWishlist();
 
   const wishlisted = isInWishlist(product.id);
+  const [cartMessage, setCartMessage] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const stockQuantity =
     product.stockQuantity ?? product.stock ?? 0;
   const isPurchasable =
@@ -46,12 +54,33 @@ export function ProductCard({
     toggleWishlist(product);
   };
 
+  const handleAddToCart = async () => {
+    setCartMessage("");
+    setIsAdding(true);
+    try {
+      const result = await addToCart(product, 1);
+      setCartMessage(
+        result === "added"
+          ? "Added to cart"
+          : result === "unavailable"
+            ? "No longer available"
+            : "Please try again"
+      );
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <article
-      className="group relative flex h-full min-w-0 flex-col overflow-hidden border border-white/10 bg-[#030505] transition-colors duration-300 hover:border-amber-600/40"
+      className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border border-white/10 bg-[#050707] transition-colors duration-300 hover:border-amber-600/50"
     >
       {/* Product Image */}
-      <div className="relative aspect-[1.03] overflow-hidden border-b border-white/[0.06] bg-[#030505]">
+      <div
+        className={`relative overflow-hidden border-b border-white/[0.06] bg-[#030505] ${
+          showAddToCart ? "aspect-[1.18]" : "aspect-[1.03]"
+        }`}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(217,119,6,0.12),transparent_58%),linear-gradient(145deg,#030505,#070909_65%)]" />
 
         <Link
@@ -177,6 +206,24 @@ export function ProductCard({
             </span>
           )}
         </div>
+        {showAddToCart && (
+          <div className="mt-3">
+            <button
+              type="button"
+              disabled={!isPurchasable || isAdding}
+              onClick={handleAddToCart}
+              className="flex h-9 w-full items-center justify-center gap-1.5 rounded-sm bg-orange-500 px-2 font-display text-[8px] font-bold uppercase tracking-[0.1em] text-[#090909] transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {cartMessage === "Added to cart" && <Check size={12} />}
+              {isAdding ? "Adding..." : cartMessage || "Add to cart"}
+            </button>
+            {cartMessage && cartMessage !== "Added to cart" && (
+              <p role="status" className="mt-1 text-center text-[9px] text-red-400">
+                {cartMessage}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );

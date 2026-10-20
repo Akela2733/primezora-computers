@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { connection } from "next/server";
 import { Footer } from "@/components/layout/Footer";
@@ -11,6 +12,7 @@ import { getStorefrontContent } from "@/lib/storefront-content";
 import "./globals.css";
 
 import { Header } from "@/components/layout/Header";
+import { CUSTOMER_SESSION_COOKIE } from "@/lib/customer-session";
 
 const bodyFont = localFont({
   src: "./fonts/inter-latin.woff2",
@@ -43,9 +45,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   await connection();
-  const [categories, content] = await Promise.all([
+  const [categories, content, cookieStore] = await Promise.all([
     getCatalogCategories(),
     getStorefrontContent(),
+    cookies(),
   ]);
 
   return (
@@ -58,6 +61,7 @@ export default async function RootLayout({
               brand={content?.brand ?? null}
               navigation={content?.navigation ?? null}
               searchPlaceholder={content?.search.inputPlaceholder ?? ""}
+              hasCustomerSession={cookieStore.has(CUSTOMER_SESSION_COOKIE)}
               categories={categories.map(({ id, name, slug }) => ({
                 id,
                 name,
