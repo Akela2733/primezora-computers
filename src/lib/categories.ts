@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeCategorySlug } from "@/lib/category-normalization";
+
+export { normalizeCategorySlug } from "@/lib/category-normalization";
 
 export type CatalogCategory = {
   id: string;
@@ -7,14 +10,6 @@ export type CatalogCategory = {
   image: string | null;
   productCategories: string[];
 };
-
-export function normalizeCategorySlug(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 export async function getCatalogCategories(): Promise<CatalogCategory[]> {
   const [categoryRecords, productCategories] = await Promise.all([
