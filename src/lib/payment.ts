@@ -22,6 +22,7 @@
 // ============================================================================
 
 export const DELIVERY_FEE = 500; // Fixed delivery fee in LKR
+export const BANK_TRANSFER_PAYMENT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export const SUPPORTED_PAYMENT_METHODS = ["cod", "bank", "card"] as const;
 export type PaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number];
@@ -51,7 +52,7 @@ export const PAYMENT_METHOD_CONFIGS: Record<PaymentMethod, PaymentMethodConfig> 
     name: "Bank Transfer",
     shortDescription: "Direct deposit / bank transfer to our official bank account.",
     instructions:
-      "Transfer the order total to our bank account. Use your Order Number as the transfer reference and send proof of payment.",
+      "Transfer the exact order total to our bank account. Use the unique payment reference shown with your order, then upload your receipt. Payment is confirmed only after Primezora verifies the incoming bank credit.",
     isOnline: false,
     requiresClientRedirect: false,
   },
@@ -232,7 +233,7 @@ class BankTransferPaymentProvider implements PaymentProvider {
         method: "bank",
         currency: input.currency ?? "LKR",
         amountDue: input.amount,
-        reference: input.orderNumber,
+        reference: input.metadata?.paymentReference ?? input.orderNumber,
         instructions: PAYMENT_METHOD_CONFIGS.bank.instructions,
       },
     };

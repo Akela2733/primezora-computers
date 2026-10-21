@@ -24,6 +24,7 @@ type CustomerOrderDetail = {
   paymentMethod: string;
   paymentStatus: string | null;
   paymentReference: string | null;
+  paymentExpiresAt: string | null;
   currency: string;
   latestReceipt: {
     submittedAt: string;
@@ -228,6 +229,12 @@ export default function CustomerOrderDetailClient({
                         label="Payment reference"
                         value={order.paymentReference ?? order.orderNumber}
                       />
+                      {order.paymentExpiresAt && (
+                        <Detail
+                          label="Payment reference expires"
+                          value={new Date(order.paymentExpiresAt).toLocaleString("en-LK")}
+                        />
+                      )}
                       {order.latestReceipt && (
                         <Detail
                           label="Receipt submitted"

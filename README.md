@@ -201,13 +201,15 @@ and in the hosting provider for production:
 
 - `BANK_TRANSFER_BANK_NAME`, `BANK_TRANSFER_ACCOUNT_NAME`,
   `BANK_TRANSFER_ACCOUNT_NUMBER`, and `BANK_TRANSFER_BRANCH`: the business
-  account details shown to customers after checkout. Do not invent or commit
-  account values. Bank-transfer orders remain unpaid until an administrator
-  verifies the actual incoming credit.
+  account details shown to customers after checkout (configure Primezora's
+  BOC account here). Do not invent or commit account values. Each bank-transfer
+  order has a unique payment reference and a 24-hour payment window. New receipt
+  uploads are blocked after expiry; administrators can still review receipts
+  submitted within the payment window. Orders are not auto-cancelled.
 - `WHATSAPP_BUSINESS_NUMBER`: Primezora's WhatsApp Business number in
-  international format with country code. The checkout creates a click-to-chat
-  link; the customer must press Send, and order-specific replies are manually
-  sent from the free WhatsApp Business app.
+  international format with country code (optional). When configured, the
+  order page displays a click-to-chat link; the customer must press Send, and
+  order-specific replies are manually sent from the free WhatsApp Business app.
 - `SUPABASE_PAYMENT_RECEIPTS_BUCKET`: private Supabase Storage bucket for
   uploaded receipts (defaults to `payment-receipts`). The server creates it as
   private if missing and refuses to upload to an existing public bucket.
@@ -218,8 +220,9 @@ Receipt uploads only set `PAYMENT_VERIFICATION_PENDING`. An authorized admin
 must check the official bank app, statement, or other bank-approved source for
 the expected amount, reference, transaction date, and transaction ID before
 approval. Approval records the administrator and audit history; duplicate
-transaction IDs are rejected. Apply migration
-`20261021000000_add_bank_transfer_verification` through the normal database
+transaction IDs are rejected. Apply migrations
+`20261021000000_add_bank_transfer_verification` and
+`20261021190000_add_bank_transfer_reference_expiry` through the normal database
 migration/deployment process before deploying this checkout change. No
 production migration or external service is run by this change.
 

@@ -10,6 +10,7 @@ import { INPUT_LIMITS } from "@/lib/input-limits";
 import { prisma } from "@/lib/prisma";
 import {
   DELIVERY_FEE,
+  BANK_TRANSFER_PAYMENT_WINDOW_MS,
   getPaymentProvider,
   type PaymentMethod,
   type PaymentIntentResult,
@@ -32,6 +33,7 @@ type CheckoutOrderResponse = {
   total: number;
   currency: string;
   paymentReference: string | null;
+  paymentExpiresAt: Date | null;
   paymentStatus: string | null;
   status: string;
   paymentMethod: string;
@@ -58,6 +60,7 @@ const ORDER_RESPONSE_SELECT = {
   total: true,
   currency: true,
   paymentReference: true,
+  paymentExpiresAt: true,
   paymentStatus: true,
   status: true,
   paymentMethod: true,
@@ -139,6 +142,10 @@ async function createPaymentIntent(
     orderNumber: order.orderNumber,
     amount: order.total,
     currency: "LKR",
+    metadata:
+      paymentMethod === "bank"
+        ? { paymentReference: order.paymentReference ?? order.orderNumber }
+        : undefined,
     customer: {
       name: order.customerName,
       email: order.customerEmail,
@@ -175,6 +182,7 @@ function respondWithOrder(
         total: order.total,
         currency: order.currency,
         paymentReference: order.paymentReference,
+        paymentExpiresAt: order.paymentExpiresAt,
         paymentStatus: order.paymentStatus,
         // Replays keep the creation-time status even after later admin updates.
         status: "PENDING",
@@ -445,7 +453,13 @@ export async function POST(request: Request) {
                 paymentStatus:
                   input.paymentMethod === "bank" ? "PAYMENT_PENDING" : null,
                 paymentReference:
-                  input.paymentMethod === "bank" ? orderNumber : null,
+                  input.paymentMethod === "bank"
+                    ? `PRZ-PAY-${randomUUID().toUpperCase()}`
+                    : null,
+                paymentExpiresAt:
+                  input.paymentMethod === "bank"
+                    ? new Date(Date.now() + BANK_TRANSFER_PAYMENT_WINDOW_MS)
+                    : null,
                 currency: "LKR",
                 status: "PENDING",
                 items: {

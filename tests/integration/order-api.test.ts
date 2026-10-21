@@ -182,7 +182,7 @@ function buildServerEnvironment(): NodeJS.ProcessEnv {
     BANK_TRANSFER_ACCOUNT_NAME: "TEST ONLY account",
     BANK_TRANSFER_ACCOUNT_NUMBER: "TEST ONLY number",
     BANK_TRANSFER_BRANCH: "TEST ONLY branch",
-    WHATSAPP_BUSINESS_NUMBER: "12345678",
+    WHATSAPP_BUSINESS_NUMBER: "",
     SUPABASE_URL: receiptStorageUrl,
     SUPABASE_SERVICE_ROLE_KEY: "integration-test-only-service-role-key",
     SUPABASE_PAYMENT_RECEIPTS_BUCKET: "payment-receipts",
@@ -417,15 +417,6 @@ function registrationRequest(email: string): Request {
       confirmPassword: "TEST_ONLY_REGISTRATION_SECRET",
       next: "/account",
     }),
-  });
-}
-
-if (createdProductCategory) {
-  await prisma.category.deleteMany({
-    where: {
-      id: createdProductCategory.id,
-      slug: createdProductCategory.slug,
-    },
   });
 }
 
@@ -796,6 +787,15 @@ describe("isolated order API integration", { concurrency: false }, () => {
           where: {
             id: createdEmptyCategory.id,
             slug: createdEmptyCategory.slug,
+          },
+        });
+      }
+
+      if (createdProductCategory) {
+        await prisma.category.deleteMany({
+          where: {
+            id: createdProductCategory.id,
+            slug: createdProductCategory.slug,
           },
         });
       }
@@ -2416,23 +2416,43 @@ describe("isolated order API integration", { concurrency: false }, () => {
       currency: string;
       paymentReference: string;
       paymentStatus: string;
+      paymentExpiresAt: string;
     };
     verificationOrderId = order.id;
     assert.match(order.orderNumber, /^PRZ-/);
     assert.equal(order.total, 1_000);
     assert.equal(order.currency, "LKR");
     assert.equal(order.paymentStatus, "PAYMENT_PENDING");
-    assert.equal(order.paymentReference, order.orderNumber);
+    assert.match(order.paymentReference, /^PRZ-PAY-/);
+    assert.notEqual(order.paymentReference, order.orderNumber);
+    const paymentExpiresAt = Date.parse(order.paymentExpiresAt);
+    assert.ok(paymentExpiresAt > Date.now());
+    assert.ok(paymentExpiresAt <= Date.now() + 24 * 60 * 60 * 1000 + 5_000);
+    const payment = firstPayload.payment as {
+      instructions?: string;
+      bankTransferDetails?: { bankName?: string };
+    };
+    assert.match(payment.instructions ?? "", /unique payment reference/i);
+    assert.equal(payment.bankTransferDetails?.bankName, "TEST ONLY bank");
 
     const savedOrder = await prisma.order.findUniqueOrThrow({
       where: { id: order.id },
-      select: { subtotal: true, deliveryFee: true, total: true, currency: true },
+      select: {
+        subtotal: true,
+        deliveryFee: true,
+        total: true,
+        currency: true,
+        paymentReference: true,
+        paymentExpiresAt: true,
+      },
     });
     assert.deepEqual(savedOrder, {
       subtotal: 1_000,
       deliveryFee: 0,
       total: 1_000,
       currency: "LKR",
+      paymentReference: order.paymentReference,
+      paymentExpiresAt: new Date(order.paymentExpiresAt),
     });
     const product = await prisma.product.findUniqueOrThrow({
       where: { id: fixture.idempotencyProductId },
@@ -2479,7 +2499,11 @@ describe("isolated order API integration", { concurrency: false }, () => {
     );
 
     const duplicateUpload = await uploadBankReceiptForTest(verificationOrderId);
-    assert.equal(duplicateUpload.status, 409);
+    assert.equal(
+      duplicateUpload.status,
+      409,
+      JSON.stringify(await responseJson(duplicateUpload))
+    );
     const unauthorizedReview = await fetch(
       `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
       {
@@ -2520,6 +2544,22 @@ describe("isolated order API integration", { concurrency: false }, () => {
     assert.equal(unpaidFulfillment.status, 409);
   });
 
+  test("expired bank-transfer orders reject new receipt uploads", async () => {
+    assert.ok(fixture);
+    const expiredOrder = await createBankOrderForTest();
+    await prisma.order.update({
+      where: { id: expiredOrder.id },
+      data: { paymentExpiresAt: new Date(Date.now() - 1_000) },
+    });
+
+    const response = await uploadBankReceiptForTest(expiredOrder.id);
+    assert.equal(response.status, 409);
+    assert.equal(
+      await prisma.paymentReceipt.count({ where: { orderId: expiredOrder.id } }),
+      0
+    );
+  });
+
   test("rejected receipts stay unpaid and can be resubmitted", async () => {
     assert.ok(fixture);
     assert.ok(verificationOrderId);
@@ -2527,6 +2567,7 @@ describe("isolated order API integration", { concurrency: false }, () => {
       where: { orderId: verificationOrderId, status: "PENDING" },
       select: { id: true },
     });
+
     const response = await fetch(
       `${baseUrl}/api/admin/orders/${verificationOrderId}/payment`,
       {
@@ -2584,6 +2625,10 @@ describe("isolated order API integration", { concurrency: false }, () => {
       where: { orderId: secondOrder.id, status: "PENDING" },
       select: { id: true },
     });
+    await prisma.order.update({
+      where: { id: verificationOrderId },
+      data: { paymentExpiresAt: new Date(Date.now() - 1_000) },
+    });
     const transactionId = `TEST-ONLY-TRANSFER-${runId}`;
     const transactionDate = new Date(Date.now() - 24 * 60 * 60 * 1000)
       .toISOString()
@@ -2607,7 +2652,11 @@ describe("isolated order API integration", { concurrency: false }, () => {
         body: JSON.stringify(makeApproval(firstReceipt.id)),
       }
     );
-    assert.equal(firstApproval.status, 200);
+    assert.equal(
+      firstApproval.status,
+      200,
+      JSON.stringify(await responseJson(firstApproval))
+    );
     const firstOrder = await prisma.order.findUniqueOrThrow({
       where: { id: verificationOrderId },
       select: {

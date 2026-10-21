@@ -164,7 +164,6 @@ export function verifyPayHereNotificationSignature(input: {
 export function assertPaymentMethodConfigured(method: PaymentMethod): void {
   if (method === "bank") {
     getBankTransferDetails();
-    getWhatsAppBusinessNumber();
   }
   if (method === "card") {
     throw new PaymentConfigurationError(

@@ -18,6 +18,56 @@ type RouteContext = {
 };
 
 class ReceiptOrderConflictError extends Error {}
+class ReceiptPayloadTooLargeError extends Error {}
+class InvalidReceiptFormError extends Error {}
+
+const MAX_RECEIPT_REQUEST_BYTES = MAX_PAYMENT_RECEIPT_BYTES + 100_000;
+
+async function readReceiptForm(request: Request): Promise<FormData> {
+  const contentType = request.headers.get("content-type");
+  if (!contentType?.toLowerCase().startsWith("multipart/form-data;")) {
+    throw new InvalidReceiptFormError();
+  }
+
+  const reader = request.body?.getReader();
+  if (!reader) throw new InvalidReceiptFormError();
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_RECEIPT_REQUEST_BYTES) {
+        await reader.cancel();
+        throw new ReceiptPayloadTooLargeError();
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const body = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return await new Response(body, {
+      headers: { "Content-Type": contentType },
+    }).formData();
+  } catch (error) {
+    if (error instanceof TypeError || error instanceof SyntaxError) {
+      throw new InvalidReceiptFormError();
+    }
+    throw error;
+  }
+}
 
 export async function POST(request: Request, { params }: RouteContext) {
   const auth = await requireCustomerApiWithProfileCheck();
@@ -38,7 +88,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const contentLength = Number(request.headers.get("content-length"));
   if (
     Number.isFinite(contentLength) &&
-    contentLength > MAX_PAYMENT_RECEIPT_BYTES + 100_000
+    contentLength > MAX_RECEIPT_REQUEST_BYTES
   ) {
     return NextResponse.json(
       { error: "Receipt files must be 10 MB or smaller." },
@@ -54,6 +104,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         id: true,
         paymentMethod: true,
         paymentStatus: true,
+        paymentExpiresAt: true,
         status: true,
       },
     });
@@ -63,6 +114,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     if (order.paymentMethod !== "bank") {
       return NextResponse.json(
         { error: "Receipts can only be uploaded for bank-transfer orders." },
+        { status: 409 }
+      );
+    }
+    if (!order.paymentExpiresAt || order.paymentExpiresAt.getTime() <= Date.now()) {
+      return NextResponse.json(
+        { error: "The payment window expired. Contact Primezora for assistance." },
         { status: 409 }
       );
     }
@@ -78,7 +135,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
-    const form = await request.formData();
+    const form = await readReceiptForm(request);
     const file = form.get("file");
     if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json(
@@ -109,12 +166,14 @@ export async function POST(request: Request, { params }: RouteContext) {
       buffer,
     });
 
+    const now = new Date();
     const submitted = await prisma.$transaction(async (tx) => {
       const changed = await tx.order.updateMany({
         where: {
           id: order.id,
           customerId,
           paymentMethod: "bank",
+          paymentExpiresAt: { gt: now },
           paymentStatus: { in: ["PAYMENT_PENDING", "PAYMENT_REJECTED"] },
           status: { not: "CANCELLED" },
         },
@@ -163,6 +222,18 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json(
         { error: "Order payment status changed. Refresh and try again." },
         { status: 409 }
+      );
+    }
+    if (error instanceof ReceiptPayloadTooLargeError) {
+      return NextResponse.json(
+        { error: "Receipt files must be 10 MB or smaller." },
+        { status: 413 }
+      );
+    }
+    if (error instanceof InvalidReceiptFormError || error instanceof SyntaxError) {
+      return NextResponse.json(
+        { error: "Choose a receipt image or PDF file." },
+        { status: 400 }
       );
     }
     console.error("CUSTOMER_PAYMENT_RECEIPT_UPLOAD_FAILED", error);

@@ -45,6 +45,7 @@ export default async function OrderSuccessPage({
       paymentMethod: true,
       paymentStatus: true,
       paymentReference: true,
+      paymentExpiresAt: true,
       currency: true,
       paymentReceipts: {
         select: { rejectionReason: true },
@@ -199,6 +200,13 @@ export default async function OrderSuccessPage({
                     <strong className="text-amber-500">{order.paymentReference ?? order.orderNumber}</strong>{" "}
                     as the payment reference. Your order remains unpaid until the incoming credit is independently verified.
                   </p>
+                  {order.paymentExpiresAt && (
+                    <p className="mt-3 text-xs leading-6 text-white/45">
+                      Payment reference expires{" "}
+                      {new Date(order.paymentExpiresAt).toLocaleString("en-LK")}.
+                      New receipt uploads are unavailable after that time.
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="mt-3 text-sm leading-7 text-amber-300">
@@ -210,7 +218,7 @@ export default async function OrderSuccessPage({
                 <div className="mt-6">
                   <a
                     href={`https://wa.me/${whatsappBusinessNumber}?text=${encodeURIComponent(
-                      `Hi Primezora! I would like to pay for order ${order.orderNumber} by bank transfer. Amount: LKR ${order.total.toLocaleString("en-LK")}. Please confirm the payment instructions.`
+                      `Hi Primezora! I would like to pay for order ${order.orderNumber} by bank transfer. Amount: LKR ${order.total.toLocaleString("en-LK")}. Payment reference: ${order.paymentReference ?? order.orderNumber}. Please confirm the payment instructions.`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

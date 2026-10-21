@@ -642,7 +642,7 @@ export default function CheckoutPage() {
                     <Landmark size={17} />
                   }
                   title="Bank Transfer"
-                  description="Transfer to our bank account and use your order number as the reference."
+                  description="Transfer to our bank account and use the unique payment reference shown after checkout."
                 />
 
               </div>

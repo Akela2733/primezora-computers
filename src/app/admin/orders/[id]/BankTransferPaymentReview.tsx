@@ -27,6 +27,7 @@ export default function BankTransferPaymentReview({
   orderId,
   paymentStatus,
   paymentReference,
+  paymentExpiresAt,
   total,
   receipts,
   auditEvents,
@@ -34,6 +35,7 @@ export default function BankTransferPaymentReview({
   orderId: string;
   paymentStatus: string | null;
   paymentReference: string | null;
+  paymentExpiresAt: Date | null;
   total: number;
   receipts: Receipt[];
   auditEvents: AuditEvent[];
@@ -99,6 +101,14 @@ export default function BankTransferPaymentReview({
           <Detail label="Payment status" value={paymentStatus ?? "PAYMENT_PENDING"} />
           <Detail label="Expected amount" value={`LKR ${total.toLocaleString("en-LK")}`} />
           <Detail label="Payment reference" value={paymentReference ?? "—"} />
+          <Detail
+            label="Payment reference expires"
+            value={
+              paymentExpiresAt
+                ? new Date(paymentExpiresAt).toLocaleString("en-LK")
+                : "Not set"
+            }
+          />
         </dl>
       </div>
 

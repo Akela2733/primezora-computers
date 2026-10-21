@@ -170,6 +170,7 @@ model Order {
   paymentMethod             String
   paymentStatus             PaymentStatus?
   paymentReference          String?              @unique
+  paymentExpiresAt          DateTime?
   paymentTransactionId      String?              @unique
   paymentVerifiedBy         String?
   paymentVerifiedAt         DateTime?

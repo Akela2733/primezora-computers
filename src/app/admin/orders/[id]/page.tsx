@@ -37,6 +37,7 @@ export default async function AdminOrderDetailPage({
       paymentMethod: true,
       paymentStatus: true,
       paymentReference: true,
+      paymentExpiresAt: true,
       status: true,
       createdAt: true,
       items: {
@@ -175,6 +176,7 @@ export default async function AdminOrderDetailPage({
                 orderId={order.id}
                 paymentStatus={order.paymentStatus}
                 paymentReference={order.paymentReference}
+                paymentExpiresAt={order.paymentExpiresAt}
                 total={order.total}
                 receipts={order.paymentReceipts}
                 auditEvents={order.paymentAuditEvents}

@@ -40,6 +40,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         paymentMethod: true,
         paymentStatus: true,
         paymentReference: true,
+        paymentExpiresAt: true,
         currency: true,
         paymentReceipts: {
           select: {
