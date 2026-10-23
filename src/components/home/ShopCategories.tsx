@@ -16,7 +16,7 @@ export async function ShopCategories() {
   const categoryContent = content.home.categories;
 
   return (
-    <section id="home-categories" className="scroll-reveal relative overflow-hidden border-y border-white/10 bg-[#050708] py-8 sm:py-10">
+    <section id="home-categories" data-motion-reveal className="relative overflow-hidden border-y border-white/10 bg-[#050708] py-8 sm:py-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,rgba(217,119,6,0.08),transparent_48%)]" />
 
       <div className="container-primezora relative grid gap-5 md:grid-cols-[minmax(145px,0.8fr)_minmax(0,2fr)] md:items-center lg:grid-cols-[210px_minmax(0,1fr)] xl:gap-7">
@@ -44,14 +44,15 @@ export async function ShopCategories() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
+        <div data-motion-stagger className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
           {categories.length > 0 ? (
             categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/categories/${normalizeCategorySlug(category.slug)}`}
                 aria-label={`Shop ${category.name}`}
-                className="scroll-reveal-item home-category-card group relative isolate flex h-44 flex-col justify-end overflow-hidden rounded-sm border border-white/10 bg-[#030505] p-3 transition duration-300 hover:-translate-y-1 hover:border-orange-500/60 sm:h-48 sm:p-3.5 lg:h-48"
+                data-motion-reveal
+                className="home-category-card group relative isolate flex h-44 flex-col justify-end overflow-hidden rounded-sm border border-white/10 bg-[#030505] p-3 transition duration-300 hover:-translate-y-1 hover:border-orange-500/60 sm:h-48 sm:p-3.5 lg:h-48"
               >
                 <div
                   aria-hidden="true"

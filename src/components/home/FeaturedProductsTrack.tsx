@@ -18,7 +18,7 @@ export default function FeaturedProductsTrack({
   const trackRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="relative overflow-hidden border-y border-amber-600/10 bg-[#030505] py-10 sm:py-12">
+    <section data-motion-reveal className="relative overflow-hidden border-y border-amber-600/10 bg-[#030505] py-10 sm:py-12">
       <div className="container-primezora relative">
         <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
           <div>
@@ -40,7 +40,7 @@ export default function FeaturedProductsTrack({
 
         {products.length > 0 ? (
           <div className="grid grid-cols-[minmax(0,1fr)_24px] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_32px]">
-            <div ref={trackRef} className="featured-products-track">
+            <div ref={trackRef} data-motion-stagger className="featured-products-track">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

@@ -7,6 +7,7 @@ import {
   Headphones,
   Headset,
 } from "lucide-react";
+import { PointerSpotlight } from "@/components/animations/ScrollMotion";
 import { getStorefrontContent } from "@/lib/storefront-content";
 
 export async function Hero() {
@@ -16,16 +17,17 @@ export async function Hero() {
   const hero = content.home.hero;
 
   return (
-    <section className="scroll-reveal relative isolate overflow-hidden bg-[#030505] text-white/90">
+    <section data-motion-reveal className="relative isolate overflow-hidden bg-[#030505] text-white/90">
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-20 bg-cover bg-[58%_center] md:bg-center"
+        className="home-hero-parallax absolute inset-0 -z-20 bg-cover bg-[58%_center] md:bg-center"
         style={{
           backgroundImage: 'url("/banners/hero%20section%20background%20image.png")',
         }}
       />
        <div className="absolute inset-0 bg-linear-to-r from-[#030505]/50 via-[#030505]/10 to-[#030505]/20" /> 
       <div className="absolute inset-0 bg-linear-to-t from-[#030505]/65 via-transparent to-[#030505]/10" />
+      <PointerSpotlight />
 
       <div className="container-primezora relative grid min-h-[540px] grid-cols-1 content-center gap-x-10 gap-y-10 py-12 sm:min-h-[580px] md:min-h-[clamp(420px,42vw,640px)] md:grid-cols-[minmax(0,1fr)_190px] md:items-center md:py-12">
         <div className="home-hero-copy max-w-[410px]">
@@ -59,14 +61,14 @@ export async function Hero() {
         </div>
 
         <nav aria-label="Explore Primezora" className="hidden md:block">
-          <ul className="space-y-5">
+          <ul data-motion-stagger className="space-y-5">
             {[
               { label: "Gaming PCs", detail: "Play Beyond Limits", href: "/shop", icon: Gamepad2 },
               { label: "PC Components", detail: "Build with Confidence", href: "/shop", icon: Boxes },
               { label: "Accessories", detail: "Small Gear. Big Impact", href: "/shop", icon: Headphones },
               { label: "Support", detail: "We're Always Here", href: "/contact", icon: Headset },
             ].map((item) => (
-              <li key={item.label} className="scroll-reveal-item">
+              <li key={item.label} data-motion-reveal>
                 <Link
                   href={item.href}
                   className="group flex items-center gap-3 transition"

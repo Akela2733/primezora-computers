@@ -115,9 +115,10 @@ export async function TrustedBrands() {
     <>
       <section
         aria-label="Shopping benefits"
-        className="scroll-reveal border-y border-white/10 bg-[#030505]"
+        data-motion-reveal
+        className="border-y border-white/10 bg-[#030505]"
       >
-        <div className="container-primezora grid divide-y divide-white/10 py-2 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+        <div data-motion-stagger className="container-primezora grid divide-y divide-white/10 py-2 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
           {benefits.map((benefit, index) => {
             const Icon = benefitIcons[benefit.icon];
             if (!Icon) {
@@ -127,7 +128,8 @@ export async function TrustedBrands() {
             return (
               <div
                 key={`${benefit.title}-${index}`}
-                className="scroll-reveal-item flex items-center gap-3 py-3 sm:px-3 lg:px-5"
+                data-motion-reveal
+                className="flex items-center gap-3 py-3 sm:px-3 lg:px-5"
               >
                 <Icon
                   size={19}
@@ -151,7 +153,8 @@ export async function TrustedBrands() {
       {brands.length > 0 && (
         <section
           aria-labelledby="trusted-brands-heading"
-          className="scroll-reveal overflow-hidden border-b border-white/10 bg-[#030505] py-3 sm:py-4"
+          data-motion-reveal
+          className="overflow-hidden border-b border-white/10 bg-[#030505] py-3 sm:py-4"
         >
           <div className="mb-2 px-4 sm:mb-3">
             <h2

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { connection } from "next/server";
 import { Footer } from "@/components/layout/Footer";
+import { ScrollMotion } from "@/components/animations/ScrollMotion";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { getCatalogCategories } from "@/lib/categories";
@@ -55,6 +56,7 @@ export default async function RootLayout({
     <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
 
       <body>
+        <ScrollMotion />
         <CartProvider>
           <WishlistProvider>
             <Header

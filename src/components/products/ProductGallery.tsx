@@ -25,7 +25,7 @@ export default function ProductGallery({
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square overflow-hidden border border-white/[0.07] bg-[#030505]">
+      <div data-motion-reveal className="relative aspect-square overflow-hidden border border-white/[0.07] bg-[#030505]">
         {activeImage ? (
           <Image
             src={activeImage}

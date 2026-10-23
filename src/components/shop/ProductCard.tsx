@@ -7,7 +7,7 @@ import {
   Heart,
   Star,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, type PointerEvent } from "react";
 
 import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
@@ -35,6 +35,26 @@ export function ProductCard({
     product.stockQuantity ?? product.stock ?? 0;
   const isPurchasable =
     product.inStock && stockQuantity > 0;
+
+  const handleCardPointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (
+      event.pointerType !== "mouse" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--card-tilt-x", `${y * -5}deg`);
+    event.currentTarget.style.setProperty("--card-tilt-y", `${x * 6}deg`);
+  };
+
+  const resetCardTilt = (event: PointerEvent<HTMLElement>) => {
+    event.currentTarget.style.setProperty("--card-tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--card-tilt-y", "0deg");
+  };
 
   const badgeStyle =
     product.badge === "NEW"
@@ -73,7 +93,10 @@ export function ProductCard({
 
   return (
     <article
-      className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border border-white/10 bg-[#050707] transition-colors duration-300 hover:border-amber-600/50"
+      data-motion-reveal
+      onPointerMove={handleCardPointerMove}
+      onPointerLeave={resetCardTilt}
+      className="product-card group relative flex h-full min-w-0 flex-col overflow-hidden rounded-md border border-white/10 bg-[#050707] hover:border-amber-600/50"
     >
       {/* Product Image */}
       <div

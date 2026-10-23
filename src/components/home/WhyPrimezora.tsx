@@ -13,7 +13,7 @@ export async function WhyPrimezora() {
       : why.image;
 
   return (
-    <section className="scroll-reveal relative isolate overflow-hidden border-y border-amber-600/15 bg-[#030505] text-white/90">
+    <section data-motion-reveal className="relative isolate overflow-hidden border-y border-amber-600/15 bg-[#030505] text-white/90">
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-20 bg-cover bg-[38%_center] md:bg-left"

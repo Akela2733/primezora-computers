@@ -141,7 +141,7 @@ function SearchPageContent({
             </div>
 
             {results.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div data-motion-stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {results.map((product) => (
                   <ProductCard
                     key={product.id}
