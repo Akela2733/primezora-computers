@@ -148,18 +148,40 @@ export default async function OrderSuccessPage({
               </span>
             </div>
 
-            <Link
-              href="/shop"
-              className="mt-10 inline-flex items-center gap-2 bg-amber-600 px-7 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
-            >
-              Continue Shopping
-              <ArrowRight size={14} />
-            </Link>
+            {order.paymentMethod === "bank" &&
+            order.paymentStatus !== "PAID" ? (
+              <div className="mt-10 flex flex-col items-center gap-4">
+                <Link
+                  href="#bank-transfer-details"
+                  className="inline-flex min-h-11 items-center gap-2 bg-amber-600 px-7 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-500"
+                >
+                  View bank details &amp; upload receipt
+                  <ArrowRight size={14} />
+                </Link>
+                <Link
+                  href="/shop"
+                  className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/45 transition hover:text-white/75"
+                >
+                  Continue Shopping
+                </Link>
+              </div>
+            ) : (
+              <Link
+                href="/shop"
+                className="mt-10 inline-flex items-center gap-2 bg-amber-600 px-7 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
+              >
+                Continue Shopping
+                <ArrowRight size={14} />
+              </Link>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="container-primezora py-12 sm:py-16">
+      <section
+        id="bank-transfer-details"
+        className="container-primezora scroll-mt-8 py-12 sm:py-16"
+      >
         <div className="mx-auto max-w-2xl border border-white/[0.07] bg-[#030505] p-8 text-center">
           <Package
             size={34}
