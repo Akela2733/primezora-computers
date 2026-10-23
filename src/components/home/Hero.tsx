@@ -16,7 +16,7 @@ export async function Hero() {
   const hero = content.home.hero;
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#030505] text-white/90">
+    <section className="scroll-reveal relative isolate overflow-hidden bg-[#030505] text-white/90">
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-20 bg-cover bg-[58%_center] md:bg-center"
@@ -28,7 +28,7 @@ export async function Hero() {
       <div className="absolute inset-0 bg-linear-to-t from-[#030505]/65 via-transparent to-[#030505]/10" />
 
       <div className="container-primezora relative grid min-h-[540px] grid-cols-1 content-center gap-x-10 gap-y-10 py-12 sm:min-h-[580px] md:min-h-[clamp(420px,42vw,640px)] md:grid-cols-[minmax(0,1fr)_190px] md:items-center md:py-12">
-        <div className="max-w-[410px]">
+        <div className="home-hero-copy max-w-[410px]">
           <p className="mb-4 whitespace-pre-line font-display text-[9px] font-bold uppercase tracking-[0.25em] text-emerald-500 sm:text-[10px]">
             {hero.eyebrow}
           </p>
@@ -66,7 +66,7 @@ export async function Hero() {
               { label: "Accessories", detail: "Small Gear. Big Impact", href: "/shop", icon: Headphones },
               { label: "Support", detail: "We're Always Here", href: "/contact", icon: Headset },
             ].map((item) => (
-              <li key={item.label}>
+              <li key={item.label} className="scroll-reveal-item">
                 <Link
                   href={item.href}
                   className="group flex items-center gap-3 transition"

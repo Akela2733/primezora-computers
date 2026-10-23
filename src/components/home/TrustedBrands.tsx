@@ -30,6 +30,15 @@ const brandLogos: Record<string, IconType> = {
   redragon: SiRedragon,
 };
 
+const featuredBrands = [
+  "ASUS",
+  "AMD",
+  "Redragon",
+  "Logitech",
+  "Corsair",
+  "HyperX",
+];
+
 const benefitIcons: Record<string, LucideIcon> = {
   BadgeCheck,
   CreditCard,
@@ -94,14 +103,19 @@ export async function TrustedBrands() {
 
   if (!content) return null;
 
-  const brands = brandRecords.map(({ brand }) => brand);
+  const brands = [
+    ...new Set([
+      ...brandRecords.map(({ brand }) => brand),
+      ...featuredBrands,
+    ]),
+  ];
   const benefits = content.home.hero.benefits;
 
   return (
     <>
       <section
         aria-label="Shopping benefits"
-        className="border-y border-white/10 bg-[#030505]"
+        className="scroll-reveal border-y border-white/10 bg-[#030505]"
       >
         <div className="container-primezora grid divide-y divide-white/10 py-2 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
           {benefits.map((benefit, index) => {
@@ -113,7 +127,7 @@ export async function TrustedBrands() {
             return (
               <div
                 key={`${benefit.title}-${index}`}
-                className="flex items-center gap-3 py-3 sm:px-3 lg:px-5"
+                className="scroll-reveal-item flex items-center gap-3 py-3 sm:px-3 lg:px-5"
               >
                 <Icon
                   size={19}
@@ -137,7 +151,7 @@ export async function TrustedBrands() {
       {brands.length > 0 && (
         <section
           aria-labelledby="trusted-brands-heading"
-          className="overflow-hidden border-b border-white/10 bg-[#030505] py-3 sm:py-4"
+          className="scroll-reveal overflow-hidden border-b border-white/10 bg-[#030505] py-3 sm:py-4"
         >
           <div className="mb-2 px-4 sm:mb-3">
             <h2

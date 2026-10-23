@@ -566,25 +566,16 @@ export default function CheckoutPage() {
                     </p>
 
                     <p className="mt-2 text-sm leading-7 text-white/50">
-                      Place your order online and
-                      visit the Primezora store to
-                      collect your items.
+                      Contact us to confirm the collection location before
+                      visiting the store.
                     </p>
 
-                    <div className="mt-4 border-t border-white/[0.07] pt-4">
-                      <p className="text-[9px] uppercase tracking-[0.15em] text-white/30">
-                        Store Address
-                      </p>
-
-                      <p className="mt-2 text-sm text-white/70">
-                        Primezora Technologies
-                      </p>
-
-                      <p className="mt-1 text-xs leading-6 text-white/40">
-                        Store address will be added
-                        here.
-                      </p>
-                    </div>
+                    <Link
+                      href="/contact"
+                      className="mt-3 inline-flex min-h-9 items-center text-xs font-semibold text-orange-400 underline underline-offset-4 transition hover:text-orange-300"
+                    >
+                      Contact us about store pickup
+                    </Link>
                   </div>
                 </div>
               </section>

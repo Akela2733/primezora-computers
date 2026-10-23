@@ -21,7 +21,7 @@ const faqs = [
   {
     question: "What are my delivery options?",
     answer:
-      "Contact us with your delivery location and the items you’re interested in, and we’ll confirm the available options.",
+      "Islandwide delivery is available across Sri Lanka. Choose delivery at checkout to see the fee and enter your address.",
   },
   {
     question: "Can I return or exchange a product?",
@@ -36,7 +36,7 @@ const faqs = [
   {
     question: "How can I track my order?",
     answer:
-      "Visit your account’s orders page or contact our team with your order number for help.",
+      "Use the Track Order page with your order number and the email address you entered at checkout.",
   },
 ];
 

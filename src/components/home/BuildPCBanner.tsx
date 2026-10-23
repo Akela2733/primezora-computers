@@ -155,7 +155,7 @@ export default function BuildPCBanner() {
   return (
     <section
       aria-label="Build your dream PC"
-      className="relative overflow-hidden border-y border-white/10 bg-[#030505] py-6 sm:py-8"
+      className="scroll-reveal relative overflow-hidden border-y border-white/10 bg-[#030505] py-6 sm:py-8"
     >
       <div className="container-primezora">
         <BuildPCShowcase />

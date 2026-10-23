@@ -99,8 +99,6 @@ export function Header({
                 <NavLink href="/shop" label={navigation.shopLabel} />
               </>
             )}
-            <NavLink href="/shop" label="Build Your PC" />
-            <NavLink href="/shop" label="Gaming" />
             <NavLink href="/about" label="About" />
             <NavLink href="/contact" label="Contact" />
           </nav>
@@ -401,17 +399,6 @@ export function Header({
                   />
                 </>
               )}
-              <MobileLink
-                href="/shop"
-                label="Build Your PC"
-                closeMenu={() => setMobileMenuOpen(false)}
-              />
-              <MobileLink
-                href="/shop"
-                label="Gaming"
-                closeMenu={() => setMobileMenuOpen(false)}
-              />
-
               <MobileLink
                 href="/about"
                 label="About"

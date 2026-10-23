@@ -248,14 +248,6 @@ export default async function OrderSuccessPage({
                   >
                     Message Primezora on WhatsApp
                   </a>
-                  <p className="mx-auto mt-3 max-w-md text-[10px] leading-5 text-white/40">
-                    WhatsApp opens a prefilled message; you must press Send.
-                    Order-specific replies are manually sent by Primezora using
-                    the WhatsApp Business app. Configure a saved Quick Reply
-                    with the bank details and payment instructions in that
-                    app; it does not read order data or create automatic
-                    order-specific replies.
-                  </p>
                 </div>
               )}
               <BankTransferReceiptUpload

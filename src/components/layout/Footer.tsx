@@ -37,8 +37,14 @@ export async function Footer() {
             </Link>
           </div>
 
-          <FooterColumn title={footer.quickLinksTitle} links={footer.quickLinks} />
-          <FooterColumn title="Support" links={footer.helpLinks} />
+          <FooterColumn
+            title={footer.quickLinksTitle}
+            links={footer.quickLinks.filter(({ label }) => !isRemovedNavigationLink(label))}
+          />
+          <FooterColumn
+            title="Support"
+            links={footer.helpLinks.filter(({ label }) => !isRemovedNavigationLink(label))}
+          />
 
           <div className="min-w-0">
             <FooterHeading>{footer.updatesTitle}</FooterHeading>
@@ -80,6 +86,11 @@ export async function Footer() {
       </div>
     </footer>
   );
+}
+
+function isRemovedNavigationLink(label: string): boolean {
+  const normalizedLabel = label.trim().toLowerCase();
+  return normalizedLabel === "gaming" || normalizedLabel === "build your pc";
 }
 
 function FooterHeading({ children }: { children: React.ReactNode }) {
