@@ -418,55 +418,6 @@ html[data-motion-ready="true"] [data-motion-reveal][data-motion-visible="true"] 
   }
 }
 
-.product-card,
-.home-category-card,
-article[class*="rounded"][class*="border"],
-div[class*="rounded-xl"][class*="border"],
-section[class*="rounded-xl"][class*="border"] {
-  position: relative;
-  isolation: isolate;
-}
-
-.product-card::before,
-.home-category-card::before,
-article[class*="rounded"][class*="border"]::before,
-div[class*="rounded-xl"][class*="border"]::before,
-section[class*="rounded-xl"][class*="border"]::before {
-  position: absolute;
-  z-index: -1;
-  inset: 1px;
-  border-radius: inherit;
-  background:
-    radial-gradient(ellipse at 50% 100%, rgba(249, 115, 22, 0.22), transparent 68%),
-    linear-gradient(180deg, rgba(249, 115, 22, 0.09), rgba(217, 119, 6, 0.2));
-  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-  content: "";
-  pointer-events: none;
-  transition: clip-path 780ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .product-card:hover::before,
-  .home-category-card:hover::before,
-  article[class*="rounded"][class*="border"]:hover::before,
-  div[class*="rounded-xl"][class*="border"]:hover::before,
-  section[class*="rounded-xl"][class*="border"]:hover::before {
-    clip-path: polygon(
-      0 77%,
-      12% 74%,
-      24% 78%,
-      38% 73%,
-      52% 77%,
-      66% 74%,
-      80% 78%,
-      92% 75%,
-      100% 77%,
-      100% 100%,
-      0 100%
-    );
-  }
-}
-
 .product-card {
   --card-tilt-x: 0deg;
   --card-tilt-y: 0deg;
@@ -583,22 +534,6 @@ section[class*="rounded-xl"][class*="border"]::before {
   .tilt-card {
     transform: none !important;
     transition: none !important;
-  }
-
-  .product-card::before,
-  .home-category-card::before,
-  article[class*="rounded"][class*="border"]::before,
-  div[class*="rounded-xl"][class*="border"]::before,
-  section[class*="rounded-xl"][class*="border"]::before {
-    transition: none;
-  }
-
-  .product-card:hover::before,
-  .home-category-card:hover::before,
-  article[class*="rounded"][class*="border"]:hover::before,
-  div[class*="rounded-xl"][class*="border"]:hover::before,
-  section[class*="rounded-xl"][class*="border"]:hover::before {
-    clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
   }
 
   .brand-marquee-track {
@@ -843,10 +778,71 @@ section[class*="rounded-xl"][class*="border"]::before {
   z-index: 2;
   width: min(230px, 24%);
   transform: translateY(-50%);
+  perspective: 1200px;
+}
+
+.buildpc-stage__hanger {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 2px;
+  height: 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(251, 146, 60, 0.7));
+  border-radius: 999px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(251, 146, 60, 0.45);
+}
+
+.buildpc-stage__hanger::before,
+.buildpc-stage__hanger::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.buildpc-stage__hanger::before {
+  top: -2px;
+}
+
+.buildpc-stage__hanger::after {
+  bottom: -2px;
+}
+
+.buildpc-stage__panel-inner {
+  position: relative;
+  min-height: 190px;
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.buildpc-stage__panel:hover .buildpc-stage__panel-inner,
+.buildpc-stage__panel:focus-within .buildpc-stage__panel-inner {
+  transform: rotateY(180deg);
+}
+
+.buildpc-stage__panel-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  backface-visibility: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(3, 5, 5, 0.86);
   padding: 16px;
   backdrop-filter: blur(12px);
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.18);
+}
+
+.buildpc-stage__panel-face--back {
+  transform: rotateY(180deg);
+  background:
+    linear-gradient(180deg, rgba(17, 18, 19, 0.95), rgba(3, 5, 5, 0.9)),
+    rgba(3, 5, 5, 0.86);
 }
 
 .buildpc-stage__panel-eyebrow {
@@ -889,12 +885,19 @@ section[class*="rounded-xl"][class*="border"]::before {
   font-size: 8px;
 }
 
+.buildpc-stage__panel-message {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
 .buildpc-stage__panel-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 11px;
   color: #fb923c;

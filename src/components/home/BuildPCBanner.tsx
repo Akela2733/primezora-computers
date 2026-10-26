@@ -131,17 +131,32 @@ function BuildPCShowcase() {
           Explore PC parts <ArrowRight size={14} />
         </Link>
       </div>
-      <aside className="buildpc-stage__panel">
-        <p className="buildpc-stage__panel-eyebrow">Your next setup</p>
-        <h3>Built around you.</h3>
-        <ol>
-          <li><span>01</span> Choose your components</li>
-          <li><span>02</span> Find your perfect upgrade</li>
-          <li><span>03</span> Shop trusted PC parts</li>
-        </ol>
-        <Link href="/shop" className="buildpc-stage__panel-link">
-          Browse components <ArrowRight size={13} />
-        </Link>
+      <aside className="buildpc-stage__panel" aria-label="Explore PC components">
+        <span className="buildpc-stage__hanger" aria-hidden="true" />
+        <div className="buildpc-stage__panel-inner">
+          <div className="buildpc-stage__panel-face buildpc-stage__panel-face--front">
+            <p className="buildpc-stage__panel-eyebrow">Your next setup</p>
+            <h3>Built around you.</h3>
+            <ol>
+              <li><span>01</span> Choose your components</li>
+              <li><span>02</span> Find your perfect upgrade</li>
+              <li><span>03</span> Shop trusted PC parts</li>
+            </ol>
+            <Link href="/shop" className="buildpc-stage__panel-link">
+              Browse components <ArrowRight size={13} />
+            </Link>
+          </div>
+          <div className="buildpc-stage__panel-face buildpc-stage__panel-face--back">
+            <p className="buildpc-stage__panel-eyebrow">Primezora / performance systems</p>
+            <h3>Make it yours.</h3>
+            <p className="buildpc-stage__panel-message">
+              Find the right parts for your next build, upgrade, or setup.
+            </p>
+            <Link href="/shop" className="buildpc-stage__panel-link">
+              Build. Upgrade. Play. <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
       </aside>
       <div className="buildpc-stage__frame" aria-hidden="true">
         <span>PRIMEZORA / PERFORMANCE SYSTEMS</span>
