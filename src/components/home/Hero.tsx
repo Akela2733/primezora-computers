@@ -15,6 +15,7 @@ export async function Hero() {
   if (!content) return null;
 
   const hero = content.home.hero;
+  let characterIndex = 0;
 
   return (
     <section data-motion-reveal className="relative isolate overflow-hidden bg-[#030505] text-white/90">
@@ -29,19 +30,34 @@ export async function Hero() {
       <div className="absolute inset-0 bg-linear-to-t from-[#030505]/65 via-transparent to-[#030505]/10" />
       <PointerSpotlight />
 
-      <div className="container-primezora relative grid min-h-[540px] grid-cols-1 content-center gap-x-10 gap-y-10 py-12 sm:min-h-[580px] md:min-h-[clamp(420px,42vw,640px)] md:grid-cols-[minmax(0,1fr)_190px] md:items-center md:py-12">
+      <div className="container-primezora relative grid min-h-[540px] grid-cols-1 content-center gap-x-10 gap-y-10 py-12 sm:min-h-[580px] md:min-h-[clamp(420px,42vw,640px)] md:grid-cols-[minmax(0,1fr)_220px] md:items-center md:py-12">
         <div className="home-hero-copy max-w-[410px]">
           <p className="mb-4 whitespace-pre-line font-display text-[9px] font-bold uppercase tracking-[0.25em] text-emerald-500 sm:text-[10px]">
             {hero.eyebrow}
           </p>
 
-          <h1 className="font-display text-[38px] font-bold uppercase leading-[0.99] tracking-[-0.045em] text-white sm:text-5xl md:text-[clamp(42px,5vw,64px)]">
+          <h1
+            aria-label={hero.titleLines.join(" ")}
+            className="home-hero-title font-display text-[38px] font-bold uppercase leading-[0.99] tracking-[-0.045em] text-white sm:text-5xl md:text-[clamp(42px,5vw,64px)]"
+          >
             {hero.titleLines.map((line, index) => (
               <span
                 key={`${index}-${line}`}
+                aria-hidden="true"
                 className={index === hero.accentLine ? "text-orange-500" : undefined}
               >
-                {line}
+                {Array.from(line).map((character) => {
+                  const currentIndex = characterIndex++;
+                  return (
+                    <span
+                      key={`${currentIndex}-${character}`}
+                      className="home-hero-title-character"
+                      style={{ animationDelay: `${200 + currentIndex * 38}ms` }}
+                    >
+                      {character === " " ? "\u00a0" : character}
+                    </span>
+                  );
+                })}
                 {index < hero.titleLines.length - 1 && <br />}
               </span>
             ))}
@@ -60,8 +76,8 @@ export async function Hero() {
           </Link>
         </div>
 
-        <nav aria-label="Explore Primezora" className="hidden md:block">
-          <ul data-motion-stagger className="space-y-5">
+        <nav aria-label="Explore Primezora" className="hero-shortcut-nav hidden md:block">
+          <ul data-motion-stagger className="hero-shortcut-list">
             {[
               { label: "Gaming PCs", detail: "Play Beyond Limits", href: "/shop", icon: Gamepad2 },
               { label: "PC Components", detail: "Build with Confidence", href: "/shop", icon: Boxes },
@@ -71,20 +87,21 @@ export async function Hero() {
               <li key={item.label} data-motion-reveal>
                 <Link
                   href={item.href}
-                  className="group flex items-center gap-3 transition"
+                  title={item.label}
+                  className="hero-shortcut-link group"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-orange-500/60 text-orange-400 transition group-hover:bg-orange-500/15">
-                    <item.icon size={15} strokeWidth={1.7} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block whitespace-nowrap font-display text-[10px] font-semibold text-white/90">
+                  <span className="hero-shortcut-copy">
+                    <span className="block whitespace-nowrap font-display text-[10px] font-semibold text-white/95">
                       {item.label}
                     </span>
-                    <span className="mt-1 block whitespace-nowrap text-[9px] text-white/55">
+                    <span className="mt-1 block whitespace-nowrap text-[9px] text-white/65">
                       {item.detail}
                     </span>
                   </span>
-                  <ArrowUpRight size={12} className="ml-auto text-orange-400 opacity-0 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+                  <span className="hero-shortcut-icon">
+                    <item.icon size={16} strokeWidth={1.7} />
+                  </span>
+                  <ArrowUpRight size={12} className="hero-shortcut-arrow" />
                 </Link>
               </li>
             ))}

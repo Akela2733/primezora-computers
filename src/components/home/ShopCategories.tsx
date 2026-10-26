@@ -52,7 +52,8 @@ export async function ShopCategories() {
                 href={`/categories/${normalizeCategorySlug(category.slug)}`}
                 aria-label={`Shop ${category.name}`}
                 data-motion-reveal
-                className="home-category-card group relative isolate flex h-44 flex-col justify-end overflow-hidden rounded-sm border border-white/10 bg-[#030505] p-3 transition duration-300 hover:-translate-y-1 hover:border-orange-500/60 sm:h-48 sm:p-3.5 lg:h-48"
+                data-tilt-card
+                className="home-category-card tilt-card group relative isolate flex h-44 flex-col justify-end overflow-hidden rounded-sm border border-white/10 bg-[#030505] p-3 transition duration-300 hover:-translate-y-1 hover:border-orange-500/60 sm:h-48 sm:p-3.5 lg:h-48"
               >
                 <div
                   aria-hidden="true"

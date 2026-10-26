@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, BellRing, Check, LoaderCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Bell, BellRing, Check, LoaderCircle, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type NotificationItem = {
   id: string;
@@ -24,12 +24,39 @@ const TYPE_LABELS: Record<NotificationItem["notification"]["type"], string> = {
   ORDER_UPDATE: "Order update",
 };
 
+type ReadFilter = "all" | "unread" | "read";
+
+function getLocalDateKey(value: string): string {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function NotificationInbox() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [readFilter, setReadFilter] = useState<ReadFilter>("all");
+  const [dateFilter, setDateFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const filteredNotifications = useMemo(
+    () =>
+      notifications.filter((item) => {
+        const matchesReadStatus =
+          readFilter === "all" ||
+          (readFilter === "unread" ? !item.readAt : Boolean(item.readAt));
+        const matchesDate =
+          !dateFilter ||
+          getLocalDateKey(item.notification.createdAt) === dateFilter;
+
+        return matchesReadStatus && matchesDate;
+      }),
+    [dateFilter, notifications, readFilter]
+  );
 
   const loadNotifications = useCallback(async () => {
     const response = await fetch("/api/customer/notifications", {
@@ -136,12 +163,87 @@ export function NotificationInbox() {
           <LoaderCircle size={18} className="mr-2 animate-spin text-amber-600" />
           Loading notifications…
         </div>
-      ) : notifications.length ? (
+      ) : (
         <>
+          <div className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 sm:p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                aria-label="Filter notifications by read status"
+                className="flex flex-wrap gap-2"
+              >
+                {([
+                  ["all", "All"],
+                  ["unread", "Unread"],
+                  ["read", "Read"],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={readFilter === value}
+                    onClick={() => setReadFilter(value)}
+                    className={`min-h-9 rounded-lg border px-3 text-[11px] font-semibold transition ${
+                      readFilter === value
+                        ? "border-amber-600/40 bg-amber-600/[0.1] text-amber-500"
+                        : "border-white/[0.08] text-white/55 hover:border-white/20 hover:text-white/80"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <label className="flex min-h-9 items-center gap-2 text-[11px] text-white/45">
+                <span>On date</span>
+                <input
+                  type="date"
+                  aria-label="Filter notifications by date"
+                  value={dateFilter}
+                  onChange={(event) => setDateFilter(event.target.value)}
+                  className="min-h-9 rounded-lg border border-white/[0.1] bg-[#030505] px-2 text-[11px] text-white/75 [color-scheme:dark] focus:border-amber-600/40 focus:outline-none"
+                />
+                {dateFilter && (
+                  <button
+                    type="button"
+                    aria-label="Clear date filter"
+                    onClick={() => setDateFilter("")}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-white/45 transition hover:bg-white/[0.05] hover:text-white"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {notifications.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#030505] px-5 py-12 text-center">
+              <Bell size={24} className="mx-auto text-white/35" />
+              <h2 className="mt-4 font-display text-base font-semibold text-white/80">
+                No notifications yet
+              </h2>
+              <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-white/45">
+                Store announcements, wishlist restock alerts and order updates will
+                appear here.
+              </p>
+            </div>
+          ) : filteredNotifications.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#030505] px-5 py-10 text-center">
+              <Bell size={22} className="mx-auto text-white/35" />
+              <h2 className="mt-3 font-display text-sm font-semibold text-white/80">
+                No matching notifications
+              </h2>
+              <p className="mt-2 text-xs leading-5 text-white/45">
+                Try a different read status or date.
+              </p>
+            </div>
+          ) : (
+            <>
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-xs text-white/45">
+              Showing {filteredNotifications.length} of {notifications.length}
+              {" · "}
               {unreadCount
-                ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`
+                ? `${unreadCount} unread`
                 : "You’re all caught up."}
             </p>
             {unreadCount > 0 && (
@@ -158,7 +260,7 @@ export function NotificationInbox() {
           </div>
 
           <div className="space-y-3">
-            {notifications.map((item) => {
+            {filteredNotifications.map((item) => {
               const content = (
                 <>
                   <div className="flex items-start gap-3">
@@ -240,18 +342,9 @@ export function NotificationInbox() {
               );
             })}
           </div>
+            </>
+          )}
         </>
-      ) : (
-        <div className="rounded-xl border border-dashed border-white/[0.1] bg-[#030505] px-5 py-12 text-center">
-          <Bell size={24} className="mx-auto text-white/35" />
-          <h2 className="mt-4 font-display text-base font-semibold text-white/80">
-            No notifications yet
-          </h2>
-          <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-white/45">
-            Store announcements, wishlist restock alerts and order updates will
-            appear here.
-          </p>
-        </div>
       )}
     </div>
   );

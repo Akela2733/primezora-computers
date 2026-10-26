@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import { connection } from "next/server";
 import { Footer } from "@/components/layout/Footer";
-import { ScrollMotion } from "@/components/animations/ScrollMotion";
+import { PointerTilt, ScrollMotion } from "@/components/animations/ScrollMotion";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { getCatalogCategories } from "@/lib/categories";
@@ -57,6 +57,7 @@ export default async function RootLayout({
 
       <body>
         <ScrollMotion />
+        <PointerTilt />
         <CartProvider>
           <WishlistProvider>
             <Header

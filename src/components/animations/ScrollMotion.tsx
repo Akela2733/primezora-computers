@@ -72,6 +72,59 @@ export function ScrollMotion() {
   return null;
 }
 
+export function PointerTilt() {
+  useEffect(() => {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      window.matchMedia("(hover: none)").matches
+    ) {
+      return;
+    }
+
+    let activeCard: HTMLElement | null = null;
+    const resetCard = (card: HTMLElement) => {
+      card.style.setProperty("--card-tilt-x", "0deg");
+      card.style.setProperty("--card-tilt-y", "0deg");
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      const target = event.target;
+      const card =
+        target instanceof Element
+          ? target.closest<HTMLElement>("[data-tilt-card]")
+          : null;
+
+      if (activeCard && activeCard !== card) resetCard(activeCard);
+      activeCard = card;
+      if (!card) return;
+
+      const bounds = card.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+      card.style.setProperty("--card-tilt-x", `${y * -5}deg`);
+      card.style.setProperty("--card-tilt-y", `${x * 6}deg`);
+    };
+
+    const resetActiveCard = () => {
+      if (activeCard) resetCard(activeCard);
+      activeCard = null;
+    };
+
+    document.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
+    window.addEventListener("blur", resetActiveCard);
+    return () => {
+      document.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("blur", resetActiveCard);
+      resetActiveCard();
+    };
+  }, []);
+
+  return null;
+}
+
 export function PointerSpotlight() {
   useEffect(() => {
     const element = document.querySelector<HTMLElement>(".home-pointer-spotlight");

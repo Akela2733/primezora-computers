@@ -53,7 +53,8 @@ export async function AboutSection() {
             return (
               <article
                 key={`${feature.title}-${index}`}
-                className={`group rounded-xl border border-white/[0.09] bg-[#030505]/75 p-5 transition hover:border-amber-600/30 hover:bg-amber-600/[0.025] sm:p-6 ${
+                data-tilt-card
+                className={`tilt-card group rounded-xl border border-white/[0.09] bg-[#030505]/75 p-5 transition hover:border-amber-600/30 hover:bg-amber-600/[0.025] sm:p-6 ${
                   index === 0 ? "sm:col-span-2" : ""
                 }`}
               >
