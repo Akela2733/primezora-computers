@@ -46,15 +46,36 @@ export async function Hero() {
                 aria-hidden="true"
                 className={index === hero.accentLine ? "text-orange-500" : undefined}
               >
-                {Array.from(line).map((character) => {
-                  const currentIndex = characterIndex++;
+                {line.split(/(\s+)/).map((word, wordIndex) => {
+                  if (/^\s+$/.test(word)) {
+                    return Array.from(word).map(() => {
+                      const currentIndex = characterIndex++;
+                      return (
+                        <span
+                          key={`${wordIndex}-${currentIndex}`}
+                          className="home-hero-title-character"
+                          style={{ animationDelay: `${200 + currentIndex * 38}ms` }}
+                        >
+                          {"\u00a0"}
+                        </span>
+                      );
+                    });
+                  }
+
                   return (
-                    <span
-                      key={`${currentIndex}-${character}`}
-                      className="home-hero-title-character"
-                      style={{ animationDelay: `${200 + currentIndex * 38}ms` }}
-                    >
-                      {character === " " ? "\u00a0" : character}
+                    <span key={`${wordIndex}-${word}`} className="inline-block whitespace-nowrap">
+                      {Array.from(word).map((character) => {
+                        const currentIndex = characterIndex++;
+                        return (
+                          <span
+                            key={`${currentIndex}-${character}`}
+                            className="home-hero-title-character"
+                            style={{ animationDelay: `${200 + currentIndex * 38}ms` }}
+                          >
+                            {character}
+                          </span>
+                        );
+                      })}
                     </span>
                   );
                 })}
@@ -69,10 +90,12 @@ export async function Hero() {
 
           <Link
             href={hero.actionHref}
-            className="group mt-6 inline-flex h-9 min-w-[158px] items-center justify-between gap-5 rounded-md bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-[#090909] transition hover:bg-orange-400"
+            className="primezora-button mt-6 min-w-[158px]"
           >
-            {hero.actionLabel}
-            <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+            <span>{hero.actionLabel}</span>
+            <span className="primezora-button__icon">
+              <ArrowRight size={13} />
+            </span>
           </Link>
         </div>
 

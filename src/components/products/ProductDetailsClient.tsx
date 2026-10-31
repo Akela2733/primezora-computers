@@ -367,11 +367,10 @@ const isWishlisted = isInWishlist(
                       !isPurchasable ||
                       quantity > stockQuantity
                     }
-                    className="flex h-12 flex-1 items-center justify-center gap-2 bg-amber-600 px-5 text-[9px] font-bold uppercase tracking-[0.16em] text-black transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
+                    className="primezora-button min-h-12 flex-1 px-5"
                   >
-                    <ShoppingCart size={14} />
-
-                    {isAddingToCart ? "Checking stock..." : "Add to Cart"}
+                    <span>{isAddingToCart ? "Checking stock..." : "Add to Cart"}</span>
+                    {!isAddingToCart && <span className="primezora-button__icon"><ArrowRight size={13} /></span>}
                   </button>
                 </div>
 

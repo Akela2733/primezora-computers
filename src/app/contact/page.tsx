@@ -78,13 +78,12 @@ export default async function ContactPage() {
             </p>
             <a
               href="#contact-form"
-              className="group mt-5 inline-flex h-10 items-center gap-5 rounded-md bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-[#090909] transition hover:bg-orange-400"
+              className="primezora-button mt-5"
             >
-              Send us a message
-              <ArrowRight
-                size={14}
-                className="transition-transform group-hover:translate-x-1"
-              />
+              <span>Send us a message</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={13} />
+              </span>
             </a>
           </div>
         </div>
@@ -209,13 +208,10 @@ export default async function ContactPage() {
               href={footer.addressHref}
               target="_blank"
               rel="noreferrer"
-              className="group mt-4 inline-flex h-9 items-center gap-3 rounded border border-orange-500/50 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] transition hover:bg-orange-500 hover:text-[#090909]"
+              className="primezora-button mt-4"
             >
-              Get directions
-              <ArrowRight
-                size={12}
-                className="text-orange-500 transition group-hover:translate-x-1 group-hover:text-[#090909]"
-              />
+              <span>Get directions</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </a>
           </div>
 
@@ -294,13 +290,10 @@ export default async function ContactPage() {
           </p>
           <Link
             href="/contact#contact-form"
-            className="group mt-4 inline-flex h-9 items-center gap-3 border border-orange-500/50 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] transition hover:bg-orange-500 hover:text-[#090909]"
+            className="primezora-button mt-4"
           >
-            Ask our team
-            <ArrowRight
-              size={12}
-              className="text-orange-500 transition group-hover:translate-x-1 group-hover:text-[#090909]"
-            />
+            <span>Ask our team</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
         </div>
 

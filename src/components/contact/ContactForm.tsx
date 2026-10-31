@@ -137,13 +137,12 @@ export function ContactForm({
       </label>
       <button
         type="submit"
-        className="group inline-flex min-h-10 items-center justify-center gap-4 rounded-md bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-[#090909] transition hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+        className="primezora-button"
       >
-        {sendLabel}
-        <ArrowRight
-          size={14}
-          className="transition-transform group-hover:translate-x-1"
-        />
+        <span>{sendLabel}</span>
+        <span className="primezora-button__icon">
+          <ArrowRight size={13} />
+        </span>
       </button>
       <p className="text-[9px] leading-4 text-white/40">
         This opens a draft in your email app so you can review it before sending.

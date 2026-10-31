@@ -55,7 +55,7 @@ function BrandGroup({
 }) {
   return (
     <div
-      className="brand-marquee-group flex min-w-full shrink-0 items-center gap-4 px-3 sm:gap-6 sm:px-4"
+      className="brand-marquee-group flex min-w-full shrink-0 items-center justify-between gap-4 px-3 sm:gap-6 sm:px-4"
       aria-hidden={hidden}
     >
       {brands.map((brand) => {

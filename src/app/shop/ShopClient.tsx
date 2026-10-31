@@ -391,10 +391,12 @@ export default function ShopClient({
               </p>
               <a
                 href="#shop-products"
-                className="mt-5 inline-flex h-10 items-center gap-3 rounded-sm bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-[#090909] transition hover:bg-orange-400"
+                className="primezora-button mt-5"
               >
-                {hero.actionLabel}
-                <ArrowRight size={14} />
+                <span>{hero.actionLabel}</span>
+                <span className="primezora-button__icon">
+                  <ArrowRight size={13} />
+                </span>
               </a>
             </div>
             <div className="absolute bottom-3 right-4 rounded-sm bg-black/45 px-2 py-1 text-[8px] text-white/70">
@@ -576,7 +578,7 @@ export default function ShopClient({
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="mt-5 border border-orange-500/50 px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-orange-400 transition hover:bg-orange-500 hover:text-black"
+                  className="primezora-button mt-5"
                 >
                   {content.resetFiltersLabel}
                 </button>

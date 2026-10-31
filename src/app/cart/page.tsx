@@ -131,9 +131,12 @@ function EmptyCart() {
           </p>
           <Link
             href="/shop"
-            className="mt-5 inline-flex items-center gap-2 rounded-md bg-orange-500 px-5 py-3 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
+            className="primezora-button mt-5"
           >
-            Explore products <ArrowRight size={14} />
+            <span>Explore products</span>
+            <span className="primezora-button__icon">
+              <ArrowRight size={13} />
+            </span>
           </Link>
         </div>
       </section>
@@ -379,18 +382,17 @@ export default function CartPage() {
 
                 <Link
                   href="/checkout"
-                  className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-3 text-[9px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
+                  className="primezora-button mt-4 w-full"
                 >
-                  <ShoppingBag size={13} />
-                  Proceed to checkout
-                  <ArrowRight size={13} />
+                  <span>Proceed to checkout</span>
+                  <span className="primezora-button__icon"><ArrowRight size={13} /></span>
                 </Link>
                 <Link
                   href="/shop"
-                  className="mt-2.5 flex min-h-9 w-full items-center justify-center gap-2 rounded-md border border-orange-500/55 text-[9px] font-medium text-white/75 transition hover:bg-orange-500/[0.08] hover:text-orange-300"
+                  className="primezora-button mt-2.5 w-full"
                 >
-                  <ShoppingCart size={12} />
-                  Continue shopping
+                  <span>Continue shopping</span>
+                  <span className="primezora-button__icon"><ArrowRight size={13} /></span>
                 </Link>
                 <p className="mt-3 flex items-center justify-center gap-1.5 text-[9px] text-emerald-300/80">
                   <Check size={11} />

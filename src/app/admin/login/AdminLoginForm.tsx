@@ -300,8 +300,7 @@ export default function AdminLoginForm({
                 className="w-full h-12 flex items-center justify-center gap-2 border border-amber-600 bg-amber-600 hover:bg-amber-600 text-black font-display text-[10px] font-bold uppercase tracking-[0.2em] transition shadow-lg shadow-amber-600/20 disabled:cursor-wait disabled:opacity-60 mt-2"
               >
                 <span>{isSubmitting ? "Verifying Credentials..." : "Authenticate"}</span>
-                <ArrowRight size={14} className={isSubmitting ? "animate-pulse" : ""} />
-              </button>
+                 </button>
             </form>
           )}
 

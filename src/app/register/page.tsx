@@ -28,7 +28,10 @@ export default async function RegisterPage({
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-12">
+    <main
+      data-page="customer-auth"
+      className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-3 py-2 sm:min-h-[calc(100dvh-5rem)] sm:px-4 sm:py-3"
+    >
       <RegisterForm
         nextPath={nextPath}
         initialEmail={rawEmail?.trim().slice(0, 254) ?? ""}

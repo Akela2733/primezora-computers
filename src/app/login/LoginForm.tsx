@@ -9,11 +9,13 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ShieldCheck,
   AlertCircle,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
+import CustomerAuthMascot, {
+  type CustomerAuthMascotState,
+} from "@/components/auth/CustomerAuthMascot";
 
 type LoginFormProps = {
   nextPath?: string;
@@ -72,6 +74,16 @@ export default function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(authError ? normalizeAuthError(authError) : null);
   const [loading, setLoading] = useState(false);
+  const [mascotState, setMascotState] =
+    useState<CustomerAuthMascotState>("welcome");
+
+  const handleEmailFocus = () => {
+    setMascotState(email.trim() ? "email-entered" : "email");
+  };
+
+  const handlePasswordFocus = () => {
+    setMascotState("password");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,10 +117,12 @@ export default function LoginForm({
 
       if (!res.ok) {
         setError(normalizeAuthError(data?.error || "Invalid email or password."));
+        setMascotState("error");
         setLoading(false);
         return;
       }
 
+      setMascotState("success");
       router.push(data.redirectUrl || nextPath || "/account");
       router.refresh();
     } catch {
@@ -118,30 +132,33 @@ export default function LoginForm({
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#030505]/90 p-6 shadow-[0_20px_60px_rgba(3,5,5,0.6)] backdrop-blur-2xl sm:p-8">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-600/20 bg-amber-600/10 text-amber-600 shadow-[0_0_25px_rgba(217,119,6,0.15)]">
-          <ShieldCheck size={28} />
-        </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-white/90">
+    <div data-auth-card data-login-card className="mx-auto max-h-full w-full max-w-[520px] rounded-[28px] border border-[#ff7a1d]/80 bg-[#0d0d0d]/95 p-3 pb-6 shadow-[0_0_0_1px_rgba(255,122,29,0.15),0_25px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl sm:p-4 sm:pb-6">
+      <div data-auth-mascot data-login-mascot className="mb-2 flex justify-center">
+        <CustomerAuthMascot
+          flow="login"
+          state={error ? "error" : mascotState}
+          loading={loading}
+        />
+      </div>
+
+      <div data-auth-title data-login-title className="mb-3 text-center">
+        <h1 className="font-display text-2xl font-black tracking-[-0.06em] text-white">
           Sign In
         </h1>
-        <p className="mt-2 text-sm text-white/50">
-          {nextPath === "/checkout"
-            ? "Sign in to continue securely with your order."
-            : "View your orders, manage delivery details, and save your favorite gear."}
+        <p className="mt-1 text-xs text-white/50">
+          Welcome back! Please sign in to your PrimeZora account.
         </p>
       </div>
 
       {loggedOut && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-xs text-amber-600">
+        <div className="mb-3 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-3 text-xs text-amber-600">
           <CheckCircle2 size={17} className="shrink-0 text-amber-600" />
           <div className="flex-1 leading-relaxed">You have been logged out safely.</div>
         </div>
       )}
 
       {registered && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-4 text-xs text-amber-600">
+        <div className="mb-3 flex items-start gap-3 rounded-xl border border-amber-600/30 bg-amber-600/10 p-3 text-xs text-amber-600">
           <CheckCircle2 size={17} className="shrink-0 text-amber-600" />
           <div className="flex-1 leading-relaxed">
             Your account is ready. Sign in below or{" "}
@@ -157,15 +174,15 @@ export default function LoginForm({
       )}
 
       {error && (
-        <div role="alert" aria-live="assertive" className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
+        <div role="alert" aria-live="assertive" className="mb-3 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
           <AlertCircle size={17} className="shrink-0 text-rose-400" />
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form data-auth-form data-login-form onSubmit={handleSubmit} className="space-y-2.5">
         <div>
-          <label htmlFor="customer-login-email" className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-login-email" className="mb-1 block text-xs font-medium text-white/70">
             Email Address
           </label>
           <div className="relative">
@@ -182,27 +199,24 @@ export default function LoginForm({
               spellCheck={false}
               required
               value={email}
+              onFocus={handleEmailFocus}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setEmail(e.target.value);
+                setMascotState(e.target.value.trim() ? "email-entered" : "email");
                 setError(null);
               }}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              placeholder="Email address"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] py-2 pl-11 pr-3.5 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
           </div>
         </div>
 
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
+          <div className="mb-1">
             <label htmlFor="customer-login-password" className="text-xs font-medium text-white/70">
               Password
             </label>
-            <Link
-              href={`/forgot-password?next=${encodeURIComponent(nextPath)}`}
-              className="text-[11px] font-medium text-amber-600 transition hover:text-amber-600 hover:underline"
-            >
-              Forgot password?
-            </Link>
           </div>
           <div className="relative">
             <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30">
@@ -215,12 +229,14 @@ export default function LoginForm({
               autoComplete="current-password"
               required
               value={password}
+              onFocus={handlePasswordFocus}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setPassword(e.target.value);
                 setError(null);
               }}
-              placeholder="Enter your password"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              placeholder="Password"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] py-2 pl-11 pr-10 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
             <button
               type="button"
@@ -233,12 +249,22 @@ export default function LoginForm({
           </div>
         </div>
 
+        <div className="flex items-center justify-between gap-2 text-[11px] text-white/55">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" className="h-4 w-4 accent-[#ff7a1d]" />
+            <span>Remember me</span>
+          </label>
+          <Link href={`/forgot-password?next=${encodeURIComponent(nextPath)}`} className="font-medium text-[#ff8a3d] hover:text-[#ffad54]">
+            Forgot password?
+          </Link>
+        </div>
+
         <button
           id="customer-login-submit"
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:opacity-50"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ff7417] to-[#ff9b37] px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-[#17100a] shadow-[0_10px_28px_rgba(255,116,23,0.18)] transition duration-200 hover:-translate-y-0.5 hover:from-[#ff8730] hover:to-[#ffad54] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff8a3d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090a] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -248,19 +274,18 @@ export default function LoginForm({
           ) : (
             <>
               <span>Sign In</span>
-              <ArrowRight size={16} />
             </>
           )}
         </button>
       </form>
 
-      <div className="mt-8 border-t border-white/[0.06] pt-6 text-center text-xs text-white/50">
-        Don&apos;t have an account?{" "}
+      <div data-auth-footer className="mt-3 mb-1 pb-3 text-center text-sm text-white/55">
+        Don&apos;t have an account? {" "}
         <Link
           href={`/register?next=${encodeURIComponent(nextPath)}`}
-          className="font-medium text-amber-600 transition hover:text-amber-600 hover:underline"
+          className="font-medium text-[#ff8a3d] hover:text-[#ffad54]"
         >
-          Create One
+          Sign Up
         </Link>
       </div>
     </div>

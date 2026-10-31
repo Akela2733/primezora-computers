@@ -184,9 +184,10 @@ export default function CustomerOrdersClient({
             </p>
             <Link
               href="/shop"
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-amber-600/10 px-4 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-600/20"
+              className="primezora-button mt-5"
             >
-              <Package size={13} /> Explore products
+              <span>Explore products</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </Link>
           </div>
         )}

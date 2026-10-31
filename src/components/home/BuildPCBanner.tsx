@@ -6,10 +6,13 @@ import Link from "next/link";
 import { useRef, type PointerEvent } from "react";
 import {
   ArrowRight,
-  CircuitBoard,
+  Bolt,
   Cpu,
-  MemoryStick,
-  Microchip,
+  Gamepad2,
+  Headphones,
+  Monitor,
+  ShieldCheck,
+  Wallet,
 } from "lucide-react";
 
 function BuildPCShowcase() {
@@ -71,98 +74,90 @@ function BuildPCShowcase() {
   };
 
   return (
-    <div
-      ref={sceneRef}
-      className="buildpc-stage"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={resetPointer}
-    >
-      <figure className="buildpc-stage__artwork">
-        <Image
-          src="/banners/build%20your%20pc.png"
-          alt="Exploded custom PC build with a graphics card, motherboard, processor, memory, and cooling system"
-          fill
-          sizes="(max-width: 767px) 65vw, 620px"
-          className="buildpc-stage__image"
-        />
-        <ul className="buildpc-stage__labels" aria-label="PC parts in the build">
-          <li className="buildpc-stage__callout buildpc-stage__callout--gpu">
-            <span className="buildpc-stage__marker"><Microchip size={13} /></span>
-            <span className="buildpc-stage__label">
-              <strong>GPU</strong>
-              <small>Graphics card</small>
-            </span>
-          </li>
-          <li className="buildpc-stage__callout buildpc-stage__callout--cpu">
-            <span className="buildpc-stage__marker"><Cpu size={13} /></span>
-            <span className="buildpc-stage__label">
-              <strong>CPU</strong>
-              <small>Processor</small>
-            </span>
-          </li>
-          <li className="buildpc-stage__callout buildpc-stage__callout--ram">
-            <span className="buildpc-stage__marker"><MemoryStick size={13} /></span>
-            <span className="buildpc-stage__label">
-              <strong>RAM</strong>
-              <small>Memory</small>
-            </span>
-          </li>
-          <li className="buildpc-stage__callout buildpc-stage__callout--motherboard">
-            <span className="buildpc-stage__marker"><CircuitBoard size={13} /></span>
-            <span className="buildpc-stage__label">
-              <strong>Motherboard</strong>
-              <small>System board</small>
-            </span>
-          </li>
-        </ul>
-      </figure>
-      <div className="buildpc-stage__atmosphere" aria-hidden="true" />
-      <div className="buildpc-stage__content">
-        <p>Custom PC builder</p>
-        <h2>
-          Build your
-          <br />
-          <span>dream PC.</span>
-        </h2>
-        <p className="buildpc-stage__description">
-          Choose your components and create a setup that is truly yours.
-        </p>
-        <Link href="/shop" className="buildpc-stage__action">
-          Explore PC parts <ArrowRight size={14} />
-        </Link>
-      </div>
-      <aside className="buildpc-stage__panel" aria-label="Explore PC components">
-        <span className="buildpc-stage__hanger" aria-hidden="true" />
-        <div className="buildpc-stage__panel-inner">
-          <div className="buildpc-stage__panel-face buildpc-stage__panel-face--front">
-            <p className="buildpc-stage__panel-eyebrow">Your next setup</p>
-            <h3>Built around you.</h3>
-            <ol>
-              <li><span>01</span> Choose your components</li>
-              <li><span>02</span> Find your perfect upgrade</li>
-              <li><span>03</span> Shop trusted PC parts</li>
-            </ol>
-            <Link href="/shop" className="buildpc-stage__panel-link">
-              Browse components <ArrowRight size={13} />
+    <>
+      <div
+        ref={sceneRef}
+        className="buildpc-stage"
+        onPointerMove={handlePointerMove}
+        onPointerLeave={resetPointer}
+      >
+        <figure className="buildpc-stage__artwork">
+          <Image
+            src="/banners/build%20your%20pc.png"
+            alt="Custom gaming PC with glowing orange fans and components"
+            fill
+            sizes="(max-width: 767px) 100vw, (max-width: 1023px) 70vw, 58vw"
+            className="buildpc-stage__image"
+          />
+        </figure>
+        <div className="buildpc-stage__atmosphere" aria-hidden="true" />
+        <div className="buildpc-stage__content">
+          <p>Custom PC builder</p>
+          <h2>
+            Build your
+            <br />
+            <span>dream PC.</span>
+          </h2>
+          <p className="buildpc-stage__description">
+            Choose your parts, make it your own, and get ready to play.
+          </p>
+          <div className="buildpc-stage__actions">
+            <Link href="/shop" className="primezora-button buildpc-stage__action">
+              <span>Start building</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={13} />
+              </span>
+            </Link>
+            <Link href="/shop" className="buildpc-stage__secondary-action">
+              Explore parts <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="buildpc-stage__panel-face buildpc-stage__panel-face--back">
-            <p className="buildpc-stage__panel-eyebrow">Primezora / performance systems</p>
-            <h3>Make it yours.</h3>
-            <p className="buildpc-stage__panel-message">
-              Find the right parts for your next build, upgrade, or setup.
-            </p>
-            <Link href="/shop" className="buildpc-stage__panel-link">
-              Build. Upgrade. Play. <ArrowRight size={13} />
-            </Link>
-          </div>
+          <ul className="buildpc-stage__benefits" aria-label="Why shop with Primezora">
+            <li><Bolt size={16} /><span>Great performance<small>Parts for every setup</small></span></li>
+            <li><ShieldCheck size={16} /><span>Genuine parts<small>Shop with confidence</small></span></li>
+            <li><Headphones size={16} /><span>Need a hand?<small>We’re here to help</small></span></li>
+          </ul>
         </div>
-      </aside>
-      <div className="buildpc-stage__frame" aria-hidden="true">
-        <span>PRIMEZORA / PERFORMANCE SYSTEMS</span>
-        <span>BUILD / UPGRADE / PLAY</span>
+        <figure className="buildpc-stage__hanging">
+          <Image
+            src="/banners/wall%20hanging.png"
+            alt="Build Your PC hanging sign showing the three steps to start a build"
+            width={517}
+            height={425}
+            sizes="(max-width: 767px) 75vw, (max-width: 1023px) 36vw, 30vw"
+            className="buildpc-stage__hanging-image"
+          />
+        </figure>
       </div>
-    </div>
+      <section className="buildpc-popular" aria-label="Popular PC builds">
+        <div className="buildpc-popular__heading">
+          <h3>Popular builds</h3>
+          <span aria-hidden="true" />
+        </div>
+        <div className="buildpc-popular__grid">
+          <Link href="/shop" className="buildpc-popular__card">
+            <Gamepad2 size={26} />
+            <span><strong>Gaming</strong><small>High FPS. No limits.</small></span>
+            <ArrowRight size={17} />
+          </Link>
+          <Link href="/shop" className="buildpc-popular__card">
+            <Monitor size={26} />
+            <span><strong>Creator</strong><small>Edit. Design. Create.</small></span>
+            <ArrowRight size={17} />
+          </Link>
+          <Link href="/shop" className="buildpc-popular__card">
+            <Cpu size={26} />
+            <span><strong>Workstation</strong><small>Power through work.</small></span>
+            <ArrowRight size={17} />
+          </Link>
+          <Link href="/shop" className="buildpc-popular__card">
+            <Wallet size={26} />
+            <span><strong>Budget</strong><small>Good parts. Great value.</small></span>
+            <ArrowRight size={17} />
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }
 

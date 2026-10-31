@@ -153,10 +153,10 @@ export default async function OrderSuccessPage({
               <div className="mt-10 flex flex-col items-center gap-4">
                 <Link
                   href="#bank-transfer-details"
-                  className="inline-flex min-h-11 items-center gap-2 bg-amber-600 px-7 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-500"
+                  className="primezora-button"
                 >
-                  View bank details &amp; upload receipt
-                  <ArrowRight size={14} />
+                  <span>View bank details &amp; upload receipt</span>
+                  <span className="primezora-button__icon"><ArrowRight size={13} /></span>
                 </Link>
                 <Link
                   href="/shop"
@@ -168,10 +168,10 @@ export default async function OrderSuccessPage({
             ) : (
               <Link
                 href="/shop"
-                className="mt-10 inline-flex items-center gap-2 bg-amber-600 px-7 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-amber-600"
+                className="primezora-button mt-10"
               >
-                Continue Shopping
-                <ArrowRight size={14} />
+                <span>Continue Shopping</span>
+                <span className="primezora-button__icon"><ArrowRight size={13} /></span>
               </Link>
             )}
           </div>

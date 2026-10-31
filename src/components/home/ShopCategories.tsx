@@ -37,10 +37,10 @@ export async function ShopCategories() {
           </p>
           <Link
             href="/shop"
-            className="group mt-4 inline-flex items-center gap-2 border-b border-orange-500/60 pb-1 font-display text-[8px] font-semibold uppercase tracking-[0.14em] text-white/80 transition hover:text-orange-400"
+            className="primezora-button mt-4"
           >
-            {categoryContent.linkLabel}
-            <ArrowRight size={13} className="text-orange-400 transition-transform group-hover:translate-x-1" />
+            <span>{categoryContent.linkLabel}</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
         </div>
 

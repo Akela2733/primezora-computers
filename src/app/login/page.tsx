@@ -43,7 +43,10 @@ export default async function CustomerLoginPage({
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-76px)] items-center justify-center px-4 py-12">
+    <main
+      data-page="customer-auth"
+      className="flex h-[calc(100dvh-4rem)] min-h-0 items-center justify-center overflow-hidden px-3 py-2 sm:h-[calc(100dvh-5rem)] sm:px-4 sm:py-3"
+    >
       <LoginForm
         nextPath={nextPath}
         initialEmail={rawEmail?.trim().slice(0, 254) ?? ""}

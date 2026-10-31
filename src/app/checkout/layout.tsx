@@ -38,15 +38,19 @@ export default async function CheckoutLayout({
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/login?next=%2Fcheckout"
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-orange-500 px-5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
+              className="primezora-button"
             >
-              Sign In
+              <span>Sign In</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={13} />
+              </span>
             </Link>
             <Link
               href="/register?next=%2Fcheckout"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-orange-500/45 px-5 text-[10px] font-bold uppercase tracking-wide text-white/85 transition hover:bg-orange-500/[0.08] hover:text-orange-300"
+              className="primezora-button"
             >
-              Create Account
+              <span>Create Account</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </Link>
           </div>
         </div>

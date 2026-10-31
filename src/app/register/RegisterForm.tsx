@@ -9,10 +9,12 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ShieldCheck,
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import CustomerAuthMascot, {
+  type CustomerAuthMascotState,
+} from "@/components/auth/CustomerAuthMascot";
 
 type RegisterFormProps = {
   nextPath: string;
@@ -74,6 +76,16 @@ export default function RegisterForm({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mascotState, setMascotState] =
+    useState<CustomerAuthMascotState>("welcome");
+
+  const handleEmailFocus = () => {
+    setMascotState(email.trim() ? "email-entered" : "email");
+  };
+
+  const handlePasswordFocus = () => {
+    setMascotState("password");
+  };
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -130,10 +142,12 @@ export default function RegisterForm({
           return;
         }
         setError(normalizeAuthError(data?.error || "Registration failed. Please check your information."));
+        setMascotState("error");
         setLoading(false);
         return;
       }
 
+      setMascotState("success");
       const fallbackPath = data.requiresSignIn
         ? `/login?registered=true&next=${encodeURIComponent(nextPath)}`
         : nextPath;
@@ -146,32 +160,35 @@ export default function RegisterForm({
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#030505]/90 p-6 shadow-[0_20px_60px_rgba(3,5,5,0.6)] backdrop-blur-2xl sm:p-8">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-amber-600/20 bg-amber-600/10 text-amber-600 shadow-[0_0_25px_rgba(217,119,6,0.15)]">
-          <ShieldCheck size={28} />
-        </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-white/90">
+    <div data-auth-card className="mx-auto w-full max-w-[520px] rounded-[28px] border border-[#ff7a1d]/80 bg-[#0d0d0d]/95 p-3 pb-6 shadow-[0_0_0_1px_rgba(255,122,29,0.15),0_25px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl sm:p-4 sm:pb-6">
+      <div data-auth-mascot className="mb-2 flex justify-center">
+        <CustomerAuthMascot
+          flow="register"
+          state={error ? "error" : mascotState}
+          loading={loading}
+        />
+      </div>
+
+      <div data-auth-title className="mb-3 text-center">
+        <h1 className="font-display text-2xl font-black tracking-[-0.06em] text-white">
           Create Your Account
         </h1>
-        <p className="mt-2 text-sm text-white/50">
-          {nextPath === "/checkout"
-            ? "Create an account to continue checkout and keep your order details in one place."
-            : "Track computer orders, manage delivery details, and keep your favorite gear together."}
+        <p className="mt-1 text-xs text-white/50">
+          Join PrimeZora and manage your orders, builds, and saved favorites.
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300" role="alert" aria-live="assertive">
+        <div className="mb-3 flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300" role="alert" aria-live="assertive">
           <AlertCircle size={17} className="shrink-0 text-rose-400" />
           <div className="flex-1 leading-relaxed">{error}</div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form data-auth-form onSubmit={handleSubmit} className="space-y-2.5">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor="customer-first-name" className="mb-1.5 block text-xs font-medium text-white/70">
+            <label htmlFor="customer-first-name" className="mb-1 block text-xs font-medium text-white/70">
               First Name
             </label>
             <input
@@ -182,16 +199,18 @@ export default function RegisterForm({
               maxLength={50}
               required
               value={firstName}
+              onFocus={() => setMascotState("name")}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setFirstName(e.target.value);
                 setError(null);
               }}
               placeholder="First name"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] px-3.5 py-2 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
           </div>
           <div>
-            <label htmlFor="customer-last-name" className="mb-1.5 block text-xs font-medium text-white/70">
+            <label htmlFor="customer-last-name" className="mb-1 block text-xs font-medium text-white/70">
               Last Name
             </label>
             <input
@@ -202,18 +221,20 @@ export default function RegisterForm({
               maxLength={50}
               required
               value={lastName}
+              onFocus={() => setMascotState("name")}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setLastName(e.target.value);
                 setError(null);
               }}
               placeholder="Last name"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] px-3.5 py-2 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="customer-email" className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-email" className="mb-1 block text-xs font-medium text-white/70">
             Email Address
           </label>
           <div className="relative">
@@ -230,18 +251,21 @@ export default function RegisterForm({
               spellCheck={false}
               required
               value={email}
+              onFocus={handleEmailFocus}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setEmail(e.target.value);
+                setMascotState(e.target.value.trim() ? "email-entered" : "email");
                 setError(null);
               }}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-3.5 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              placeholder="Email address"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] py-2 pl-11 pr-3.5 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="customer-password" className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-password" className="mb-1 block text-xs font-medium text-white/70">
             Password
           </label>
           <div className="relative">
@@ -257,12 +281,14 @@ export default function RegisterForm({
               minLength={8}
               maxLength={128}
               value={password}
+              onFocus={handlePasswordFocus}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setPassword(e.target.value);
                 setError(null);
               }}
-              placeholder="At least 8 characters"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              placeholder="Password"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] py-2 pl-11 pr-10 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
             <button
               type="button"
@@ -274,7 +300,7 @@ export default function RegisterForm({
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          <div className="mt-2" aria-live="polite">
+          <div className="mt-1.5" aria-live="polite">
             <div className="mb-1 flex items-center justify-between text-[10px] text-white/60">
               <span>Password strength (optional tips)</span>
               <span>{strength.label}</span>
@@ -299,10 +325,10 @@ export default function RegisterForm({
                 style={{ width: `${(strength.score / 5) * 100}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[10px] leading-relaxed text-white/50">
+            <p className="mt-1 text-[10px] leading-tight text-white/50">
               Use at least 8 characters. A longer passphrase is easier to remember; mixing character types makes it harder to guess.
             </p>
-            <ul className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-white/55" aria-label="Optional password tips">
+            <ul className="mt-1 grid grid-cols-2 gap-x-1 gap-y-0.5 text-[10px] leading-tight text-white/55" aria-label="Optional password tips">
               <li className={strength.checks.length ? "text-emerald-300" : ""}>8-128 characters</li>
               <li className={strength.checks.uppercase ? "text-emerald-300" : ""}>Uppercase letter</li>
               <li className={strength.checks.lowercase ? "text-emerald-300" : ""}>Lowercase letter</li>
@@ -313,7 +339,7 @@ export default function RegisterForm({
         </div>
 
         <div>
-          <label htmlFor="customer-confirm-password" className="mb-1.5 block text-xs font-medium text-white/70">
+          <label htmlFor="customer-confirm-password" className="mb-1 block text-xs font-medium text-white/70">
             Confirm Password
           </label>
           <div className="relative">
@@ -329,12 +355,14 @@ export default function RegisterForm({
               minLength={8}
               maxLength={128}
               value={confirmPassword}
+              onFocus={() => setMascotState("confirm-password")}
+              onBlur={() => setMascotState("welcome")}
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
                 setError(null);
               }}
-              placeholder="Re-enter password"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-10 text-sm text-white/90 placeholder-white/20 transition focus:border-amber-600/50 focus:bg-white/[0.05] focus:outline-none focus:ring-1 focus:ring-amber-600/50"
+              placeholder="Confirm password"
+              className="w-full rounded-xl border border-[#ff7a1d]/40 bg-[#090909] py-2 pl-11 pr-10 text-sm text-white/90 placeholder-white/30 transition focus:border-[#ff8a3d] focus:bg-[#0d0d0d] focus:outline-none focus:ring-1 focus:ring-[#ff8a3d]/60"
             />
             <button
               type="button"
@@ -353,7 +381,7 @@ export default function RegisterForm({
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:opacity-50"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#ff7417] to-[#ff9b37] px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-[#17100a] shadow-[0_10px_28px_rgba(255,116,23,0.18)] transition duration-200 hover:-translate-y-0.5 hover:from-[#ff8730] hover:to-[#ffad54] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff8a3d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090a] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -362,18 +390,17 @@ export default function RegisterForm({
             </>
           ) : (
             <>
-              <span>Create Account</span>
-              <ArrowRight size={16} />
+              <span>Sign Up</span>
             </>
           )}
         </button>
       </form>
 
-      <div className="mt-8 border-t border-white/[0.06] pt-6 text-center text-xs text-white/50">
-        Already have an account?{" "}
+      <div data-auth-footer className="mt-3 mb-1 pb-3 text-center text-sm text-white/55">
+        Already have an account? {" "}
         <Link
           href={`/login?next=${encodeURIComponent(nextPath)}`}
-          className="font-medium text-amber-600 transition hover:text-amber-600 hover:underline"
+          className="font-medium text-[#ff8a3d] hover:text-[#ffad54]"
         >
           Sign In
         </Link>

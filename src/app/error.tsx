@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+
 export default function ApplicationError({
   reset,
 }: {
@@ -21,9 +23,10 @@ export default function ApplicationError({
         <button
           type="button"
           onClick={reset}
-          className="mt-7 border border-amber-600 bg-amber-600 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-black transition hover:bg-amber-600"
+          className="primezora-button mt-7"
         >
-          Try again
+          <span>Try again</span>
+          <span className="primezora-button__icon"><ArrowRight size={13} /></span>
         </button>
       </section>
     </main>

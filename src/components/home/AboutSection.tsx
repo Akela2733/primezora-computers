@@ -37,13 +37,10 @@ export async function AboutSection() {
           </p>
           <Link
             href={about.actionHref}
-            className="group mt-7 inline-flex min-h-11 items-center gap-3 rounded-lg border border-amber-600/45 bg-amber-600/[0.08] px-5 text-xs font-semibold uppercase tracking-[0.1em] text-amber-500 transition hover:border-amber-500 hover:bg-amber-600 hover:text-black"
+            className="primezora-button mt-7"
           >
-            {about.actionLabel}
-            <ArrowRight
-              size={15}
-              className="transition-transform group-hover:translate-x-1"
-            />
+            <span>{about.actionLabel}</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
         </div>
 

@@ -42,10 +42,10 @@ export async function WhyPrimezora() {
           </p>
           <Link
             href={why.actionHref}
-            className="group mt-4 inline-flex h-9 items-center gap-3 border border-amber-600/60 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white/90 transition hover:bg-amber-600 hover:text-[#030505]"
+            className="primezora-button mt-4"
           >
-            {why.actionLabel}
-            <ArrowRight size={12} className="text-amber-600 transition-transform group-hover:translate-x-1 group-hover:text-[#030505]" />
+            <span>{why.actionLabel}</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
         </div>
       </div>

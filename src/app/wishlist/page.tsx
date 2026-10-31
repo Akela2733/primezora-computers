@@ -229,10 +229,10 @@ export default function WishlistPage() {
             </p>
             <Link
               href="/shop"
-              className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-black transition hover:bg-amber-400"
+              className="primezora-button mt-7"
             >
-              Explore products
-              <ArrowUpRight size={16} />
+              <span>Explore products</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </Link>
           </div>
         </section>
@@ -379,19 +379,14 @@ export default function WishlistPage() {
                                 type="button"
                                 onClick={() => void handleAddToCart(product)}
                                 disabled={busy}
-                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-500 px-3 text-xs font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border disabled:border-white/[0.08] disabled:bg-white/[0.03] disabled:text-white/35 sm:px-4"
+                                className="primezora-button min-h-10 px-3 sm:px-4"
                               >
                                 {busy ? (
                                   <Loader2 size={15} className="animate-spin" />
                                 ) : (
-                                  <ShoppingCart size={15} />
+                                  <span>Add to cart</span>
                                 )}
-                                <span className="hidden sm:inline">
-                                  Add to cart
-                                </span>
-                                <span className="sm:hidden">
-                                  Add
-                                </span>
+                                {!busy && <span className="primezora-button__icon"><ArrowRight size={13} /></span>}
                               </button>
                             </div>
                           </div>
@@ -458,7 +453,7 @@ export default function WishlistPage() {
                   type="button"
                   onClick={() => void handleAddAvailableToCart()}
                   disabled={catalogProducts.length === 0 || addingAll}
-                  className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-white/35"
+                  className="primezora-button mt-5 w-full"
                 >
                   {addingAll ? (
                     <>
@@ -467,18 +462,18 @@ export default function WishlistPage() {
                     </>
                   ) : (
                     <>
-                      <ShoppingCart size={17} />
-                      Add to cart
+                      <span>Add to cart</span>
+                      <span className="primezora-button__icon"><ArrowRight size={13} /></span>
                     </>
                   )}
                 </button>
 
                 <Link
                   href="/cart"
-                  className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/[0.1] text-sm font-medium text-white/75 transition hover:border-white/20 hover:text-white"
+                  className="primezora-button mt-3 w-full"
                 >
-                  View cart
-                  <ArrowRight size={15} />
+                  <span>View cart</span>
+                  <span className="primezora-button__icon"><ArrowRight size={13} /></span>
                 </Link>
 
                 <div className="mt-5 flex items-start gap-2 border-t border-white/[0.07] pt-4 text-[11px] leading-5 text-white/40">

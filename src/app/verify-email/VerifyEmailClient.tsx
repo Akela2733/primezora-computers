@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import ResendConfirmationForm from "@/app/email-confirmation/ResendConfirmationForm";
 
 type VerifyEmailClientProps = {
@@ -129,9 +129,9 @@ export default function VerifyEmailClient({
               onClick={verifyEmail}
               disabled={loading}
               aria-busy={loading}
-              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-600 px-4 py-3 text-sm font-semibold text-black transition hover:from-amber-600 hover:to-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="primezora-button mt-7 w-full"
             >
-              {loading ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : "Verify email address"}
+              {loading ? <><Loader2 size={16} className="animate-spin" /> Verifying...</> : <><span>Verify email address</span><span className="primezora-button__icon"><ArrowRight size={13} /></span></>}
             </button>
           </>
         )}
@@ -181,15 +181,17 @@ export default function VerifyEmailClient({
         <nav aria-label="Account verification actions" className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href={loginUrl}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-amber-600/40 hover:text-amber-600"
+            className="primezora-button"
           >
-            {verified || alreadyUsed ? "Continue to sign in" : "Return to sign in"}
+            <span>{verified || alreadyUsed ? "Continue to sign in" : "Return to sign in"}</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
           <Link
             href={changeEmailUrl}
-            className="rounded-xl border border-amber-600/30 px-4 py-3 text-sm font-medium text-amber-600 transition hover:bg-amber-600/10"
+            className="primezora-button"
           >
-            Change email
+            <span>Change email</span>
+            <span className="primezora-button__icon"><ArrowRight size={13} /></span>
           </Link>
         </nav>
       </section>

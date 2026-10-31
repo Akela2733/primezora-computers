@@ -70,13 +70,12 @@ export default async function AboutPage() {
             </p>
             <Link
               href="#our-story"
-              className="group mt-6 inline-flex h-10 items-center gap-4 rounded-sm bg-orange-500 px-5 font-display text-[9px] font-bold uppercase tracking-[0.12em] text-[#090909] transition hover:bg-orange-400"
+              className="primezora-button mt-6"
             >
-              {about.actionLabel}
-              <ArrowRight
-                size={14}
-                className="transition-transform group-hover:translate-x-1"
-              />
+              <span>{about.actionLabel}</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={13} />
+              </span>
             </Link>
           </div>
           <a
@@ -118,13 +117,10 @@ export default async function AboutPage() {
               </p>
               <Link
                 href={about.actionHref}
-                className="group mt-5 inline-flex h-9 items-center gap-3 border border-orange-500/60 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white/90 transition hover:bg-orange-500 hover:text-[#090909]"
+                className="primezora-button mt-5"
               >
-                {about.actionLabel}
-                <ArrowRight
-                  size={12}
-                  className="text-orange-400 transition-transform group-hover:translate-x-1 group-hover:text-[#090909]"
-                />
+                <span>{about.actionLabel}</span>
+                <span className="primezora-button__icon"><ArrowRight size={13} /></span>
               </Link>
             </div>
 
@@ -180,13 +176,10 @@ export default async function AboutPage() {
             </p>
             <Link
               href={about.actionHref}
-              className="group mt-4 inline-flex h-9 items-center gap-3 border border-orange-500/50 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white/85 transition hover:bg-orange-500 hover:text-[#090909]"
+              className="primezora-button mt-4"
             >
-              {about.actionLabel}
-              <ArrowRight
-                size={12}
-                className="text-orange-400 transition-transform group-hover:translate-x-1 group-hover:text-[#090909]"
-              />
+              <span>{about.actionLabel}</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </Link>
           </div>
 
@@ -259,13 +252,10 @@ export default async function AboutPage() {
               href={shopMapHref}
               target="_blank"
               rel="noreferrer"
-              className="group mt-4 inline-flex h-9 items-center gap-3 border border-orange-500/55 px-4 font-display text-[8px] font-semibold uppercase tracking-[0.1em] text-white/90 transition hover:bg-orange-500 hover:text-[#090909]"
+              className="primezora-button mt-4"
             >
-              {shopLocation}
-              <ArrowRight
-                size={12}
-                className="text-orange-400 transition-transform group-hover:translate-x-1 group-hover:text-[#090909]"
-              />
+              <span>{shopLocation}</span>
+              <span className="primezora-button__icon"><ArrowRight size={13} /></span>
             </Link>
           </div>
         </div>

@@ -235,10 +235,13 @@ export function ProductCard({
               type="button"
               disabled={!isPurchasable || isAdding}
               onClick={handleAddToCart}
-              className="flex h-9 w-full items-center justify-center gap-1.5 rounded-sm bg-orange-500 px-2 font-display text-[8px] font-bold uppercase tracking-[0.1em] text-[#090909] transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="primezora-button w-full"
             >
               {cartMessage === "Added to cart" && <Check size={12} />}
-              {isAdding ? "Adding..." : cartMessage || "Add to cart"}
+              <span>{isAdding ? "Adding..." : cartMessage || "Add to cart"}</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={12} />
+              </span>
             </button>
             {cartMessage && cartMessage !== "Added to cart" && (
               <p role="status" className="mt-1 text-center text-[9px] text-red-400">

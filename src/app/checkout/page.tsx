@@ -267,10 +267,12 @@ export default function CheckoutPage() {
 
             <Link
               href="/shop"
-              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-orange-500 px-5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:bg-orange-400"
+              className="primezora-button mt-5"
             >
-              <ArrowRight size={13} />
-              Browse products
+              <span>Browse products</span>
+              <span className="primezora-button__icon">
+                <ArrowRight size={13} />
+              </span>
             </Link>
           </div>
         </section>

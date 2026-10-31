@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CircleAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
@@ -47,10 +47,10 @@ export default async function PaymentCancelPage({
         </p>
         <Link
           href={`/order-success?order=${encodeURIComponent(order.orderNumber)}`}
-          className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 px-5 text-xs font-semibold uppercase tracking-[0.1em] text-white/75 transition hover:border-amber-500/40 hover:text-amber-400"
+          className="primezora-button mt-8"
         >
-          <ArrowLeft size={14} />
-          View order status ({order.status.toLowerCase()})
+          <span>View order status ({order.status.toLowerCase()})</span>
+          <span className="primezora-button__icon"><ArrowRight size={13} /></span>
         </Link>
       </section>
     </main>
