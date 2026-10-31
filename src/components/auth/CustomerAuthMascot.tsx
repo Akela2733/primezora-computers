@@ -120,7 +120,7 @@ export default function CustomerAuthMascot({
           )}
         </div>
 
-        {asset.hasSpeechBubble ? (
+        {"hasSpeechBubble" in asset && asset.hasSpeechBubble ? (
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {message}
           </p>

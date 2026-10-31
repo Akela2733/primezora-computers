@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Package, ShoppingBag } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  ShoppingBag,
+} from "lucide-react";
 
 import { getOrderStatusLabel, type OrderStatus } from "@/lib/order-status";
 

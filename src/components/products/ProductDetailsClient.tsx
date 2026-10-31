@@ -4,6 +4,7 @@ import ProductGallery from "@/components/shop/ProductGallery";
 import Link from "next/link";
 import {
   AlertCircle,
+  ArrowRight,
   Check,
   ChevronRight,
   Heart,
